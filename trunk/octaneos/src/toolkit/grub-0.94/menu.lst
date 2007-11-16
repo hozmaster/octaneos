@@ -1,0 +1,5 @@
+timeout 5
+password 1234
+
+title linux
+kernel /vmlinuz root=/dev/fd0

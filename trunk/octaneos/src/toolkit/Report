@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+#
+# VIEWIMAGE
+# - just check out the image
+# 
+# $Id: Report,v 1.2 2005/05/15 15:55:54 bigbinc Exp $
+#
+#
+
+
+CUR_DIR=`pwd`
+IMGDIR=${CUR_DIR}/tmp
+
+LOOPDEV=/dev/loop0
+IMGFILE=${IMGDIR}/orange.img
+MNTDIR=${CUR_DIR}/mnt
+
+
+# make sure the image file exists
+
+if ! `losetup $LOOPDEV $IMGFILE` ; then
+	echo "losetup failed..."
+	echo "Please make sure that you are root"
+	echo "Also make sure that you have loop device compiled in the kernel."
+	exit 0
+fi
+
+# mounting fs
+mount $LOOPDEV $MNTDIR -t ext2
+if [ "$?" != "0" ] ; then
+	echo "ERROR $? mounting loop device."
+	losetup -d $LOOPDEV
+	exit $?
+fi
+
+sync
+
+
+echo " ++ Running analysis on current [ Image Directory ] "
+echo " ++ Output to ImageReport.txt"
+echo 
+
+df
+ls -lt $MNTDIR
+ls -lt $MNTDIR/dev
+ls -lt $MNTDIR > ImageReport.txt 
+echo "++ Devices ++ " >> ImageReport.txt
+ls -lt $MNTDIR/dev >> ImageReport.txt
+
+chown bigbinc ImageReport.txt
+chgrp bigbinc ImageReport.txt
+
+echo "Closing down system..."
+umount $MNTDIR
+losetup -d $LOOPDEV
+
+sync
+echo "done."

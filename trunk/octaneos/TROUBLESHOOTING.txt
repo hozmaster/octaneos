@@ -1,0 +1,46 @@
+#
+# $Id: TROUBLESHOOTING.txt,v 1.2 2005/05/21 06:08:06 bigbinc Exp $
+#
+# Berlin Brown
+#
+
+== Troubleshooting ==========
+
+* 5/18/2005:
+
+This application relies on several other applications. This
+application relies on a modern linux system.  Your distro
+may not have all the proper applications.
+
+So!  I will list all of the dependencies and you might 
+be able to understand your error or problem.
+
+** Base System **
+
+- GNU Make 3.80
+- GCC version 3.4.3-20050110 
+	(Gentoo 3.4.3.20050110-r2, ssp-3.4.3.20050110-0, pie-8.7.7)
+- Python 2.3.5
+- Java version "1.4.2-01" - Blackdown
+- (Kernel)Linux ohio 2.4.26-gentoo-r6 #
+		1 Sun Aug 8 15:30:28 EST 2004 i686 AMD Athlon(tm) XP AuthenticAMD GNU/Linux
+- GNU ld version 2.15.92.0.2 20040927
+- GNU objcopy 2.15.92.0.2 20040927
+- dd (coreutils) 5.2.1
+- mke2fs - create an ext2 filesystem 1.35
+- grub - grub (GNU GRUB 0.94)
+- losetup - setup loop devices
+
+== [ SCRIPT Errors ] ========
+
+In the event you get script errors, bad interpreter or command not
+found.  You may need to run the DOS2UNIX script provided in this package.
+You can do this from unix:
+
+./scripts/dosit -a toolkit/Run
+
+Where './toolkit/Run' is the bad script and we want to get rid
+of the windows line delimiters
+
+
+	

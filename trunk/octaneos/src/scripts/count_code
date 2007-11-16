@@ -1,0 +1,76 @@
+#!/bin/sh
+#
+#
+# Berlin Brown
+# bigbinc@hotmail.com
+#
+# $Id: count_code,v 1.1 2004/03/14 03:23:59 bigbinc Exp $
+#
+
+# find [ cur_dir] -name wildcard [option:type] regular_file
+# 		and print with newline
+echo "++ ============================== ++"
+echo "...Removing the *~ files..."
+echo "++ ============================== ++"
+find . -name '*~' -type f -print \
+	| xargs rm -f -v
+echo "...done"
+
+
+echo "...Finding C/H/S Files"
+find . -name '*.[chS]' -type f -print > .ctlist 
+echo "...done"
+
+echo "...Finding C Files"
+find . -name '*.c' -type f -print > .cctlist
+echo "...done"
+
+echo "...Finding H Files"
+find . -name '*.h' -type f -print > .hctlist
+echo "...done"
+
+# ++ 
+echo "...Counting Files..."
+
+#
+# Create report file with the lines of code
+#
+
+echo "++ " > SrcReport.txt
+echo "++" 			>> SrcReport.txt
+echo "++ Berlin Brown"		>> SrcReport.txt
+echo "++ bigbinc@hotmail.com" 	>> SrcReport.txt
+echo "  "			>> SrcReport.txt
+echo " ++ ==== Report == " 	>> SrcReport.txt
+echo
+echo
+
+# ++ Full Report ++
+echo  >> SrcReport.txt
+echo "++ C Report ++" >> SrcReport.txt
+echo  >> SrcReport.txt
+
+
+for filesEncode in `cat .cctlist`
+do
+	wc -l $filesEncode | cat >> SrcReport.txt
+done
+
+
+# ++ Full Report ++
+echo
+echo
+echo "++ All Report ++" >> SrcReport.txt
+for filesEncode in `cat .ctlist`
+do
+	wc -l $filesEncode | cat >> SrcReport.txt 
+done
+
+echo "++ ...DONE ++" >> SrcReport.txt
+
+rm -vf .ctlist
+rm -vf .cctlist
+rm -vf .hctlist
+
+echo "...done [ Counting Code ] "
+

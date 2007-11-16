@@ -1,0 +1,13 @@
+#
+# Misc Data File for 
+# the ./Run script
+#
+
+# Location of the main grub binary
+# This normally will be located
+#   /usr/local/sbin/grub
+#  ... but also
+#   /sbin/grub for most modern systems
+#
+grub_bin=/sbin/grub
+

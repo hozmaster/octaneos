@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# script to convert .wav files to .ogg
+#
+# Berlin Brown
+# bigbinc@hotmail.com
+#
+# $Id: rm_squid,v 1.1 2004/03/14 03:23:59 bigbinc Exp $
+
+# find [ cur_dir] -name wildcard [option:type] regular_file
+# 		and print with newline
+echo "...Removing the *~ files..."
+find . -name '*~' -type f -print \
+	| xargs rm -f -v
+echo "...done"
+
+

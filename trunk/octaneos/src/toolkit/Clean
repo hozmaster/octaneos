@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# Berlin Brown
+# 
+# bigbinc@hotmail.com
+#
+# Clean up everything
+#
+# $Id: Clean,v 1.4 2005/05/21 06:08:10 bigbinc Exp $
+#
+echo
+echo "**======================================**"
+echo
+echo "If you run Clean, you will have to run the java code again!"
+echo " [to re-run the java build: type 'ant run']"
+echo
+echo "Note: most files in this directory will be removed,"
+echo "including the current vmlinuz kernel."
+echo -n "Are you sure you want to continue....?(y/n)"
+read INPUT1
+
+if [ $INPUT1 = "y" ] ; then
+
+        echo "** Cleaning directory..."
+        rm -f *~
+        rm -f *.o
+        rm -f tmp/orange.img
+	rm -f bochs/orange.img
+        rm -f vmlinuz
+	rm -f vmlinux
+	rm -f .first_run
+	rm -f .firstrun
+fi
+
+#
+# We at least can clean img file, please...
+#
+echo
+echo " ** (Info): Sorry but I have to at least clean the image file"
+echo " .... bochs/orange.img.... deleting"
+echo " .... tmp/orange.img.... deleting"
+rm -fv bochs/bochsout.txt
+rm -fv bochs/orange.img 
+rm -fv ImageReport.txt
+rm -fv tmp/orange.img
+rm -f *~

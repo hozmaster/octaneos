@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+#
+# Berlin Brown
+# bigbinc@hotmail.com
+#
+# $Id: count_pure,v 1.1 2004/03/14 03:23:59 bigbinc Exp $
+#
+
+# find [ cur_dir] -name wildcard [option:type] regular_file
+# 		and print with newline
+
+echo "...Finding C/H/S Files"
+find . -name '*.[chS]' -type f -print > .zzctlist 
+echo "...done"
+
+
+# ++ 
+echo "...Counting Files..."
+
+#
+# Create report file with the lines of code
+#
+
+echo "" > PureReport.txt
+
+for filesEncode in `cat .zzctlist`
+do
+wc -l $filesEncode | cat >> PureReport.txt
+done
+
+rm -vf .zzctlist
+
+echo "...done [ Counting Code ] "
+
