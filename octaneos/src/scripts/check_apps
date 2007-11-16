@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+#
+# $Id: check_apps,v 1.1 2004/04/04 18:58:43 bigbinc Exp $
+#
+# check for your normal apps
+#
+
+JHOME=$JAVA_HOME
+
+# Check these locations to see if the right software is installed 
+PY01=/usr/bin/python
+PY02=/usr/local/bin/python
+BOCHS01=/usr/local/bin/bochs
+BOCHS02=/usr/bin/bochs
+GRUB01=/usr/sbin/grub
+GRUB02=/usr/local/sbin/grub
+
+GOOD_MSG="..... check passed this is good!"
+BAD_MSG="..... check [ [  failed ] ], was not found here."
+
+echo
+echo "-------------------------------------"
+echo " [ Checking for { python, bochs, grub, and JAVA_HOME }"
+
+echo
+echo " python check - 01:"
+
+# for those who dont know bash
+# the -f stands for see if file exists return true or false 
+if [ ! -f  $PY01 ] ; then
+	echo " $PY01 $BAD_MSG"
+else
+	echo " $PY01 $GOOD_MSG"
+fi
+
+echo
+echo " python check - 02:"
+
+if [ ! -f  $PY02 ] ; then
+	echo " $PY02 $BAD_MSG"
+else
+	echo " $PY02 $GOOD_MSG"
+fi
+
+echo
+echo " BOCHS check - 01:"
+
+if [ ! -f  $BOCHS01 ] ; then
+	echo " $BOCHS01 $BAD_MSG"
+else
+	echo " $BOCHS01 $GOOD_MSG"
+fi
+
+echo
+echo " BOCHS check - 02:"
+
+if [ ! -f  $BOCHS02 ] ; then
+	echo " $BOCHS02 $BAD_MSG"
+else
+	echo " $BOCHS02 $GOOD_MSG"
+fi
+
+# ....... [ ] ........... ##
+echo
+echo " GRUB check - 01:"
+
+if [ ! -f  $GRUB01 ] ; then
+	echo " $GRUB01 $BAD_MSG"
+else
+	echo " $GRUB01 $GOOD_MSG"
+fi
+
+echo
+echo " GRUB check - 02:"
+
+if [ ! -f  $GRUB02 ] ; then
+	echo " $GRUB02 $BAD_MSG"
+else
+	echo " $GRUB02 $GOOD_MSG"
+fi
+
+# ... java checks ....
+echo
+echo " JAVA check - 01:"
+
+# -d stands for directory exists or not
+# -z stands for check for null value 
+
+if [ -z  $JHOME ] ; then
+	echo " $JHOME , JAVA_HOME this environment variable was null"
+else
+	echo " $JHOME $GOOD_MSG"
+fi
+
+
+echo
+echo " Out of the three programs, only one test must pass."
+echo "  As of 4/4/2004 visit these URLs for downloads"
+echo "    http://www.python.org/"
+echo "    http://www.gnu.org/software/grub/"
+echo "    http://bochs.sourceforge.net/"
+
+echo " done..."
+echo "-------------------------------------"
+echo

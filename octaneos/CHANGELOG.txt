@@ -1,0 +1,28 @@
+#----------------------------------------------------------
+#
+# Berlin Brown
+#  5/15/2005
+#
+# Changelog for Orange Linux
+#
+#----------------------------------------------------------
+
+* 5/23/2005:
+	- Testing new floppy driver based on 
+		MiniRighi Operating System (GPL) code floppy.c
+			Andrea Righi <righiandr@users.sf.net>
+		
+
+* 5/20/2005:
+	- Adding debug code to the floppy driver
+	- Completed Changes to the clobber/clean system
+
+* 5/18/2005:
+	- Floppy drive detection works
+
+* 5/15/2005:
+	- Keep archive format: 'Orange-0.0.17.zip'
+	- revamping build system
+	- Current version of portage
+		Portage 2.0.51.19 (default-linux/x86/2005.0/2.4, 
+			gcc-3.4.3-20050110, glibc-2.3.5-r0, 2.4.26-gentoo-r6 i686)

@@ -1,0 +1,28 @@
+###############################################################
+# bochsrcfile for Orange Linux Image
+###############################################################
+
+# how much memory the emulated machine will have
+megs: 32
+
+# filename of ROM images
+# Edit to your bochs HOME directory
+romimage: file="C:/Program Files/Bochs-2.2.pre4/BIOS-bochs-latest", address=0xf0000
+vgaromimage: file="C:/Program Files/Bochs-2.2.pre4/VGABIOS-lgpl-latest"
+
+# what disk images will be used 
+floppya: 1_44=orange.img, status=inserted
+floppyb: 1_44=floppyb.img, status=inserted
+
+# hard disk - not enabled
+#ata0: enabled=0, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+#ata0-master: type=disk, path="hd10meg.img", cylinders=306, heads=4, spt=17
+
+# choose the boot disk.
+boot: a
+
+# where do we send log messages?
+log: bochsout.txt
+
+# disable the mouse, since our image is text only
+mouse: enabled=0

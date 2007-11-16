@@ -1,0 +1,137 @@
+//
+// $Id: patches.txt,v 1.1 2004/04/04 11:46:38 bigbinc Exp $
+// 
+// I like this patch system
+//
+
+
+Where do I get extra kernel patches? 
+(REG) There are many places which provide various extra patches to the kernel for new features. 
+One fairly good archive is available at: http://www.linuxhq.com/. 
+
+
+What is a patch? 
+(RRR) A patch file (as it refers to the Linux kernel) is an ASCII text file that contains the differences between the original code and the new code, plus some additional information such as filenames and line numbers. 
+The patch program (man patch) can then apply the patch to an existing kernel source tree. 
+
+
+How do I make a patch suitable for the linux kernel list? 
+
+(REG) Here are some basic guidelines for posting patches. For information on how to generate patches, see the entry by RRR below. 
+Ensure the patch does not have trailing control-M characters on each line. 
+A number of broken tools used to encode patches add control-M for "DOS compatibility". 
+
+
+This breaks many versions of patch, so be sure to configure your tools properly, or use unbroken tools, 
+otherwise your patch will be silently deleted. 
+
+
+Include the patch inline in your email, in plain text. 
+Do not post it as a base64 MIME attachment. Many people will not be able to read your patch, and thus your patch will be deleted without comment.
+
+
+If you have a large patch, post a URL instead, otherwise you'll fill the mailboxes of thousands of people, and you will get complaints. 
+Posting a new, large patch once might be OK, but updates should not be posted in full (post a URL). 
+
+If you want Linus or one of the primary maintainers (i.e. Marcelo, David) to apply your patch, 
+you must Cc: them explicitly, otherwise your patch will be ignored. 
+
+Finally, I've seen one person question the veracity of these guidelines, stating that the rules are rather more relaxed, and this FAQ is being over zealous. Fortunately, the King Penguin himself responded to this, so I include his words on this, so that there can be no doubt: 
+If I get a patch in an attachment (other than a "Text/PLAIN" type
+attachment with no mangling and that pretty much all mail readers and
+all tools will see as a normal body), I simply WILL NOT apply it unless
+I have strong reason to. I usually wont even bother looking at it,
+unless I expected something special from the sender.
+
+Really. Don't send patches as attachments. 
+
+                Linus
+
+ 
+A caveat applies for people using a Mozilla Mail client. Andrew Morton noted that Mozilla mangles spaces in column zero when patches are included in the message body. Fortunately, Mozilla Mail sends patch attachments as type text/plain or text/x-patch (depending on the presence of a file extension), so it's safe to send patches as attachments instead. 
+
+
+
+
+(RRR) To make a patch you use the diff program (read the info file for diff). The easiest way to do this is to set up two source trees under /usr/src, set a symlink "/usr/src/linux" to point to the modified tree, and diff one tree against the other. The file /usr/src/Documentation/CodingStyle has more specific information, read it. Things to remember: 
+Always specify unified (-u) diff format. 
+
+
+Avoid making formatting changes to the source that make the diff needlessly larger. Watch out for editors that convert tabs to spaces or vice versa. 
+Unless you have specific reasons, diff against the latest official source tree. Otherwise, your patch is likely to be ignored. Either way, specify in your post against what you've diff'ed. 
+
+Make sure your diff includes only the intended changes in your patch, not every other patch you have made to your source tree. Usually patches are limited to a few files, or directories. It is best to only diff the relevant files i.e. if I only made changes to the file driver_xyz.c under drivers/net, then I would use the following commands (assuming you have the original source tree named "linux-2.1.105", and the modified tree pointed at by the symlink "linux"): 
+
+
+cd /usr/src
+diff -u linux-2.1.105/drivers/net/driver_xyz.c            \
+                linux/drivers/net/driver_xyz.c  > my_patch
+
+ 
+The following two should go without saying: the arguments to diff are first source (the original, unmodified file(s)), and then destination (your modified version of the file(s)), otherwise you get a reversed patch (and lots of people wondering what you're smoking). Also, make sure your patch applies and compiles cleanly. 
+Of course you need to set up two identical source directories to be able to diff the tree later. A nice trick -- requiring a little bit of consideration, though -- is to create the modified source tree from hard links to the original source tree: 
+
+
+tar xzvf linux-2.1.anything.tar.gz
+mv linux linux-2.1.anything.orig
+cp -al linux-2.1.anything.orig linux-2.1.anything
+ 
+
+This will hardlink every source file from the original tree to a new location; it is very fast, since it does not need to create some 80+ megabytes of files. You can now apply patches to the linux-2.1.anything source tree, since patch does not change the original files but move them to filename.orig, so the contents of the hard-linked file will not be changed. 
+
+
+Assuming that your editor does the same thing, too (moving original files to backup files before writing out changed ones) you can also freely edit within the hardlinked tree. If your editor does not handle files this way, you need to make a copy of each file before editing it, like this: 
+
+cp driver_xyz.c temporary; mv temporary driver_xyz.c
+
+ 
+
+You can use file permissions to remind you to do this. Just remove write permissions from all the files in the directory you are working in: 
+
+chmod -w *.c
+
+ 
+The changed tree can be diffed at high speed, since most files don't just have indentical contents, they are identical files in both trees. Naturally removing that tree is quite fast, too. Thanks to Janos Farkas <chexum@shadow.banki.hu> for this trick. 
+
+Finally, review the patch file (the format is not that complicated) before posting, and include all relevant information as to the nature of the patch. In particular, specify: why is this patch needed/useful, and what exactly does it fix/improve. 
+
+
+How do I apply a patch? 
+(TAC) (From /usr/src/linux/README) You can upgrade between releases by patching. Patches are distributed in the traditional gzip and the new bzip2 format. To install by patching, get all the newer patch files, enter the top-level directory of the unpacked kernel source tree and execute:
+
+
+ gzip -cd patchXX.gz | patch -p1 or:
+ bzip2 -dc patchXX.bz2 | patch -p1
+
+ (repeat xx for all versions bigger than the version of your current source tree, in order) and you should be ok. You may want to remove the backup files (xxx~ or xxx.orig), and make sure that there are no failed patches (xxx# or xxx.rej). If there are, either you or me has made a mistake.
+ Alternatively, the script patch-kernel can be used to automate this process. It determines the current kernel version and applies any patches found. Use it thus: 
+scripts/patch-kernel .
+
+
+ The first argument in the command is the location of the kernel source. Patches are applied from the current directory, but an alternative directory can be specified as the second argument. 
+(RRR) To apply kernel patches please take a look at the kernel README file (/usr/src/linux/README) under "Installing the kernel". There is also a good explanation on the Linux HQ Project site. 
+
+
+What's vger? 
+(REG) "vger" is the name of the machine which hosts the LKML server. This server also hosts a number of other linux-related mailing lists. More information about the server is available at http://vger.kernel.org/ 
+
+
+What is a CVS tree? Where can I find more information about CVS? 
+(REG) "CVS" is short for Concurrent Versions System, a Source Code Management system. Check out the CVS Bubbles page. 
+Is there a CVS tutorial somewhere? 
+
+(ADB) Here is a CVS tutorial which you can find online: 
+An interactive CVS tutorial. 
+
+Getting a general idea of how CVS works takes about 15 minutes (highly recommended). Note that there are various graphical front ends to CVS, so you don't have to learn the usual assortment of cryptic commands. 
+How do I get my patch into the kernel? 
+
+(RRR) Depending on your patch there are several ways to get it into the kernel. The first thing is to determine under which maintainer does your code fall into (look in the MAINTAINERS file). If your patch is only a small bugfix and you're sure that it is 'obviously correct', then by all means send it to the appropriate maintainer and post it to the list. If there is urgency to the bugfix (i.e. a major security hole) you can also send it to Linus directly, but remember he's likely to ignore random patches unless they are "obviously correct" to him, have the maintainer's approval, or have been well tested and meet the first condition. In case you're wondering what constitutes well tested, here's another important bit: one purpose of the list is to get patches peer-reviewed and well-tested. Now, if your patch is relatively big, i.e. a rewrite of a large code section or a new device driver, then to conserve bandwidth and disk-space just post an announcement to the list with a link to the patch. Lastly, if you're not too sure about your patch yet, want some feedback from the maintainer, or wish to avoid open-season flaming on work-in-progress, then use private email. 
+(REG) If there is no specific maintainer for the part of the kernel you want to patch, then you have three main options: 
+send it to linux-kernel@vger.kernel.org and hope someone picks it up and feeds it to Linus, or maybe Linus himself will pick it up (don't count on it) 
+send it to linux-kernel and Cc: Linus Torvalds <torvalds@osdl.org> and hope Linus will apply it. Note that Linus operates like a black box. Do not expect a response from him. You will need to check patches he releases to see if he applied your patch. If he doesn't apply your patch, you will need to resend it (often many times). If after weeks or months and many patch releases he still hasn't applied it, maybe you should give up. He probably doesn't like it 
+send it to linux-kernel and Cc: Alan Cox <alan@redhat.com>. Alan is better at responding to email, and will queue your patch and resend it to Linus periodically, so you can forget about it. He also serves as a good taste tester. If Alan accepts your patch, it's more likely that Linus will too. If he doesn't like your patch, you will probably get an email saying so. Expect it to be terse. 
+Why does the kernel tarball contain a directory called linux/ instead of linux-x.y.z/ ? 
+(DW) Because that's the way Linus wants it. It makes applying many consecutive patches simpler, because the directory doesn't need to be renamed each time, and it also makes life easier for Linus. 
+What's the difference between the official kernels and Alan Cox's -ac series of patches? 
+(REG, contributed by Erik Mouw) Alan's kernel can be seen as a test bed for Linus' kernels. While Linus is very conservative and only applies obvious and well tested patches to the 2.4 kernel, Alan maintains a set of kernel patches that contains new concepts, more and/or newer drivers, and more intrusive patches. If the patches prove themselves stable, Alan submits them to Linus to include them into the official kernel.

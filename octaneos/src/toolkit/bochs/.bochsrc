@@ -1,0 +1,26 @@
+#
+#
+# Berlin Brown
+# bigbinc@hotmail.com
+# 
+# $Id: .bochsrc,v 1.1.1.1 2004/03/08 21:42:13 bigbinc Exp $
+#
+megs: 32
+romimage: file=/home/bigbinc/bochs/bochs-2.1.1/bios/BIOS-bochs-latest, address=0xf0000
+vgaromimage: /home/bigbinc/bochs/bochs-2.1.1/bios/VGABIOS-elpin-2.40
+
+
+floppya: 1_44=orange.img, status=inserted
+floppyb: 1_44=floppyb.img, status=inserted
+
+#diskc: file=hd10meg.img, cyl=306, heads=4, spt=17
+newharddrivesupport: enabled=1
+
+boot: a
+
+#ata0-master: type=disk, path="c.img", mode=flat, cylinders=20, heads=16, spt=63
+
+log: bochsout.txt
+
+mouse: enabled=0
+

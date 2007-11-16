@@ -1,0 +1,65 @@
+create mem	c 1 1 root:kmem 660
+create kmem	c 1 2 root:kmem 660
+create null	c 1 3 root:sys 666
+create port	c 1 4 root:kmem 660
+create zero	c 1 5 root:sys 666
+
+create core	-> /proc/kcore
+
+create full	c 1 7 root:sys 666
+
+create tty	c 5 0 root:tty 666
+
+create fd	-> /proc/self/fd
+
+#huh????
+
+create stdin	-> fd/0
+create stdout	-> fd/1
+create stderr	-> fd/2
+
+create fd0	b 2 0 root:floppy 660
+create fd0H1440	b 2 28 root:floppy 660
+create fd0E2880	b 2 32 root:floppy 660
+create fd0h1440	b 2 40 root:floppy 660
+create fd1	b 2 1 root:floppy 660
+create fd1H1440	b 2 29 root:floppy 660
+create fd1E2880	b 2 33 root:floppy 660
+create fd1h1440	b 2 41 root:floppy 660
+
+create hda	b 3 0 root:disk 660
+create hda1	b 3 1 root:disk 660
+create hda2	b 3 2 root:disk 660
+create hda3	b 3 3 root:disk 660
+create hdb	b 3 64 root:disk 660
+create hdb1	b 3 65 root:disk 660
+create hdb2	b 3 66 root:disk 660
+create hdb3	b 3 67 root:disk 660
+
+create tty0	c 4 0 root:tty 622
+
+create console	-> tty0
+
+create vcs0	c 7 0 root:sys 600
+create vcsa	c 7 128 root:sys 600
+create tty1	c 4 1 root:tty 666
+create vcs1	c 7 1 root:sys 600
+create vcsa1	c 7 129 root:sys 600
+create tty2	c 4 2 root:tty 666
+create vcs2	c 7 2 root:sys 600
+create vcsa2	c 7 130 root:sys 600
+create tty3	c 4 3 root:tty 666
+create vcs3	c 7 3 root:sys 600
+create vcsa3	c 7 131 root:sys 600
+create tty4	c 4 4 root:tty 666
+create vcs4	c 7 4 root:sys 600
+create vcsa4	c 7 132 root:sys 600
+
+create ttyS0	c 4 64 root:tty 666
+create cua0	c 5 64 root:uucp 660
+create ttyS1	c 4 65 root:tty 666
+create cua1	c 5 65 root:uucp 660
+create ttyS2	c 4 66 root:tty 666
+create cua2	c 5 66 root:uucp 660
+create ttyS3	c 4 67 root:tty 666
+create cua3	c 5 67 root:uucp 660

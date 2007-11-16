@@ -1,0 +1,11 @@
+++
+++
+++
+++
+++
+ - misc CVS notes
+
+ to remove several files
+
+ rm -f *.c
+ cvs remove
