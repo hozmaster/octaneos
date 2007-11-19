@@ -5,6 +5,7 @@
 
 * 11/18/2007:
 	- Revived project under octaneos
+	- Major refactoring needed.
 
 * 5/23/2005:
 	- Testing new floppy driver based on 

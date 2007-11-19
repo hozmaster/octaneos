@@ -26,10 +26,13 @@
  Base System
 =================================================
 	Must have at least the following:
+	On a modern operating system like Ubunty Linux, these
+	utilities should already been installed.
 	
 	(see /src/docs/TESTING_ENVIRONMENT for
 	an update host testing configuration)
 	
+	(As of 2005 testing)
 	- GNU ld version 2.15.92.0.2 20040927
 	- GNU objcopy 2.15.92.0.2 20040927
 	- dd (coreutils) 5.2.1
@@ -37,6 +40,25 @@
 	- grub - grub (GNU GRUB 0.94)
 	- losetup - setup loop devices
 
+	(As of Nov 2007 testing)
+	$ ld --version
+	GNU ld (GNU Binutils for Ubuntu) 2.18
+	
+	$ objcopy --version
+	GNU objcopy (GNU Binutils for Ubuntu) 2.18
+	
+	$ dd --version
+	dd (coreutils) 5.97
+	
+	mke2fs:
+	E2fsprogs version 1.40.2 July 2007
+	
+	$ grub --version
+	grub (GNU GRUB 0.97)
+	
+	util-linux-ng (includes losetup)
+	v2.13
+	
 =================================================	
  SCRIPT Errors
 =================================================
