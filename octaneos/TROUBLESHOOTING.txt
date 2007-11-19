@@ -41,6 +41,9 @@
 	- losetup - setup loop devices
 
 	(As of Nov 2007 testing)
+	$ gcc --version
+	gcc (GCC) 4.1.3 20070929 (prerelease) (Ubuntu 4.1.2-16ubuntu2)
+	
 	$ ld --version
 	GNU ld (GNU Binutils for Ubuntu) 2.18
 	
