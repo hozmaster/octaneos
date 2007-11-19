@@ -1,8 +1,6 @@
 #!/bin/sh
 #
 #
-# $Id: check_apps,v 1.1 2004/04/04 18:58:43 bigbinc Exp $
-#
 # check for your normal apps
 #
 
