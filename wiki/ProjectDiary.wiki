@@ -1,4 +1,5 @@
 #summary Project Diary to keep up with the development on OctaneOS.
+#labels Featured
 
 = Revived the OrangeLinux/Akita project, now OctaneOS =
 
