@@ -1,11 +1,16 @@
-##
-##
-## Misc notes
-##
-##
+###
+### Misc Operating System Development Notes
+###
+### THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+### "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+### LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+### A PARTICULAR PURPOSE ARE DISCLAIMED.
+###
+### See LICENSE.OCTANE for more details
 
-
-* 5/19/2005:
+-------------------------------------------------
+ * 5/19/2005:
+-------------------------------------------------
 	- floppy.c - it looks like the interrupt is working,
 		we get to floppy_on_interrupt(void)
 		but, it may not behaving correctly.
@@ -19,11 +24,10 @@ Note: floppy major number = 2
 the way in with the "0" type codes 
 one on the way in and one on the way out
 
-##
-## This will probably go on my notes blog, a description of the different hardware
-## interrupts
-##
-## 
+-------------------------------------------------
+-- This will probably go on my notes blog, a description of the different hardware
+-- interrupts
+-------------------------------------------------
 
 line     interrupt  function
 
@@ -56,17 +60,10 @@ IRQ15     77        PC/AT: probably available
 Note: to change system alias.sh, go to
 /etc/profile.d/alias.sh
 
-##
-## filesystem 
-## linux filesystem - ext2 = 5366 loc
-##   raw fs code = 8016 = loc
+-------------------------------------------------
+-- filesystem 
+-- linux filesystem - ext2 = 5366 loc
+--   raw fs code = 8016 = loc
+-------------------------------------------------
 
-== [ SpiritBot ] ==
-
-dev.java.net:
-
-cvs -d :pserver:bigbinc@cvs.dev.java.net:/cvs login
-cvs -d :pserver:bigbinc@cvs.dev.java.net:/cvs checkout spiritbot
-
-pwd: xxxxxxxxxxx9y
 

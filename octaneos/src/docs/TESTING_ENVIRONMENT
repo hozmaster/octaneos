@@ -1,0 +1,44 @@
+###**********************************************
+###
+### Berlin Brown
+###
+### THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+### "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+### LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+### A PARTICULAR PURPOSE ARE DISCLAIMED.
+###
+### See LICENSE.OCTANE for more details
+###**********************************************
+
+*************************************************
+ Description
+*************************************************
+ 
+ In order to build Octane OS, many different linux applications
+ are required.
+ 
+ This testing environment document contains application
+ version information and an ideal set of conditions.
+
+*************************************************
+ November 2007, Testing Environment
+*************************************************
+ (As of 11/18/2007, tested with the following configuration)
+ 
+ Linux Ubuntu 7.10
+ 
+ $ uname -a
+ Linux houston 2.6.22-14-generic #1 SMP Sun Oct 14 23:05:12 GMT 2007 i686 GNU/Linux
+ 
+ $ grub --version
+ grub (GNU GRUB 0.97)
+ 
+ $ gcc --version
+ gcc (GCC) 4.1.3 20070929 (prerelease) (Ubuntu 4.1.2-16ubuntu2)
+ 
+ (Note: bochs emulator software is not normally not
+ installed on must linux systems.  It is not required
+ to run the images, but is recommended for testing)
+ $ bochs --version
+ Bochs x86 Emulator 2.3.5 
+ 

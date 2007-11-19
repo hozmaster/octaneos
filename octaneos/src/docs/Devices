@@ -12,8 +12,6 @@ create tty	c 5 0 root:tty 666
 
 create fd	-> /proc/self/fd
 
-#huh????
-
 create stdin	-> fd/0
 create stdout	-> fd/1
 create stderr	-> fd/2
