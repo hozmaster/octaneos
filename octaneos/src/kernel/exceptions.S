@@ -20,7 +20,7 @@
 
 
 #
-# [[ Note:	 see lowlevel.S for same list ]]
+#  Note: see lowlevel.S for same list
 #
 # stack pointer register offsets stuff
 #	
@@ -41,12 +41,6 @@ REGI_OLD_EAX	= 0x2C
 REGI_EIP	= 0x30
 REGI_CS		= 0x34
 REGI_EFLAGS	= 0x38
-
-	
-#.................................................................
-#
-# ++ Save all ++
-#
         
 #define SAVE_ALL \
         cld; \
@@ -86,12 +80,10 @@ REGI_EFLAGS	= 0x38
         addl $4,%esp; \
         iret
 
-#.................................................................
-
-# ++ [ system_call ] ++
+# System Call:
 # EAX represents the offset in the sys_call table
-#  - set typically by the calling system function
-######	
+# set typically by the calling system function
+#
 ALIGN	
 ENTRY(system_call)	
 	SAVE_ALL
@@ -109,7 +101,7 @@ end_sys_call:
 	RESTORE_ALL
 
 	
-# ++======================== INT_0001 ==========================++
+#======================== INT_0001 ==========================
 	
 ENTRY(load_divide_error)
 	SAVE_ALL
@@ -119,7 +111,7 @@ ENTRY(load_divide_error)
 	RESTORE_ALL	
 
 
-# ++======================== INT_0002 ==========================++
+#======================== INT_0002 ==========================
 	
 ENTRY(load_debug_error)
 	SAVE_ALL
@@ -128,8 +120,7 @@ ENTRY(load_debug_error)
 	
 	RESTORE_ALL	
 
-
-# ++======================== INT_0003 ==========================++
+#======================== INT_0003 ==========================
 	
 ENTRY(load_nmi_error)
 	SAVE_ALL
@@ -139,7 +130,7 @@ ENTRY(load_nmi_error)
 	RESTORE_ALL	
 
 
-# ++======================== INT_0004 ==========================++
+#======================== INT_0004 ==========================
 	
 ENTRY(load_breakpoint_error)
 	SAVE_ALL
@@ -149,7 +140,7 @@ ENTRY(load_breakpoint_error)
 	RESTORE_ALL	
 
 
-# ++======================== INT_0005 ==========================++
+#======================== INT_0005 ==========================
 	
 ENTRY(load_overflow_error)
 	SAVE_ALL
@@ -159,7 +150,7 @@ ENTRY(load_overflow_error)
 	RESTORE_ALL	
 
 
-# ++======================== INT_0006 ==========================++
+#======================== INT_0006 ==========================
 	
 ENTRY(load_boundscheck_error)
 	SAVE_ALL
@@ -169,7 +160,7 @@ ENTRY(load_boundscheck_error)
 	RESTORE_ALL	
 
 
-# ++======================== INT_0007 ==========================++
+#======================== INT_0007 ==========================
 	
 ENTRY(load_invalidop_error)
 	SAVE_ALL
@@ -179,7 +170,7 @@ ENTRY(load_invalidop_error)
 	RESTORE_ALL	
 
 
-# ++======================== INT_0008 ==========================++
+#======================== INT_0008 ==========================
 	
 ENTRY(load_device_na_error)
 	SAVE_ALL
@@ -188,7 +179,7 @@ ENTRY(load_device_na_error)
 	
 	RESTORE_ALL
 
-# ++======================== INT_0009 ==========================++
+#======================== INT_0009 ==========================
 	
 ENTRY(load_doublefault_error)
 	SAVE_ALL
@@ -198,7 +189,7 @@ ENTRY(load_doublefault_error)
 	RESTORE_ALL
 
 
-# ++======================== INT_0010 ==========================++
+#======================== INT_0010 ==========================
 	
 ENTRY(load_segmentover_error)
 	SAVE_ALL
@@ -207,7 +198,7 @@ ENTRY(load_segmentover_error)
 	
 	RESTORE_ALL
 
-# ++======================== INT_0011 ==========================++
+#======================== INT_0011 ==========================
 	
 ENTRY(load_invalidtss_error)
 	SAVE_ALL
@@ -216,7 +207,7 @@ ENTRY(load_invalidtss_error)
 	
 	RESTORE_ALL
 
-# ++======================== INT_0012 ==========================++
+#======================== INT_0012 ==========================
 	
 ENTRY(load_segment_error)
 	SAVE_ALL
@@ -225,7 +216,7 @@ ENTRY(load_segment_error)
 	
 	RESTORE_ALL	
 
-# ++======================== INT_0013 ==========================++
+#======================== INT_0013 ==========================
 	
 ENTRY(load_stack_error)
 	SAVE_ALL
@@ -234,7 +225,7 @@ ENTRY(load_stack_error)
 	
 	RESTORE_ALL
 
-# ++======================== INT_0014 ==========================++
+#======================== INT_0014 ==========================
 	
 ENTRY(load_protection_error)
 	SAVE_ALL
@@ -243,7 +234,7 @@ ENTRY(load_protection_error)
 	
 	RESTORE_ALL
 
-# ++======================== INT_0015 ==========================++
+#======================== INT_0015 ==========================
 	
 ENTRY(load_pagefault_error)
 	SAVE_ALL
@@ -253,7 +244,7 @@ ENTRY(load_pagefault_error)
 	RESTORE_ALL
 
 
-# ++======================== INT_0016 ==========================++
+#======================== INT_0016 ==========================
 	
 ENTRY(load_intel_error)
 	SAVE_ALL
@@ -262,7 +253,7 @@ ENTRY(load_intel_error)
 	
 	RESTORE_ALL
 
-# ++======================== INT_0017 ==========================++
+#======================== INT_0017 ==========================
 	
 ENTRY(load_coprocessor_error)
 	SAVE_ALL
@@ -271,4 +262,4 @@ ENTRY(load_coprocessor_error)
 	
 	RESTORE_ALL
 
-# ++ ==== End Exceptions  =======================================++
+#==== End Exceptions  =======================================
