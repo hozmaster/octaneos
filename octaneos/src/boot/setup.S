@@ -1,15 +1,12 @@
-
 //
-// modded:
 // Berlin Brown
 // 	bigbinc@hotmail.com
 //
 // $Id: setup.S,v 1.1 2004/03/14 03:21:39 bigbinc Exp $, we are assuming a big kernel
 //
+// Original Source:
+// Setup.S		Copyright (C) 1991, 1992 Linus Torvalds
 //
-//	setup.S		Copyright (C) 1991, 1992 Linus Torvalds
-//
-
 
 #define __ASSEMBLY__
 

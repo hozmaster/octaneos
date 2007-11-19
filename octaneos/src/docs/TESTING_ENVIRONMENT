@@ -40,5 +40,23 @@
  installed on must linux systems.  It is not required
  to run the images, but is recommended for testing)
  $ bochs --version
- Bochs x86 Emulator 2.3.5 
+ Bochs x86 Emulator 2.3.5
  
+ $ ld --version
+ GNU ld (GNU Binutils for Ubuntu) 2.18
+	
+ $ objcopy --version
+ GNU objcopy (GNU Binutils for Ubuntu) 2.18
+	
+ $ dd --version
+ dd (coreutils) 5.97
+	
+ mke2fs:
+ E2fsprogs version 1.40.2 July 2007
+	
+ $ grub --version
+ grub (GNU GRUB 0.97)
+	
+ util-linux-ng (includes losetup)
+ v2.13
+
