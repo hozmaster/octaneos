@@ -3,13 +3,10 @@
 # Script to Fix dos/unix line delimiters
 #
 
-
 USAGE="usage $0 -code(-a) [file]"
 
 case "$1" in
-
 	-a) tr -d "\015" < $2 > $2.new ; mv $2.new $2 ; chmod 755 $2 ; echo " Ran DOS fix [ ... done ] "; exit 1;;
-
 
 	*) echo $USAGE
 	exit 0
