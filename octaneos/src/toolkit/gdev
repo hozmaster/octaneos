@@ -1,24 +1,22 @@
 #!/bin/sh
 #
-#
-# $Id: gdev,v 1.1.1.1 2004/03/08 21:42:12 bigbinc Exp $
-#
-# Berlin Brown
-#
-# bigbinc@hotmail.com
-#
-# ++ Slimmed down devices creation ++
-#
-
-
+## $Id: gdev,v 1.1.1.1 2004/03/08 21:42:12 bigbinc Exp $
+##
+## Berlin Brown (berlin.brown@gmail.com)
+##
+## Device creation scripts
+## THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+## "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+## LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+## A PARTICULAR PURPOSE ARE DISCLAIMED.
+##
+## See LICENSE.OCTANE for more details
+##
 
 CUR_DIR=`pwd`
 MNTDIR=${CUR_DIR}/mnt
 DEV_DIR=${MNTDIR}/dev
 
-#
-# ++ makedev script ++ 
-#
 # usage: makedev name [ b c u ]  major minor owner group mode
 makedev () {
 
@@ -44,7 +42,6 @@ symlink () {
 	
 } 
 
-# ++=== End Functions ===++
 
 if [ $DEV_DIR = "/dev" ] ; then
 
@@ -125,8 +122,6 @@ makedev cua2 c 5 66 root uucp 660
 makedev ttyS3 c 4 67 root tty 666
 makedev cua3 c 5 67 root uucp 660
 
-
 echo "...done [ Device Creation ]"
-
 
 exit 0
