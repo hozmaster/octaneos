@@ -1,9 +1,7 @@
-/*
+/************************************************************
  * Berlin Brown
  * bigbinc@hotmail.com
- * 
- * *
- * * ++ __I would not edit this file__  ++
+ ***********************************************************
  *
  * $Id: misc.c,v 1.1 2004/03/14 03:23:59 bigbinc Exp $
  *
@@ -27,6 +25,14 @@
  * malloc by Hannu Savolainen 1993 and Matthias Urlichs 1994
  * puts by Nick Holloway 1993, better puts by Martin Mares 1995
  * High loaded stuff by Hans Lermen & Werner Almesberger, Feb. 1996
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED.
+ *
+ * See LICENSE.OCTANE for more details
+ ***********************************************************
  */
 
 #include <stdarg.h>
@@ -83,9 +89,7 @@ typedef unsigned int size_t;
 })
 
 //============================================================
-//
 // DEFAULT(typedefs)
-//
 //============================================================
 
 typedef unsigned char  uch;
@@ -432,11 +436,17 @@ return __res;
 } // end of the function ++
 
 
+
 //============================================================
-//
 // MISC.C - code below
-//
 //============================================================
+
+//
+// Used when gcc detects corruption of the on-stack canary value
+//
+void __stack_chk_fail(void) {
+
+}
 
 static void *malloc(int size)
 {
@@ -2273,12 +2283,8 @@ int sscanf(const char * buf, const char * fmt, ...)
 } // end of the functino
 
 
-
-
 //==========================================================
-//
-// END() - VSPRINTF.C - 
-//
+// END() - VSPRINTF.C
 //==========================================================
 
 

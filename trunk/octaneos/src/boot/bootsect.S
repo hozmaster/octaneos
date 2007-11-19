@@ -1,12 +1,16 @@
 /*
  * Berlin Brown
- * bigbinc@hotmail.com
- * 
- * $Id: bootsect.S,v 1.2 2005/05/21 05:36:18 bigbinc Exp $
+ * berlin.brown@gmail.com
  *
- * Created by Linus Torvalds and crew
+ * Originally Created by Linus Torvalds (original Linux)
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED.
+ *
+ * See LICENSE.OCTANE for more details
  */
-
 
 SETUPSECTS	= 4
 BOOTSEG		= 0x07C0
