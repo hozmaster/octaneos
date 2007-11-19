@@ -11,7 +11,6 @@
 #define PAGE_SHIFT                      12
 #define PAGE_SIZE                       ((unsigned long)1<<PAGE_SHIFT)
 
-
 long user_stack [ PAGE_SIZE>>2 ];
 
 struct {
@@ -20,4 +19,4 @@ struct {
 } stack_start = { &user_stack[PAGE_SIZE>>2], __KERNEL_DS };
 
 static void non_function(void) {
-} // 
+}

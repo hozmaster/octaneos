@@ -1,12 +1,14 @@
 //
-// BerlinBrown
-//  bigbinc@hotmail.com
-//
-// - test main.c
+// BerlinBrown (berlin.brown@gmail.com)
 // 
 // $Id: main.c,v 1.30 2005/05/26 00:06:54 bigbinc Exp $
 //
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED.
 //
+// See LICENSE.OCTANE for more details
 
 #include <system/system.h>
 #include <asm/io.h>
@@ -14,8 +16,6 @@
 #include <system/jiffies_value.h>
 
 // Note: this is a part of buildct.c getting the build count
-
-// == [ imported functions ] ==
 
 // generated from python scripts
 extern unsigned long main_get_build_count;
@@ -26,7 +26,7 @@ extern void __puts(const char *);
 extern int __sprintf(char * buf, const char *fmt, ...);
 extern void load_misc_kprint(void);
 
-// exceptions ++
+// Exceptions
 extern void load_exception_table(void);
 extern void load_interrupts(void);
 extern int check_timer_irq(void);
@@ -46,7 +46,6 @@ extern void _jiffy_delay(void);
 
 //
 // External Floppy Driver functions
-//
 extern void floppy_init(void);
 extern void __debug_floppy(void);
 
@@ -57,20 +56,17 @@ extern void new_floppy_init(void);
 
 extern void block_devices_init(void);
 extern void scheduler_init(void);
-
 extern int __public_debug(int);
 extern void mount_root(void);
-
 extern void public_timer_test(void);
 
 
 void __test_floppy(void);
 
-// ... [ imported functions ] ...........................
 char  *__vidmem = (char *)0xb8000;
 
 //
-// ++ draw characters ++
+// Draw Characters
 //
 static void _video_draw_char(const char _c, int _x, int _y) {
 
@@ -101,7 +97,6 @@ static void _video_draw_char(const char _c, int _x, int _y) {
   // white on blue 
   __attr = 0x17;
 
-
   // bold = 0/1
   // underline = 0/1
   // reverse = 0/1
@@ -113,21 +108,18 @@ static void _video_draw_char(const char _c, int _x, int _y) {
   __vidmem [ (( _x + (80 * _y)) * 2) + 0] = _c;
   __vidmem [ (( _x + (80 * _y)) * 2) + 1 ] = __attr;
 	
-} // end of the function ++
+}
 
 static void _draw_char(char _c,int _x, int _y) {
 
   __vidmem [ ( _x + 80 * _y ) * 2 ] = _c;	
 	
-} // end of the unctino
-
+}
 
 static void view_PIC(void) {
 
   char buf[255];
-
   unsigned int v;
-
   v = inb(0xa1) << 8 | inb(0x21);
 
   __sprintf(buf," [ PIC  IMR ] : %04x\n", v); __puts(buf);
@@ -139,26 +131,19 @@ static void view_PIC(void) {
   outb(0x0b,0x20);
   v = inb(0xa0) << 8 | inb(0x20);
   outb(0x0a,0xa0);
-  outb(0x0a,0x20);
-   
+  outb(0x0a,0x20); 
   __sprintf(buf," [ PIC  ISR ] : %04x\n", v); __puts(buf);
-
   v = inb(0x4d1) << 8 | inb(0x4d0);
-
   __sprintf(buf," [ PIC ELCR ] : %04x\n", v); __puts(buf);
   
-
-} // end of the function ++
+}
 
 //
-// ++ start kernel ++
+// Start Kernel
 //
-asmlinkage void start_kernel(void)
-{
-  
+asmlinkage void start_kernel(void) {
 
   char buf[255];
-
   int _i = 0;
   int _diff = 0;
 
@@ -170,23 +155,19 @@ asmlinkage void start_kernel(void)
   _video_draw_char('t', 79,5);
   _video_draw_char('X', 79,6);
 
-  // ++ draw a blue line to the bottom ++
   for (_i = 7; _i < 24; _i++) {
     _video_draw_char(' ', 79,_i);
   } // end of the for 
 	
-  // ++ setup code ++
+  // Setup Code
 
-  load_misc_kprint();
-  
+  load_misc_kprint();  
   __sprintf(buf, "=========== [ Project Akita ] ===========\n"); __puts(buf);
-
   __sprintf(buf, "[ Build: %ld; since { 5/15/2005 } %s]\n", 
 		  	main_get_build_count, main_get_version); __puts(buf);
 
-
-  // [  - set the root device to the FLOPPY ]
-  // ..... system.h to fs_super.c....
+  // Set the root device to the FLOPPY
+  // system.h to fs_super.c
   ROOT_DEV = 0x200;
     
   // now lets load the IDT
@@ -219,11 +200,9 @@ asmlinkage void start_kernel(void)
   
   __test_floppy();
 
-  // ==================== LOCKDOWN ========================
-  
+  // ==================== LOCKDOWN ========================  
   for(;;)
   {
-
     _jiffy_delay_setup(40);
     _jiffy_start();
     _jiffy_delay();
@@ -247,10 +226,8 @@ asmlinkage void start_kernel(void)
 	
 }
 
-///========================================================
-///
-/// End of File
-///
-///========================================================
+//========================================================
+// End of File
+//========================================================
 
 
