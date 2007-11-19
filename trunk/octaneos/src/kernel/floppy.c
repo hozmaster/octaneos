@@ -1,27 +1,26 @@
-//
+//------------------------------------------------
 // Berlin Brown
-//
 // berlin.brown@gmail.com
-//
+//------------------------------------------------
 // $Id: floppy.c,v 1.25 2005/05/26 00:06:53 bigbinc Exp $
 //
-// 
-// large majority taken from linux kernel - Linus Torvalds
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED.
 //
-// Note: notice the major interrupt shifting, pretty strange if
-// you ask me, cool code though
-//
-// we are swapping out functions through variable
-//  .... floppy_swap_interrupt ...
+// See LICENSE.OCTANE for more details
+// (Originally based on linux0.1 - Linus Torvalds)
+//------------------------------------------------
+// ** Revision History and Notes **
+//------------------------------------------------
 //
 // blk_dev -> request_fn typically calls  [ do_fd_request ] 
 //     .... and then -> floppy_on_interrupt
 //             .... and then -> transfer
 //                 .... (in transfer) -> seek_interrupt [interruptswap]
-//
 //         ... in between the interrupts may handle stuff
 //     
-//
 // size         2880
 // sect         18
 // head         2
@@ -32,16 +31,10 @@
 // (char)spec1  0xCF
 // 
 // dor = digital output_register
-//
-//
-// The original taken from IBM PC manuals somewhere
-//
-//
+
 // typically the dma buffer region must be 64k = 64 * 1024
 //
-// 
-// taken from newos: [
-//
+// from newos: [
 //  dma_address = 4
 //  dma_count = 5,
 //  dma_command = 8,
@@ -49,10 +42,9 @@
 //  dma_mode = 0xb,
 //  dma_flipflop = 0xc,
 //  dma_page = 0x81,
-//
 //  ] 
 //
-// we need the dma buffer region to be below a MB
+// We need the dma buffer region to be below a MB
 //
 
 #include <system/system.h>
@@ -80,14 +72,12 @@ extern void _jiffy_start(void);
 extern void _jiffy_delay(void);
 
 //
-// ... [ floppy_swap_interrupt ] ......
+// Floppy_swap_interrup:
 // - the function that gets swapped out
 //
 // see linux = DEVICE_INTR or do_floppy
 //
 // see function below - lowlevel_floppy_interrupt
-//
-//
 void (*floppy_swap_interrupt)(void) = NULL;
 
 // see interrupts.c
@@ -95,17 +85,11 @@ extern void handle_interrupt(int);
 
 static unsigned char reply_buffer[_MAX_REPLIES];
 
-//
-// ##[ Floppy Status Variables ] ........................................
-//
-
-// [ floppy flags ] 
+// floppy flags
 // note: seek is different from seek_track
 static int private_recalibrate  = 0;
 static int private_reset = 0;
 static int private_seek = 0;
-
-// see... upper section code 
 
 // see current_DOC = current output register
 static unsigned char current_output_register = 0x0C;
@@ -140,8 +124,6 @@ static unsigned char floppy_specs_gap         = 0x1B;
 static unsigned char floppy_specs_rate        = 0x00;
 static unsigned char floppy_specs_spec1       = 0xCF;
 
-// ## [ End of Floppy Status Variables ] 
-
 static volatile int _test_floppy_state = 0;
 static volatile int _test_floppy_hits = 0;
 
@@ -165,11 +147,8 @@ static void do_floppy_request(void);
 static void floppy_transfer_data(void);
 
 // Note: changed the ecx,edx to memory
-// [ use to copy the changing temp floppy buffer to kernel memory ]
-
-     
-static void floppy_copy_buffer(void *from, void *to) {
-  
+// use to copy the changing temp floppy buffer to kernel memory
+static void floppy_copy_buffer(void *from, void *to) {  
   int d0, d1, d2;
   __asm__ __volatile__(			\
 			"cld\n\t"           \
@@ -177,7 +156,6 @@ static void floppy_copy_buffer(void *from, void *to) {
 			: "=&c" (d0), "=&D" (d1), "=&S" (d2) \
 			: "0" (_BLOCK_SIZE / 4),"1" ((long) to),"2" ((long) from) \
 			: "memory");
-  
 }
 
 void view_floppy_data(void)
@@ -234,45 +212,33 @@ static void recalibrate_floppy(void)
   output_byte_fdc(0x07);  
   output_byte_fdc(private_head << 2 | private_current_drive);
   
-  if (private_reset)
-    {
-      
-      do_floppy_request();
-      
-    }
-  
+  if (private_reset) {         
+      do_floppy_request();      
+  }  
 }
 
-static void reset_interrupt(void)
-{
+static void reset_interrupt(void) {
 
   // where 8 = fd_sensei
   output_byte_fdc(0x08);
-
   floppy_get_results();
-
   output_byte_fdc(0x03);
   output_byte_fdc(private_current_spec1);
-
   output_byte_fdc(6);  
   do_floppy_request();
 
 }
 
-static void _debug_floppy_timer(void)
-{
+static void _debug_floppy_timer(void) {
 
   int i;
   unsigned char mask = 0x10;
-
-  for (i = 0; i < 4; i++, mask <<=1)
-  {
+  for (i = 0; i < 4; i++, mask <<=1) { 
     
     if (!(mask & current_output_register))
       continue;
 
-    current_output_register &= ~mask;
-    
+    current_output_register &= ~mask;    
     outb(current_output_register, 0x3f2);
     
   }
@@ -287,7 +253,6 @@ static void floppy_on_interrupt(void)
 
   private_selected = 1;
   _test_floppy_state = 2;
-
   if (private_current_drive != (current_output_register & 0x03))
     {
 
@@ -306,14 +271,12 @@ static void floppy_on_interrupt(void)
 }
 
 //
-// use with floppy_on
-// ok, so the variable names are a little long
-//
+// Use with floppy_on:
 //
 // turn floppy on - trys to set the current_output_register
 //
 // to the current drive, to the current drive
-//.... deprecated
+//
 static void turn_floppy_on(unsigned int the_floppy_number)
 {
 
@@ -363,34 +326,29 @@ int public_floppy_change(unsigned int nr)
   __sprintf(buf, ".");
   __puts(buf);
   
-  // we didnt get it yet, try again...[ loop ]
+  // We didnt get it yet, try again...[ loop ]
   if ((current_output_register & 0x03) != nr)
     goto repeat;
   
-  // digital input register.... = 0x3f7
-  if (inb(0x3f7) & 0x80)
-    {
+  // digital input register = 0x3f7
+  if (inb(0x3f7) & 0x80) {   
       
-      // turn the floppy - off
-      
+      // turn the floppy - off      
       // success !
       return 1; 
-    }
+  }
   
   return 0;
   
 }
 
-
 static void reset_floppy(void) {
 
-  int i;
-  
+  int i;  
   private_reset = 0;
   private_current_spec1 = -1;
   private_current_rate = -1;
-  private_recalibrate = 1;
-  
+  private_recalibrate = 1; 
   _disable_interrupts();
   
   // [ swap with the reset interrupt ] 
@@ -412,10 +370,9 @@ static void debug_floppy_request(int _blk)
 }
 
 //
-// [ copy data from floppy buffer region to kernel code ]  - the meat
+// Copy data from floppy buffer region to kernel code
 //
-static void readwrite_interrupt(void)
-{
+static void readwrite_interrupt(void) {
 
   char buf[80];
   int _res = floppy_get_results();
@@ -455,23 +412,18 @@ static void readwrite_interrupt(void)
   
 }
 
-//.......................................................
-//
+//*******************************************************
 //  setup_rw_floppy... called by seek()
-//
-//.......................................................
+//*******************************************************
 inline void setup_rw_floppy(void)
 {
 
   setup_dma_floppy();
 
-  // [ Can I finally get some data off the dang floppy! ] 
-  // [ this interrupt swap will copy data from floppy memory to kernel buffer data ] 
+  // Can I finally get some data off the dang floppy!
+  // this interrupt swap will copy data from floppy memory to kernel buffer data ] 
   
-  floppy_swap_interrupt = readwrite_interrupt;  
-
-  
-  //..... end swap ...
+  floppy_swap_interrupt = readwrite_interrupt;
   output_byte_fdc(private_command);
   
   output_byte_fdc(private_head << 2 | private_current_drive);
@@ -877,8 +829,7 @@ static void setup_dma_floppy(void)
   count = 1024;
 
   // see kernelhead.S for floppy_area
-  _addr = (unsigned long)new_floppy_area;
-  
+  _addr = (unsigned long)new_floppy_area;  
   _disable_interrupts();
 
   // [ floppy - dma = 0x02 ]
@@ -890,24 +841,18 @@ static void setup_dma_floppy(void)
   else
     _tmp01 = _DMA_MODE_WRITE;
 
-
   set_dma_mode(0x02, _tmp01);
-
   set_dma_addr(0x02, _addr);
   set_dma_count(0x02, count);
 
-  enable_dma(0x02);
-    
+  enable_dma(0x02); 
   _enable_interrupts();
 
 }
 
 
 //
-//
 // an unexpected floppy interrupt
-//
-//
 static void _unexpected_floppy_interrupt(void)
 {
 
@@ -1000,9 +945,6 @@ void __debug_floppy(void) {
 } // end of the function 
 
 
-//
-//
-//
 // - see hardware_interrupt06 - embedded there
 //
 // design taken from linux floppy code
@@ -1081,9 +1023,8 @@ static void _setup_dma_floppy_area(void)
 
 }
 
-//
-// see main.c - called there
-//
+
+// see main.c - invoked at the entry point
 void floppy_init(void)
 {
 
@@ -1100,31 +1041,23 @@ void floppy_init(void)
   public_block_devices[0x02].request_function = do_floppy_request;
    
   //
-  //  [ data 0x0C to port { 0x3f2 } ]
-  //
+  //  [ data 0x0C to port { 0x3f2 } ]  
   // enable FDC....
-  // Step [ 1. ]
-  //
+  // Step [ 1. ] 
   outb(current_output_register, 0x3f2);
-  
-  //
+ 
   // Step [ 2. ]
   // and then load the interrupt
-  // this probably needs to before trying to write the floppy controller
-  //
+  // this probably needs to before trying to write the floppy controller  
   handle_interrupt(0x06);
   
-  //
   // Step [ 3. ]
-  // 0x02 = FLOPPY_DMA 
-  //
+  // 0x02 = FLOPPY_DMA  
   request_dma(0x02);  
-  
-  //
+    
   // Linux Step [ 4. ]
   // [ super swap out floppy interrupt ]
-  //   ... set low-level function to nothing ...
-  //
+  //   ... set low-level function to nothing 
   floppy_swap_interrupt = _unexpected_floppy_interrupt;
   _get_version();
 
