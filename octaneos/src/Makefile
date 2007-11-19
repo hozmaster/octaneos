@@ -6,7 +6,6 @@
 ### berlin.brown@gmail.com
 ###  
 ###   Version: 1.0.0
-###   
 ###   First System Tested: Mandrake Linux 9.1 3.2.2-3mdk (2005)
 ###
 ###**********************************************************
@@ -89,10 +88,10 @@ SUBDIRS = kernel
 
 bochs: vmlinux
 	@echo
-	@echo 
+	@echo "##" 
 	@echo "## Copying file to toolkit directory"
-	@echo "## now: 'cd toolkit' and type 'ant 'run'"
-	@echo "##         OR just type ./Run"
+	@echo "## now: 'cd toolkit' and enter 'sudo ./Run'"
+	@echo "## (You will need to run the ./Run script as a sudo command)"
 	@echo
 	cp -v vmlinux $(TOPDIR)/toolkit/vmlinuz
 
@@ -225,11 +224,6 @@ report:
 backup:
 	cd .. && tar cf - Orange | gzip > Orange-$(VERS).tar.gz 
 
-# -- [ note you need java for this arg ] --
-cvs:
-	cd .. && tar cf - Orange | gzip > OrangeCVS-$(VERS).tar.gz 
-	$(TOPDIR)/scripts/snapshot.sh OrangeCVS-$(VERS)
-
 ###
 ### Complicated stuff to find which subdirs to enter into and compile
 ### - see CORE_FILES for example at the top of this file
@@ -305,8 +299,8 @@ dummy:
 endif
 
 # Clean | remove all garbage
-SUBDIRS_CLEAN = kernel boot include tools scripts include init zBoot toolkit \
-		toolkit/java
+SUBDIRS_CLEAN = kernel boot include tools scripts include init zBoot toolkit
+
 clean:
 	@echo "========================================="
 	@echo " Cleaning Project"
