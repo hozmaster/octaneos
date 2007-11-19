@@ -3,8 +3,6 @@
 # Berlin Brown
 #  5/15/2005
 #
-# Changelog for Orange Linux
-#
 #----------------------------------------------------------
 
 * 5/23/2005:
@@ -12,7 +10,6 @@
 		MiniRighi Operating System (GPL) code floppy.c
 			Andrea Righi <righiandr@users.sf.net>
 		
-
 * 5/20/2005:
 	- Adding debug code to the floppy driver
 	- Completed Changes to the clobber/clean system
