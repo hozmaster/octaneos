@@ -21,7 +21,6 @@ INITSEG  = 0x9000
 SYSSEG   = 0x1000
 SETUPSEG = 0x9020
 
-
 .code16
 .globl begtext, begdata, begbss, endtext, enddata, endbss
 
