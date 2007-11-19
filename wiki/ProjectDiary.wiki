@@ -4,7 +4,7 @@
 
 11/18/2007
 
-I have been writing small hobby operating systems since 2000 or so.  I took a break and quit around 2002-2003.  I am trying to revive my last project and recreate it under the OctaneOS project.  OctaneOS is an attempt at a hobby operating system that boots a factor image and subsequently boots factor code.
+I have been writing small hobby operating systems since 2000 or so.  I took a break and quit around 2003-2007.  I am trying to revive my last project and recreate it under the OctaneOS project.  OctaneOS is an attempt at a hobby operating system that boots a factor image and subsequently boots factor code.
 
 I recently made some code cleanups to the Akita/OrangeLinux project and was able to build and boot the kernel with a modern Linux host operating system (Ubuntu 7.10) shown in the image below:
 
