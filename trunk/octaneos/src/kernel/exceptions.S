@@ -4,12 +4,7 @@
  *
  * $Id: exceptions.S,v 1.5 2004/03/30 17:57:40 bigbinc Exp $
  *
- *
  * all exception handlers will be in traps.c
- *
- *
- * [ Note: this library may contain
- * assembly code non related to exceptions ]
  */
 
 #define __ASSEMBLY__

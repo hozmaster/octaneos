@@ -1,7 +1,5 @@
 //
 //
-
-
 #define __KERNEL_CS     0x10
 #define __KERNEL_DS     0x18
 

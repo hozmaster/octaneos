@@ -17,8 +17,7 @@
 void public_hexdump(void *_addr, int _count) {
 
   // 16 bytes = 00
-  char buf[80];
-  
+  char buf[80];  
   int i = 0;
   int j = 0;
   int _row_ctr_max = 0;
@@ -50,7 +49,6 @@ void public_hexdump(void *_addr, int _count) {
     __puts(buf);    
     
     for (i = 0; i < 8; i++) {
-
       _c = __mem[(j * 8) + i];
       
       //  -- convert to ascii 
@@ -66,15 +64,13 @@ void public_hexdump(void *_addr, int _count) {
 	
       }
       
-    }
-    
+    }    
     __sprintf(buf, "\n");	      
-    __puts(buf);    
-    
+    __puts(buf);        
     _row_ctr += 8;
     
   }
-  
+ 
   __sprintf(buf, " -------  [ End HexDump ] ----------------------------\n");
   __puts(buf);
 

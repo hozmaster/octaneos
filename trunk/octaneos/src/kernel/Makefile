@@ -1,13 +1,21 @@
-#
+#----------------------------------------------------------
 # Berlin Brown
-#  bigbinc@hotmail.com
-#
 # $Id: Makefile,v 1.19 2005/05/26 00:06:53 bigbinc Exp $
 #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #----------------------------------------------------------
 
 LDFLAGS = -m elf_i386
-
 
 .S.s:
 	$(CPP) -traditional $< -o $*.s
@@ -16,7 +24,7 @@ LDFLAGS = -m elf_i386
 .s.o:
 	$(AS) -c -o $*.o $<
 .c.o:
-	@echo " [ compiling Standard C file and gcc asm code ] "
+	@echo " /// compiling Standard C file and gcc asm code ///"
 	$(CC) $(CFLAGS) -S $< -o asm/$@.s
 	$(CC) $(CFLAGS) -c $<
 
@@ -39,17 +47,14 @@ kernel.o: $(OBJS)
 dummy:
 
 #
-## include a dependency file if one exists
+# include a dependency file if one exists
 #
 ifeq (.depend,$(wildcard .depend))
 include .depend
 endif
 
-
 #
-# ++ Make Dependencies
-#  - the modern kernel uses Rules.make, we will do copy-paste
-#
+# Make Dependencies
 fastdep: dummy
 	$(TOPDIR)/scripts/mkdep $(CFLAGS) $(EXTRA_CFLAGS) -- $(wildcard *.[chS]) > .depend
 
