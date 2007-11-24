@@ -1,8 +1,5 @@
 #
-#
-## Clean target only ##
-#
-#
+# Clean target only
 all: clean
 
 clean:

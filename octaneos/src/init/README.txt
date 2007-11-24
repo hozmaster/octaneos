@@ -1,10 +1,7 @@
-++
-++
-++
-++ This directory contains main.c
-++
-++ $Id: README.txt,v 1.1 2004/04/05 12:40:17 bigbinc Exp $
-++ 
+## This directory contains main.c
+##
+## $Id: README.txt,v 1.1 2004/04/05 12:40:17 bigbinc Exp $
+## 
 
 main.c for lack of a better file name gets the ball rolling
 in terms of kernel initialization.

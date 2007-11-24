@@ -3,8 +3,6 @@
 //
 // $Id: block_devices.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
 //
-//
-//
 // based on ll_rw_block.c
 //
 
@@ -14,12 +12,8 @@
 
 struct class_block_request public_block_requests[NO_BLOCK_REQUESTS];
 
-//
-// [ The major numbers are listed below ]
-//
-
 // see beta.h...
-// [ 7 ] = number of block devices
+// // 7 = number of block devices
 struct class_block_device public_block_devices[7] = {
   { NULL, NULL },         // [ 0 ] no_dev
   { NULL, NULL },         // [ 1 ] mem

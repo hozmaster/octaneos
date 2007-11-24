@@ -2,19 +2,10 @@
 #define _ASM_IO_H
 //
 // Berlin Brown
-//  bigbinc@hotmail.com
-// 
-//  Spirit ---
-//  
 //   $Id: io.h,v 1.4 2005/05/26 00:06:54 bigbinc Exp $
 //   
 
-//
-// based on linux 1.0 io.h
-//  Linus
-//
 
-// Seems interesting...
 #ifdef SLOW_IO_BY_JUMPING
 #define __SLOW_DOWN_IO "\njmp 1f\n1:\tjmp 1f\n1:"
 #else
@@ -34,18 +25,6 @@
 #define __FULL_SLOW_DOWN_IO __SLOW_DOWN_IO
 #endif
 
-//................................................
-//
-// PORT output
-//
-//   ####### [ OUTB ---- OUTW ] ######
-//
-//
-////      OUT  -- VALUE, PORT 
-//
-//
-//................................................
-
 #define __OUT1(s,x) \
 static inline void out##s(unsigned x value, unsigned short port) {
 
@@ -54,8 +33,6 @@ __asm__ __volatile__ ("out" #s " %" s1 "0,%" s2 "1"
 
 //
 // -- OUT --
-//
-//
 #define __OUT(s,s1,x) \
 __OUT1(s,x) __OUT2(s,s1,"w") : : "a" (value), "Nd" (port)); } \
 	__OUT1(s##_p,x) __OUT2(s,s1,"w") __FULL_SLOW_DOWN_IO : : "a" (value), "Nd" (port));}
@@ -67,11 +44,6 @@ __OUT1(s,x) __OUT2(s,s1,"w") : : "a" (value), "Nd" (port)); } \
 #define __IN2(s,s1,s2) \
 		__asm__ __volatile__ ("in" #s " %" s2 "1,%" s1 "0"
 	
-//
-// The fun begins - define IN
-//
-	
-
 #define __IN(s,s1,i...) \
 __IN1(s) __IN2(s,s1,"w") : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
 __IN1(s##_p) __IN2(s,s1,"w") __FULL_SLOW_DOWN_IO : "=a" (_v) : "Nd" (port) ,##i ); return _v; }
@@ -87,7 +59,7 @@ static inline void outs##s(unsigned short port, const void * addr, unsigned long
 : "=S" (addr), "=c" (count) : "d" (port),"0" (addr),"1" (count)); }
 
 
-// set UP __IN ----
+// set UP __IN
 #define RETURN_TYPE unsigned char
 __IN(b,"")
 #undef RETURN_TYPE

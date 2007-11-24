@@ -1,24 +1,16 @@
 /*
  * Berlin Brown
  *
- * bigbinc@hotmail.com
- *
  * $Id: bad_interrupts.S,v 1.1 2004/03/15 00:55:19 bigbinc Exp $
- *
- * basically defined by linux
  *
  * default bad interrupts
  *
- * I know I could have used macros.....	
  */
 
 #define __ASSEMBLY__
 
 #include <linux/linkage.h>
 #include <asm/segment.h>
-
-
-
 
 # use FIRST [ 0 to 7 ] [ 8 - 16 -- second ]
 	
@@ -39,13 +31,12 @@
 #	__bad_interrupt_13_20
 #	__bad_interrupt_14_40
 #	__bad_interrupt_15_80
-
 	
-# ++ ============================= 00 ========================++	
+#  ============================= 00 ========================
 
 .align 4
 ENTRY(__bad_interrupt_00_01)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most registers
 	cld
 	push %es
 	push %ds
@@ -59,7 +50,7 @@ ENTRY(__bad_interrupt_00_01)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x01,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
+1:	orb $0x01,SYMBOL_NAME(cache_21)		# /// MASK CODE
         movb SYMBOL_NAME(cache_21),%al
         outb %al,$0x21
         jmp 1f
@@ -75,11 +66,11 @@ ENTRY(__bad_interrupt_00_01)
 	pop %es
 	iret
 
-# ++ ============================= 01 ========================++	
+# ============================= 01 ========================
 
 .align 4
 ENTRY(__bad_interrupt_01_02)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -93,7 +84,7 @@ ENTRY(__bad_interrupt_01_02)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x02,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
+1:	orb $0x02,SYMBOL_NAME(cache_21)		# /// MASK CODE
         movb SYMBOL_NAME(cache_21),%al
         outb %al,$0x21
         jmp 1f
@@ -110,11 +101,11 @@ ENTRY(__bad_interrupt_01_02)
 	pop %es
 	iret
 
-# ++ ============================= 02 ========================++	
+# ============================= 02 ========================
 
 .align 4
 ENTRY(__bad_interrupt_02_04)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -145,11 +136,11 @@ ENTRY(__bad_interrupt_02_04)
 	pop %es
 	iret
 
-# ++ ============================= 03 ========================++	
+# ============================= 03 ========================
 
 .align 4
 ENTRY(__bad_interrupt_03_08)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -163,7 +154,7 @@ ENTRY(__bad_interrupt_03_08)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x08,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
+1:	orb $0x08,SYMBOL_NAME(cache_21)		# /// MASK CODE
         movb SYMBOL_NAME(cache_21),%al
         outb %al,$0x21
         jmp 1f
@@ -179,14 +170,12 @@ ENTRY(__bad_interrupt_03_08)
 	pop %ds
 	pop %es
 	iret
-
-# ++ 1 2 4 8 10 20 40 80
 	
-# ++ ============================= 04 ========================++	
+# /// ============================= 04 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_04_10)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -217,11 +206,11 @@ ENTRY(__bad_interrupt_04_10)
 	pop %es
 	iret
 
-# ++ ============================= 05 ========================++	
+# /// ============================= 05 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_05_20)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -252,11 +241,11 @@ ENTRY(__bad_interrupt_05_20)
 	pop %es
 	iret
 
-# ++ ============================= 06 ========================++	
+# /// ============================= 06 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_06_40)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -287,11 +276,11 @@ ENTRY(__bad_interrupt_06_40)
 	pop %es
 	iret
 
-# ++ ============================= 07 ========================++	
+# /// ============================= 07 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_07_80)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -322,11 +311,11 @@ ENTRY(__bad_interrupt_07_80)
 	pop %es
 	iret
 
-# ++ ============================= 08 ========================++	
+# /// ============================= 08 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_08_01)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -338,7 +327,7 @@ ENTRY(__bad_interrupt_08_01)
 	mov %dx,%es
 
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -366,11 +355,11 @@ ENTRY(__bad_interrupt_08_01)
 	pop %es
 	iret
 
-# ++ ============================= 09 ========================++	
+# /// ============================= 09 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_09_02)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -382,7 +371,7 @@ ENTRY(__bad_interrupt_09_02)
 	mov %dx,%es
 
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -410,11 +399,11 @@ ENTRY(__bad_interrupt_09_02)
 	pop %es
 	iret
 
-# ++ ============================= 10 ========================++	
+# /// ============================= 10 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_10_04)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -426,7 +415,7 @@ ENTRY(__bad_interrupt_10_04)
 	mov %dx,%es
 
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -453,11 +442,11 @@ ENTRY(__bad_interrupt_10_04)
 	pop %es
 	iret
 
-# ++ ============================= 11 ========================++	
+# /// ============================= 11 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_11_08)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -469,7 +458,7 @@ ENTRY(__bad_interrupt_11_08)
 	mov %dx,%es
 
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -497,11 +486,11 @@ ENTRY(__bad_interrupt_11_08)
 	pop %es
 	iret
 
-# ++ ============================= 12 ========================++	
+# /// ============================= 12 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_12_10)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -513,7 +502,7 @@ ENTRY(__bad_interrupt_12_10)
 	mov %dx,%es
 
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -542,11 +531,11 @@ ENTRY(__bad_interrupt_12_10)
 	iret
 
 
-# ++ ============================= 13 ========================++	
+# /// ============================= 13 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_13_20)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -557,7 +546,7 @@ ENTRY(__bad_interrupt_13_20)
 	mov %dx,%ds
 	mov %dx,%es
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -588,11 +577,11 @@ ENTRY(__bad_interrupt_13_20)
 
 
 
-# ++ ============================= 14 ========================++	
+# /// ============================= 14 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_14_40)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -604,7 +593,7 @@ ENTRY(__bad_interrupt_14_40)
 	mov %dx,%es
 
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f
@@ -634,11 +623,11 @@ ENTRY(__bad_interrupt_14_40)
 
 
 
-# ++ ============================= 15 ========================++	
+# /// ============================= 15 ========================	
 
 .align 4
 ENTRY(__bad_interrupt_15_80)
-	# [ ++ Save Most registers ++ ]
+	# /// Save Most Registers
 	cld
 	push %es
 	push %ds
@@ -649,7 +638,7 @@ ENTRY(__bad_interrupt_15_80)
 	mov %dx,%ds
 	mov %dx,%es
 
-	# ++ SECOND ++ ================================
+	# // SECOND /// ================================
 		
 	inb $0xA1,%al
 	jmp 1f

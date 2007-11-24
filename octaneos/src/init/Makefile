@@ -1,8 +1,5 @@
 #
-# $Id$
-#
-# - clean script for init
-#
+# clean script for init
 all: clean
 
 clean:
