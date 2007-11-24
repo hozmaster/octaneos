@@ -8,7 +8,6 @@
 //
 //
 
-
 #include <system/system.h>
 #include <system/alpha.h>
 #include <system/beta.h>
@@ -19,8 +18,8 @@ extern int public_floppy_change(unsigned int);
 extern void readwrite_block(int, struct class_buffer_head *);
 
 
-// see readwrite_block - block_devices -
-// - buffer_read = bread
+// see readwrite_block - block_devices
+// buffer_read = bread
 struct class_buffer_head *_buffer_read(int dev, int block)
 {
   
@@ -32,11 +31,9 @@ struct class_buffer_head *_buffer_read(int dev, int block)
 
 }
 
-
 //
-// [ see fs_super, where this is called...
+// See fs_super, where this is called
 // - the mask is defined in beta.h
-//      .... called by read_super..  ]
 //
 void check_disk_change(int dev)
 {

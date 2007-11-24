@@ -6,11 +6,7 @@
 //
 // $Id: fs_super.c,v 1.6 2005/05/26 00:06:53 bigbinc Exp $
 //
-// for the time being - filesystem code
-//
-// I will try to add fs_ as a prefix to code filenames
-// 
-// I wanted to keep all code in one directory(shrug)
+// filesystem code
 //
 
 #include <system/system.h>
@@ -51,7 +47,6 @@ int ROOT_DEV = 0x0;
 // 1024 = BLOCK_SIZE
 // see beta.h... typedef char buffer_block[1024];
 
-
 // [ more externs ]
 extern struct class_buffer_head *_buffer_read(int, int);
 
@@ -85,7 +80,6 @@ static struct super_block *read_super(int dev)
 
 }
 
-
 void mount_root(void)
 {
   
@@ -100,7 +94,7 @@ void mount_root(void)
   __sprintf(buf, "(mount_root)INODE-Size: %d typically = 32\n", sizeof(struct d_inode));
   __puts(buf);
   
-  // -- null the super blocks...
+  // null the super blocks...
   // where 8 = NO_SUPER_BLOCKS - 1 = 7
   for (p = &super_block[0]; p < &super_block[7]; p++) {
     
@@ -109,8 +103,8 @@ void mount_root(void)
     
   } // end of the for - clear the super_blocks
   
-  // [ we need to mount the floppy ]  
-  // [ read the super block ]
+  // We need to mount the floppy
+  // Read the super block
   read_super(ROOT_DEV);
 
   __sprintf(buf, "(mount_root)...done..\n", sizeof(struct d_inode));

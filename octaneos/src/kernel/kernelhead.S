@@ -10,9 +10,7 @@
  *
  * should be compiled with ASSEMBLY defined
  * --
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- *
+ *  Original Copyright (C) 1991, 1992  Linus Torvalds
  * -- 
  */
 
@@ -41,7 +39,7 @@ startup_32:
 	movl %eax,%fs
 	movl %eax,%gs
 
-# ++ Setup Stack ++
+# // Setup Stack
 
 	lss 	stack_start,%esp
 
@@ -53,7 +51,7 @@ startup_32:
 	rep
 	stosb
 
-# ++ Enter 32-bit setup ++
+# // Enter 32-bit setup
 	call setup_idt
 	
 	xorl %eax, %eax
@@ -86,7 +84,7 @@ startup_32:
 	movsb
 1:
 
-# ++ Assuming 486 or better ++
+# // Assuming 486 or better
 	movl $1, %eax
 	.byte 0x0f, 0xa2
 	andl $0xf00, %eax
@@ -102,14 +100,12 @@ startup_32:
 	call check_x87
 	call setup_paging
 
-
 	lgdt gdt_descr
 	lidt idt_descr
 
 
-# ++ Jump to start_kernel ++
-
-# [ change the current selector with the code below ]
+# Jump to start_kernel ++
+# change the current selector with the code below
 	ljmp $(__KERNEL_CS),$1f
 1:      movl $(__KERNEL_DS),%eax
 	movl %eax,%ds
@@ -140,11 +136,9 @@ ALIGN
 1:
 	.byte 0xDB,0xE4
 	ret
-
-
-
+		
 /*
- * ++ Functions ++
+ * Function Definitions
  */
 setup_idt:
 	lea ignore_int,%edx
@@ -215,7 +209,7 @@ setup_paging:
 	
 
 /*
- * ++ End of Functions and Code
+ * End of Functions and Code
  */
 	
 .org 0x1000

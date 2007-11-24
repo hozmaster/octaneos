@@ -1,22 +1,14 @@
 //
 // Berlin Brown
 //
-//
-// bigbinc@hotmail.com
-//
 // interrupts.c
 //
 // $Id: interrupts.c,v 1.15 2005/05/26 00:06:53 bigbinc Exp $
 //
-//
 // to load an irq
-//
-// load the pic:
-//
-// enable the irq
-//
-//  and based on the linux code, timer irqs can be weird
-// 
+// * load the pic:
+// * enable the irq
+// * and based on the linux code, timer irqs can be weird
 //        vector = assign_irq_vector(0);
 //        set_intr_gate(vector, interrupt[0]);
 //
@@ -37,9 +29,7 @@ action->handler(irq, action->dev_id, regs);
  disable_none,
  ack_none,
  end_none
-
  interrupt_handler000 --->>> 
-
  save_regs
  
  do_IRQ --->> handler
@@ -104,9 +94,7 @@ extern void scheduler_timer_helper(void);
 extern struct TSS_object _tss;
 
 //==========================================================
-//
-// Functions
-//
+// Function Definitions
 //==========================================================
 
 unsigned long _get_jiffy_value(void)
@@ -133,13 +121,9 @@ void __xloop_delay(unsigned long loops)
 
 int check_timer_irq(void)
 {
-
   unsigned int __tmp01 =  _jiffies;
-  
-  sti();
-    
-  __xloop_delay(0xf0000);
-  
+  sti();    
+  __xloop_delay(0xf0000); 
   return _jiffies  - __tmp01;
     
 }
@@ -213,9 +197,6 @@ void print_tmp_ctr(void) {
   
 }
 
-//
-// ++ handle_interrupt ++
-//
 void handle_interrupt(int _irq_no)
 {
 	
@@ -270,10 +251,8 @@ void handle_interrupt(int _irq_no)
 
 }
 
-
 //
-// **==== Load the 8259 PIC ====**
-//
+// Load the 8259 PIC
 void load_remap_controller(void)
 {
         
@@ -341,7 +320,6 @@ void load_interrupts(void) {
   _set_intr_gate(0x20+13, __bad_interrupt_13_20);
   _set_intr_gate(0x20+14, __bad_interrupt_14_40);
   _set_intr_gate(0x20+15, __bad_interrupt_15_80);
-
   __disable_irq(0);
 
   

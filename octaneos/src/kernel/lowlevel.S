@@ -9,27 +9,19 @@
  *
  */
 
-
 #define __ASSEMBLY__
 
 #include <linux/linkage.h>
 #include <asm/segment.h>
 
-
 #
-# ++ Get system registers ++
-#
-#
-#
-# - we are going to push a lot of stuff onto the stack
-#
+# Get system registers
+# We are going to push a lot of stuff onto the stack
 # note:	 C is a really big macro assembler
-#
-
 
 #
-#	 push %gs	 ++++++++++++++++++
-#	 push %fs	 ++++++++++++++++++
+#	 push %gs	 ++++++++++++++++++****
+#	 push %fs	 ++++++++++++++++++****
 #        push %es	 ++++++++++++++++++
 #        push %ds	 ++++++++++++++++++
 #        pushl %eax	 ++++++++++++++++++
@@ -40,11 +32,9 @@
 #        pushl %ecx	 ++++++++++++++++++
 #        pushl %ebx	 ++++++++++++++++++
 	
-#
 # variables we put on the stack ==
 #
 # here placed in order they placed on it
-#
 	
 REGI_EBX	= 0x00
 REGI_ECX	= 0x04

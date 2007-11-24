@@ -5,7 +5,6 @@
  * 
  * $Id: hardware_interrupts.S,v 1.6 2004/04/10 14:16:25 bigbinc Exp $
  *
- *
  * assembly wrapper functions for interrupts
  *
  * the actual work will get done elsewhere
@@ -100,7 +99,7 @@
 1:	outb %al,$0x20;
 		
 #
-# [ ++ set_intr_gate prepares the actual interrupt ++ ]
+# Set_intr_gate prepares the actual interrupt
 #
 # we just need a way back to C
 #
@@ -115,7 +114,7 @@
 # 5         0x20	harddrive
 # 6         0x40	floppy
 # 7         0x80
-# -=-=--=-=- Second PIC -=-=-=-=--=--=
+# /// Second PIC ///
 # 8         0x01
 # 9         0x02
 # 10        0x04
@@ -124,17 +123,16 @@
 # 13        0x20  ....... ]
 # 14        0x40  ......  ]
 # 15        0x80  ......  ]
-
 	
 #
-# ++================ TIMER_IRQ - 0000 =================++
+# //============== TIMER_IRQ - 0000 =================
 #
 	
 ENTRY(hw_interrupt_entry_00)
 	pushl $-0-2	
 	SAVE_ALL
 	
-        SETUP_PIC01(0x01)                      # ... [ Edit Accordingly ] ....
+        SETUP_PIC01(0x01)                      
 	
 	sti
 	movl %esp,%ebx
@@ -143,7 +141,7 @@ ENTRY(hw_interrupt_entry_00)
 
 
 	# .... see interrupts.c for timer_irq
-	call SYMBOL_NAME(_public_timer_irq)	# ++ do something ++
+	call SYMBOL_NAME(_public_timer_irq)
 	
 	addl $8,%esp
 	cli
@@ -153,14 +151,14 @@ ENTRY(hw_interrupt_entry_00)
 	RESTORE_ALL
 
 #
-# ++================ KEYBOARD_IRQ - 0001 =================++
+# //============== KEYBOARD_IRQ - 0001 =================
 #
 	
 ENTRY(hw_interrupt_entry_01)
 	pushl $-0-2	
 	SAVE_ALL
 	
-        SETUP_PIC01(0x02)				# ... [ Edit Accordingly ] ....
+        SETUP_PIC01(0x02)				
 	
 	sti
 	movl %esp,%ebx
@@ -172,33 +170,29 @@ ENTRY(hw_interrupt_entry_01)
 	addl $8,%esp
 	cli
 
-	PIC_CLOSE_FIRST(0x02)				# ... [ Edit Accordingly ] ....
+	PIC_CLOSE_FIRST(0x02)				
 
 	RESTORE_ALL
 
 
 #
-# ++================ FLOPPY_IRQ - 0006 =================++
+# //============== FLOPPY_IRQ - 0006 =================
 # see floppy.c
 	
 ENTRY(hw_interrupt_entry_06)
 	pushl $-0-2	
 	SAVE_ALL
 	
-        SETUP_PIC01(0x40)			# ... [ Edit Accordingly ] ....
+        SETUP_PIC01(0x40)			
 	
 	sti
 	movl %esp,%ebx
 	pushl %ebx
 	pushl $0
-	
-	call SYMBOL_NAME(lowlevel_floppy_interrupt)	# ++ do something ++
-	
+	call SYMBOL_NAME(lowlevel_floppy_interrupt)
 	addl $8,%esp
 	cli
-
-	PIC_CLOSE_FIRST(0x40)			# ... [ Edit Accordingly ] ....
-
+	PIC_CLOSE_FIRST(0x40)
 	RESTORE_ALL
 
 
