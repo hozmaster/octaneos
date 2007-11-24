@@ -5,20 +5,16 @@
 // bigbinc@hotmail.com
 //
 // $Id: scheduler.c,v 1.15 2005/05/26 00:06:53 bigbinc Exp $
-//
-//
 
 // sti - enable interrupts
 // cli - clear interrupt enable
 //
 // originally based on Alexei A. Frounze's code
-//
 
 // gcc -O2 -fomit-frame-pointer -W -Wall
 // - defined as _jiffies
 // note: jiffies is defined in interrupts
 //   - used by the timer_interrupt, it should be in this code
-//
 //
 // == Based on Linux Kernel ================
 //
@@ -28,25 +24,17 @@
 // TSS - GDT layout
 //
 // 0 - null
-//
 // 1 - kernel code segment
-//
 // 2 - kernel data segment
-//
 // 3 - user code segment
-//
 // 4 - user data segment
 //
 // TSS layout  
 // 
 // 8 - TSS [ task 0 ]
-//
 // 9 - LDT [ task 0 ]
-//
 // 10 - TSS [ task 1 ]
-//
 // 11 - LDT [ task x1 ]
-//
 //
 // the task_switcher just jumps to the value in 
 //
@@ -64,15 +52,9 @@ extern descriptor_table gdt;
 #define TIMER_LIST_REQUESTS                 64
 
 
-// ----------------------------------=-=- [ class_timer_list ]
-//                                             long:           jiffies
-//                                             function_ptr:   timer_function 
-//                                             next_list_val:  next
-struct class_timer_list {
-  
+struct class_timer_list {  
   long jiffies;
   void (*timer_function)();
-
   struct class_timer_list *next;
 
 }; // end of the struct
@@ -192,9 +174,8 @@ void scheduler_timer_helper(void)
 
 }
 
-
-// [ called whenever you want a to delay a function ]
-// [ by a set number of jiffies                     ]
+// Called whenever you want a to delay a function
+// by a set number of jiffies
 void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)) {
 
   char buf[80];
@@ -204,10 +185,8 @@ void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)
     
     return;
     
-  } // end of the if -=-=--==-=-=
-
+  }
   _disable_interrupts();
-  
   if (jiffies_timer_count <= 0)
   {
 
@@ -263,13 +242,9 @@ void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)
       p = p->next;
       
       // ok, timer value set, now use 
-      // scheduler timer helper to actually use it
-      
-    }
-    
-    
-  }
-  
+      // scheduler timer helper to actually use it      
+    } 
+  }  
   _enable_interrupts();
      
 }
@@ -278,9 +253,7 @@ static void clear_timer_interrupts(void)
 {
   
   int i;
-
   private_next_timer = NULL;
-
   for (i = 0; i < TIMER_LIST_REQUESTS; i++) {
 
     private_timer_list[i].jiffies = 0;
@@ -288,8 +261,7 @@ static void clear_timer_interrupts(void)
 
   }
 
-}
-	
+}	
 
 //	
 // called by init/main.c
@@ -316,12 +288,11 @@ void scheduler_init(void) {
   _load_tss_descriptor((gdt + ((_task_offset << 1) + _FIRST_TSS)), &_tss[2]);
 
   //
-  // set the system software interrupt 
-  //
+  // set the system software interrupt
   // see: traps.c  for the actual function definition
   _set_system_gate(0x80, &system_call);
  
-  // ++ load the task register ++
+  // load the task register
   load_task_register(0x0);
 
 }

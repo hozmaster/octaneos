@@ -2,7 +2,6 @@
 // Berlin Brown
 //
 // bigbinc@hotmail.com
-//
 // $Id: system_calls.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
 //
 // Note: using asmlinkage for going down into an interrupt
@@ -16,7 +15,6 @@
 #include <linux/linkage.h>
 #include <asm/segment.h>
 #include <asm/io.h>
-
 
 asmlinkage int system_debug(void) {
 

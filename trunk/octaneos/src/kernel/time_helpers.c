@@ -1,8 +1,5 @@
 //
-//
-//
 // Berlin Brown
-//
 // bigbinc@hotmail.com
 //
 //

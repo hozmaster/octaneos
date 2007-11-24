@@ -2,12 +2,8 @@
 //
 // Berlin Brown
 //
-// bigbinc@hotmail.com
-//
 // $Id: traps.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
 //
-
-// ++ set _gate 
 
 #include <system/system.h>
 
@@ -37,36 +33,23 @@ do { \
 
 asmlinkage void load_divide_error(void);
 asmlinkage void load_debug_error(void);
-asmlinkage void load_nmi_error(void);
-  
+asmlinkage void load_nmi_error(void);  
 asmlinkage void load_breakpoint_error(void);
-    
 asmlinkage void load_overflow_error(void);
-  
 asmlinkage void load_boundscheck_error(void);
-    
 asmlinkage void load_invalidop_error(void);
-  
 asmlinkage void load_device_na_error(void);
 asmlinkage void load_doublefault_error(void);
-  
 asmlinkage void load_segmentover_error(void);
-  
 asmlinkage void load_invalidtss_error(void);
-    
 asmlinkage void load_segment_error(void);
-  
 asmlinkage void load_stack_error(void);
-  
 asmlinkage void load_protection_error(void);
-  
 asmlinkage void load_pagefault_error(void);
 asmlinkage void load_intel_error(void);
 asmlinkage void load_coprocessor_error(void);
 
-
 //=========== Exception Handlers ==================
-
 
 // blue screen of death
 void __blue_screen(void) {
@@ -114,7 +97,6 @@ void panic(const char *str)
   for(;;);
 
 }
-
 
 // ## Exception 01
 void handler_divide_error(void)
