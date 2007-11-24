@@ -3,10 +3,8 @@
 
 //
 // Berlin Brown
-//  bigbinc@hotmail.com
-//	
-//	(based on Linux Kernel Code)
-//
+// berlin.brown@gmail.com
+// (Loosely based on early linux kernel source 0.1)
 #define __KERNEL_CS     0x10
 #define __KERNEL_DS     0x18
 
