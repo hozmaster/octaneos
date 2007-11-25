@@ -1,6 +1,5 @@
 /*
- * Berlin Brown
- * berlin.brown@gmail.com
+ * Copyright (C) 2003, 2007 Berlin Brown
  *
  * Originally Created by Linus Torvalds (original Linux)
  * 

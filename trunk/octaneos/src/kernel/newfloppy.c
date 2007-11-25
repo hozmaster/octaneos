@@ -1,10 +1,8 @@
 /*
- * Berlin Brown
+ * Copyright (C) 2003, 2007 Berlin Brown
  *
  * newfloppy.c
- * 
- * $Id$
- * 
+ *  
  * This floppy driver is a test to replace the current linux
  * style floppy driver for something slimmer
  *

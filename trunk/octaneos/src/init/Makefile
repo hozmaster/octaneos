@@ -1,4 +1,4 @@
-#
+# Copyright (C) 2003, 2007 Berlin Brown
 # clean script for init
 all: clean
 

@@ -1,6 +1,5 @@
 /*
- * Berlin Brown
- *
+ * Copyright (C) 2003, 2007 Berlin Brown
  * bigbinc@hotmail.com
  *
  * $Id: mini.S,v 1.1 2004/03/14 03:21:39 bigbinc Exp $

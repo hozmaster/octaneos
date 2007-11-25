@@ -1,6 +1,5 @@
 //
-// Berlin Brown
-// 	bigbinc@hotmail.com
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: setup.S,v 1.1 2004/03/14 03:21:39 bigbinc Exp $, we are assuming a big kernel
 //

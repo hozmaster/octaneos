@@ -1,10 +1,9 @@
 #ifndef _ASM_IO_H
 #define _ASM_IO_H
 //
-// Berlin Brown
-//   $Id: io.h,v 1.4 2005/05/26 00:06:54 bigbinc Exp $
-//   
-
+// Copyright (C) 2003, 2007 Berlin Brown
+// $Id: io.h,v 1.4 2005/05/26 00:06:54 bigbinc Exp $
+//
 
 #ifdef SLOW_IO_BY_JUMPING
 #define __SLOW_DOWN_IO "\njmp 1f\n1:\tjmp 1f\n1:"

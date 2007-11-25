@@ -1,5 +1,5 @@
 #----------------------------------------------------------
-# Berlin Brown
+# Copyright (C) 2003, 2007 Berlin Brown
 # $Id: Makefile,v 1.19 2005/05/26 00:06:53 bigbinc Exp $
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS

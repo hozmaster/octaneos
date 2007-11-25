@@ -1,13 +1,9 @@
 //
-// Berlin Brown
-//
-// bigbinc@hotmail.com
+// Copyright (C) 2003, 2007 Berlin Brown
 // $Id: system_calls.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
 //
 // Note: using asmlinkage for going down into an interrupt
 //   its dangerous down there
-//
-//
 // actual system_call function is in 
 //  assembly code,  exceptions.S
 //
