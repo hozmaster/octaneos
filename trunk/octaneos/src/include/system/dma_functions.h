@@ -1,8 +1,5 @@
 //==========================================================
-//
-// Berlin Brown
-//
-// bigbinc@hotmail.com
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: dma_functions.h,v 1.4 2005/05/26 00:06:45 bigbinc Exp $
 //
@@ -18,7 +15,7 @@
 #include <system/alpha.h>
 
 //==========================================================
-//  [ DMA FUNCTIONS ]
+// DMA FUNCTIONS
 //==========================================================
 static __inline__ void enable_dma(unsigned int dmanr)
 {
@@ -81,29 +78,22 @@ static __inline__ void set_dma_page(unsigned int dmanr, char pagenr)
  
 }
 
-
 static __inline__ void set_dma_addr(unsigned int dmanr, unsigned int a)
 {
   set_dma_page(dmanr, a>>16);
 
   if (dmanr <= 3)  {
-
     outb( a & 0xff, ((dmanr&3)<<1) + _IO_DMA1_BASE );
     outb( (a>>8) & 0xff, ((dmanr&3)<<1) + _IO_DMA1_BASE );
-
   }  else  {
-
     outb( (a>>1) & 0xff, ((dmanr&3)<<2) + _IO_DMA2_BASE );
     outb( (a>>9) & 0xff, ((dmanr&3)<<2) + _IO_DMA2_BASE );
-
   }
-
 }
 
 static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
 {
   count--;
-
   if (dmanr <= 3)  {
     
     outb( count & 0xff, ((dmanr&3)<<1) + 1 + _IO_DMA1_BASE );
@@ -118,28 +108,19 @@ static __inline__ void set_dma_count(unsigned int dmanr, unsigned int count)
 
 }
 
-
-
 static __inline__ int get_dma_residue(unsigned int dmanr)
 {
   unsigned int io_port = 
     (dmanr<=3)? ((dmanr&3)<<1) + 1 + _IO_DMA1_BASE
-    : ((dmanr&3)<<2) + 2 + _IO_DMA2_BASE;
-  
-  unsigned short count;
-  
+    : ((dmanr&3)<<2) + 2 + _IO_DMA2_BASE;  
+  unsigned short count;  
   count = 1 + inb(io_port);
-  count += inb(io_port) << 8;
-  
+  count += inb(io_port) << 8;  
   return (dmanr<=3)? count : (count<<1);
   
 }
 
-
-//
-// see dma_functions.c [ kernel ]
-//
-
+// see dma_functions.c (kernel)
 extern int request_dma(unsigned int);
 extern void free_dma(unsigned int);
 

@@ -1,16 +1,12 @@
-///
 //
-// Berlin Brown
-//
-// bigbinc@hotmail.com
-//
-// beta.h
-//
-//
-// a lot of filesystem code
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: beta.h,v 1.10 2005/05/26 00:06:45 bigbinc Exp $
 //
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED.
 
 #ifndef __BETA_H_
 #define __BETA_H_
@@ -37,34 +33,23 @@
 // ROOT_DEV = mask
 // MAJOR_NR = no mask
 //
-// typically variables [dev] = mask
-//
-//
-// in terms of block - drivers
-//
-// you typically see dev & 0x03
-//  - for example [ 0x200 & 0x03 ]
-//
-
 
 // shift and get major device number ie 2
-// probably should be unmask...whatever
+// probably should be unmask whatever
 #define GET_MAJOR_MASK(a) (((unsigned) (a))>>8)
 #define GET_MINOR_MASK(a) ((a)&0xff)
 
-
-// see linux fs.h  ...
+// see linux fs.h
 #define _READ_FLAG        0
 #define _WRITE_FLAG       1
 #define _READ_AHEAD_FLAG  2
 #define _WRITE_AHEAD_FLAG 3
 
-
 // major_no = 2 = FLOPPY_MAJOR
 // rootdev = FLOPPY_DEVICE
 #define _FLOPPY_DEVICE           0x200
 #define _FLOPPY_DEVICE_NO        2
-// see define above...
+// see define above 
 #define _FLOPPY_MAJOR            GET_MAJOR_MASK(0x200)
 #define _FLOPPY_MINOR            GET_MINOR_MASK(0x000)
 
@@ -83,7 +68,6 @@ struct class_buffer_head {
 
   unsigned char buffer_count;
   unsigned char buffer_lock;
-
 
   struct class_buffer_head *buffer_prev;
   struct class_buffer_head *buffer_next;
@@ -107,10 +91,6 @@ struct class_block_request {
   struct class_block_request *next;
 };
 
-
-//
-//
-//
 // see block_devices. 
 //
 // : 0 = no_dev
@@ -123,11 +103,9 @@ struct class_block_device {
 
 };
 
-
-// see... block_devices.c
+// see block_devices.c
 extern struct class_block_request public_block_requests[NO_BLOCK_REQUESTS];
 extern struct class_block_device public_block_devices[NO_BLOCK_DEVICES];
-
 
 // see public_buffer_head above 
 struct d_inode {
@@ -138,7 +116,6 @@ struct d_inode {
   unsigned long     i_time;
   unsigned char     i_gid;
   unsigned char     i_nlinks;
-
   unsigned short    i_zone[9];
 
 };
@@ -152,7 +129,6 @@ struct file {
 
   //off_t f_pos;
 };
-
 
 struct m_inode {
 
@@ -179,7 +155,6 @@ struct m_inode {
 
 //
 // Note: only buffer_head name has changed up to this point
-//  --- changed from buffer_head to class_buffer_head
 //
 struct super_block {
 
@@ -209,7 +184,6 @@ struct super_block {
 
 typedef char buffer_block[1024];
 
-//  --- [ end of filesystem structs ]
 //=========================================================
 
 #endif

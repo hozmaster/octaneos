@@ -1,49 +1,37 @@
 //
-//
-//
-// Berlin Brown
-//
-// bigbinc@hotmail.com
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: alpha.h,v 1.9 2005/05/26 00:06:45 bigbinc Exp $
 //
-//
-// large chunks from linux kernel dma.h
+// Large chunks from linux kernel dma.h
 //=========================================================
-//
-//
-// second phase of header variables --
-//
+
 #ifndef _SYSTEM_ALPHA_H_
 #define _SYSTEM_ALPHA_H_
 
-// try to convert outb_p  - to - outb_dma
-
-
 #define _MAX_DMA_CHANNELS	8
 
-#define _IO_DMA1_BASE	         0x00
-#define _IO_DMA2_BASE	         0xC0
-
+#define _IO_DMA1_BASE        0x00
+#define _IO_DMA2_BASE	     0xC0
 
 #define _DMA1_CMD_REG		 0x08
 #define _DMA1_STAT_REG		 0x08
-#define _DMA1_REQ_REG            0x09
+#define _DMA1_REQ_REG        0x09
 #define _DMA1_MASK_REG		 0x0A
 #define _DMA1_MODE_REG		 0x0B
 #define _DMA1_CLEAR_FF_REG	 0x0C
-#define _DMA1_TEMP_REG           0x0D
+#define _DMA1_TEMP_REG       0x0D
 #define _DMA1_RESET_REG		 0x0D
-#define _DMA1_CLR_MASK_REG       0x0E
-#define _DMA1_MASK_ALL_REG       0x0F
+#define _DMA1_CLR_MASK_REG   0x0E
+#define _DMA1_MASK_ALL_REG   0x0F
 
 #define _DMA2_CMD_REG		 0xD0
 #define _DMA2_STAT_REG		 0xD0
-#define _DMA2_REQ_REG            0xD2
+#define _DMA2_REQ_REG        0xD2
 #define _DMA2_MASK_REG		 0xD4
 #define _DMA2_MODE_REG		 0xD6
 #define _DMA2_CLEAR_FF_REG	 0xD8
-#define _DMA2_TEMP_REG           0xDA
+#define _DMA2_TEMP_REG       0xDA
 #define _DMA2_RESET_REG		 0xDA
 #define _DMA2_CLR_MASK_REG       0xDC
 #define _DMA2_MASK_ALL_REG       0xDE
@@ -88,7 +76,6 @@
 #define FD_DIR          0x3f7
 #define FD_DCR          0x3f7
 
-
 // fdc status data
 
 #define _FDC_STATUS_BUSYMASK 0x0F
@@ -115,7 +102,5 @@
 
 #define FDC_TYPE_STD    0x80
 #define FDC_TYPE_82077  0x90
-
-
 
 #endif 

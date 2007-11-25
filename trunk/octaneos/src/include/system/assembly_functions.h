@@ -1,15 +1,13 @@
 //
-// Berlin Brown
-//
+// Copyright (C) 2003, 2007 Berlin Brown
 // 
 // $Id: assembly_functions.h,v 1.3 2005/05/26 00:06:45 bigbinc Exp $
 //
-//
+
 #ifndef _ASSEMBLY_FUNCTIONS_H_
 #define _ASSEMBLY_FUNCTIONS_H_
 
 #define __ASSEMBLY__
-
 
 //
 // this macro may or may not be different
