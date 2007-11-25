@@ -19,11 +19,11 @@ void usage(void) {
   fprintf(stderr, "usage xnode <path> { b c u p } <major> <minor>\n");
   exit(1);
 
-} // end of the function ++
+}
 
 //
 // Create all nodes within this function 
 //
 int main(int argc, char **argv) {
   return 0;
-} // End of function //
+}

@@ -23,11 +23,6 @@
 #undef memset
 #undef memcpy
 
-/*
- * Why do we do this? Don't ask me..
- *
- * Incomprehensible are the ways of bootloaders.
- */
 static void* memset(void *, int, size_t);
 static void* memcpy(void *, __const void *, size_t);
 #define memzero(s, n)     memset ((s), 0, (n))
@@ -378,7 +373,7 @@ asmlinkage int decompress_kernel(struct moveparams *mv, void *rmode)
 
 	gunzip();
 
-	puts("\n>> Ok, booting the kernel.<< \n");
+	puts("\nINFO: booting the kernel.<< \n");
 
 
 	if (high_loaded) close_output_buffer_if_we_run_high(mv);
