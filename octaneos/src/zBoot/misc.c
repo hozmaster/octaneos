@@ -748,28 +748,19 @@ asmlinkage int decompress_kernel(unsigned int _eax,
   
   makecrc();
 
-  puts("++========================================\n");
-  puts("++ Uncompressing OS-Kernel...\n");
-  puts("++========================================\n");
-
+  puts("========================================\n");
+  puts("INFO: Uncompressing OS-Kernel...\n");
+  puts("========================================\n");
   gunzip();
-
   puts("Ok, booting the kernel.\n");
-
-  close_output_buffer_if_we_run_high(&mv);
-  
+  close_output_buffer_if_we_run_high(&mv);  
   return high_loaded;
 
-} // end of the function ++
-
-
+}
 
 //============================================================
-//
 // END MISC.C
-//
 //============================================================
-
 
 
 //============================================================

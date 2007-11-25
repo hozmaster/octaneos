@@ -14,12 +14,6 @@
 //------------------------------------------------
 // ** Revision History and Notes **
 //------------------------------------------------
-//
-// blk_dev -> request_fn typically calls  [ do_fd_request ] 
-//     .... and then -> floppy_on_interrupt
-//             .... and then -> transfer
-//                 .... (in transfer) -> seek_interrupt [interruptswap]
-//         ... in between the interrupts may handle stuff
 //     
 // size         2880
 // sect         18
@@ -326,7 +320,7 @@ int public_floppy_change(unsigned int nr)
   __sprintf(buf, ".");
   __puts(buf);
   
-  // We didnt get it yet, try again...[ loop ]
+  // We didnt get it yet, try again [ loop ]
   if ((current_output_register & 0x03) != nr)
     goto repeat;
   
@@ -413,7 +407,7 @@ static void readwrite_interrupt(void) {
 }
 
 //*******************************************************
-//  setup_rw_floppy... called by seek()
+//  setup_rw_floppy called by seek()
 //*******************************************************
 inline void setup_rw_floppy(void)
 {
@@ -447,7 +441,7 @@ inline void setup_rw_floppy(void)
 }
 
 //
-// see... transfer for a swap
+// see transfer for a swap
 //
 static void seek_swap_interrupt(void)
 {
@@ -455,7 +449,7 @@ static void seek_swap_interrupt(void)
   unsigned char _reply0 = 0;
   unsigned char _reply1 = 0;
 
-  /// sense drive status...
+  /// sense drive status
   // FD_SESEI = 0x08 = sense interrupt status
   output_byte_fdc(0x08);
 
@@ -478,7 +472,7 @@ static void seek_swap_interrupt(void)
 }
 
 //
-// see ... linux transfer
+// see linux transfer
 //
 static void floppy_transfer_data(void)
 {
@@ -554,9 +548,9 @@ static void floppy_transfer_data(void)
 
 //
 // note: called in from the filesystem,
-//  ... block request...
+// block request
 //
-///........... called by readwrite_block - block_devices.c .........
+//  called by readwrite_block - block_devices.c
 //  CURRENT       === blk_dev[MAJOR_NR].current_request
 //  CURRENT_DEV   === blk_dev[MAJOR_NR].current_request->dev
 //
@@ -620,7 +614,7 @@ static void do_floppy_request(void)
     
     	//
     	// note command must equal a floppy command
-    	// see... alpha.h
+    	// see alpha.h
     	// FD_WRITE = 0xC5
     	//
     	private_command = FD_WRITE;
@@ -645,8 +639,8 @@ static void do_floppy_request(void)
 
 //
 // fill in data for a fake block request
-//  see.... test_floppy
-//  see.... beta.h
+//  see test_floppy
+//  see beta.h
 //
 static void _test_block_request(void) {
 
@@ -680,7 +674,7 @@ void __test_floppy(void)
   _floppy_area_addr = (unsigned long)new_floppy_area;
   _block_dev_addr = (unsigned long)_CURRENT_BLOCK_REQ->buffer;
 
-  __sprintf(buf, "...testing floppy rst: %d recal: %d drv: %d [%x %x ]\n", private_reset, 
+  __sprintf(buf, "Testing floppy rst: %d recal: %d drv: %d [%x %x ]\n", private_reset, 
 	    private_recalibrate, private_current_drive, _floppy_area_addr, _block_dev_addr);
   __puts(buf);
 
@@ -689,7 +683,7 @@ void __test_floppy(void)
   do_floppy_request();
   public_add_timer(0xff0,view_floppy_data);
   
-  __sprintf(buf, "...done state: [ %d ].\n", _test_floppy_state);
+  __sprintf(buf, "done state: [ %d ].\n", _test_floppy_state);
   __puts(buf);
 
 }
@@ -735,7 +729,7 @@ static int floppy_get_results(void)
   
   private_reset = 1;
   
-  __sprintf(buf, "(FDC) Get-Status timed out...\n\r");
+  __sprintf(buf, "(FDC) Get-Status timed out\n\r");
   __puts(buf);
   return -1;
   
@@ -774,16 +768,12 @@ static short _get_version(void)
 
 }
 
-//...............................................
-//
-// output byte to FD_DATA = 0x3f5
-//
-//...............................................
-static void output_byte_fdc(char byte)
-{
+//***********************************************
+// output byte to FD_DATA = 0x3f
+//***********************************************
+static void output_byte_fdc(char byte) {
 
   char buf[80];
-
   int _i;
   unsigned char status;
 
@@ -802,7 +792,6 @@ static void output_byte_fdc(char byte)
     }
 
   }
-
   private_current_track = _FDC_TRACK_NO;
   private_reset = 1;
   __sprintf(buf, "Unable to send byte to FDC\n");
@@ -810,8 +799,7 @@ static void output_byte_fdc(char byte)
 
 }
 
-static void setup_dma_floppy(void)
-{
+static void setup_dma_floppy(void) {
 
   unsigned long _addr = 0;
   unsigned long count;
@@ -868,24 +856,18 @@ static void _unexpected_floppy_interrupt(void)
   if (_res != 2 || 
       (_reply0 & 0xE0) == 0x60)
     {
-
-      private_reset = 1;
-      
-    } else {
-      
-      private_recalibrate = 1;
-      
+      private_reset = 1;      
+    } else {     
+      private_recalibrate = 1;      
     }
   
   _test_floppy_state = 3;
    
 }
 
-static void select_floppy_drive(unsigned int nr)
-{
-  
-  private_seek = 1;
+static void select_floppy_drive(unsigned int nr) {
 
+  private_seek = 1;
   // 255 = NO_TRACK
   private_current_track = 255;
 
@@ -919,11 +901,9 @@ static void deprecated_turn_floppy_on(void)
 
 }
 
-static void deprecated_turn_floppy_off(void)
-{
+static void deprecated_turn_floppy_off(void) {
 
   unsigned int nr = 0x02;
-
   unsigned char mask = ~(0x10 << nr);
   _disable_interrupts();
 
@@ -935,17 +915,11 @@ static void deprecated_turn_floppy_off(void)
 }
 
 
-//
-// [ public __debug_floppy ] 
-//
 void __debug_floppy(void) {
 
-  // there used to be stuff here
+}
 
-} // end of the function 
-
-
-// - see hardware_interrupt06 - embedded there
+// See hardware_interrupt06 - embedded there
 //
 // design taken from linux floppy code
 //
@@ -962,19 +936,16 @@ void lowlevel_floppy_interrupt(void)
   }
 #else
 
-
 #endif
 
 }
 
 //
-//  - see if we can find the size and if we have an A/B/both drive
-// 
+// See if we can find the size and if we have an A/B/both drive
 void floppy_get_drives(void)
 {
 
-  // code taken from bona-fide osdev
-
+  // Code from bona-fide osdev
   char buf[80];
 
   char *drive_type[6] = { 
@@ -1023,26 +994,24 @@ static void _setup_dma_floppy_area(void)
 
 }
 
-
 // see main.c - invoked at the entry point
 void floppy_init(void)
 {
 
-#if 0
-  // [ block_request = current_request - beta.h ]
+#if 1
+
+  // block_request = current_request - beta.h
   _setup_dma_floppy_area();
   _test_floppy_state = 1;
 
-  //
   // fill - in block device struct data
   // see block_devices.c
   //  - note the floppy is major number  = 2  
   //
   public_block_devices[0x02].request_function = do_floppy_request;
    
-  //
-  //  [ data 0x0C to port { 0x3f2 } ]  
-  // enable FDC....
+  // data 0x0C to port { 0x3f2 }
+  // enable FDC
   // Step [ 1. ] 
   outb(current_output_register, 0x3f2);
  
@@ -1056,8 +1025,8 @@ void floppy_init(void)
   request_dma(0x02);  
     
   // Linux Step [ 4. ]
-  // [ super swap out floppy interrupt ]
-  //   ... set low-level function to nothing 
+  // super swap out floppy interrupt
+  // set low-level function to nothing 
   floppy_swap_interrupt = _unexpected_floppy_interrupt;
   _get_version();
 
@@ -1066,5 +1035,5 @@ void floppy_init(void)
   new_floppy_init();
 
 #endif
-  
+
 }

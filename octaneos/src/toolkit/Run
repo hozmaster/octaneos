@@ -35,7 +35,7 @@ DISKSIZE=1440
 
 case "`/usr/bin/env id`" in
 	"uid=0("*) ;;
-	*) echo >&2 "Error: Invalid permissions, login as 'su'"; exit 1;;
+	*) echo >&2 "Error: Invalid permissions, run sudo: sudo ./Run"; exit 1;;
 esac
 
 echo "====================================="
