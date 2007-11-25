@@ -1,11 +1,9 @@
 //
-// Berlin Brown
-//
-// bigbinc@hotmail.com
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: system_calls.h,v 1.4 2005/05/26 00:06:45 bigbinc Exp $
 //
-//  externs system_calls 
+// Externs system_calls 
 //
 #ifndef _SYSTEM_CALLS_H_
 #define _SYSTEM_CALLS_H_
@@ -16,8 +14,7 @@ typedef int (*int_function_ptr)();
 extern "C" {
 #endif
 
-  // [ these sys calls are not unix standards ]
-  extern int system_debug();    //  [ 0 ] 
+extern int system_debug();
 
 #ifdef __cplusplus
 }
