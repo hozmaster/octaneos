@@ -972,59 +972,51 @@ void floppy_get_drives(void)
  
 }
 
-static void _setup_dma_floppy_area(void)
-{
+static void _setup_dma_floppy_area(void) {
 
-  int i;
-
-  //
+  int i;  
   // Note: from the linux kernel code
   // this pointer must be aligned so that it is not on a 64kb region
-  //
 
   // - only want 1024
   new_floppy_area = (unsigned char *)0x80000;
-  
-  for (i = 0; i < 1024; i++)
-  {
-
+  for (i = 0; i < 1024; i++) {
     new_floppy_area[i] = (unsigned char)0x00;
 
   }
-
 }
 
+//
+// Initialize the floppy device
 // see main.c - invoked at the entry point
-void floppy_init(void)
-{
+void floppy_init(void) {
 
 #if 1
 
-  // block_request = current_request - beta.h
+  // block_request = current_request
   _setup_dma_floppy_area();
   _test_floppy_state = 1;
 
   // fill - in block device struct data
-  // see block_devices.c
-  //  - note the floppy is major number  = 2  
-  //
+  // See block_devices.c
+  // Note the floppy is major number = 2   
   public_block_devices[0x02].request_function = do_floppy_request;
    
   // data 0x0C to port { 0x3f2 }
   // enable FDC
-  // Step [ 1. ] 
+  // Step 1.
   outb(current_output_register, 0x3f2);
  
-  // Step [ 2. ]
+  // Step 2.
   // and then load the interrupt
   // this probably needs to before trying to write the floppy controller  
   handle_interrupt(0x06);
   
-  // Step [ 3. ]
+  // Step 3.
   // 0x02 = FLOPPY_DMA  
   request_dma(0x02);  
     
-  // Linux Step [ 4. ]
+  // Step 4.
   // super swap out floppy interrupt
   // set low-level function to nothing 
   floppy_swap_interrupt = _unexpected_floppy_interrupt;
