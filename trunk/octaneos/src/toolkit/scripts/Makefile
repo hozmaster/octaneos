@@ -7,8 +7,6 @@
 #  Makefile for normal gcc applications
 #
 # $Id: Makefile,v 1.1.1.1 2004/03/08 21:42:22 bigbinc Exp $
-#
-#
 
 CC              = gcc
 

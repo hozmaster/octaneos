@@ -7,26 +7,20 @@
 # 2/16/2004
 #
 
-
 echo "Writing Disk..."
-
 
 DEST_DEV=/dev/fd0
 DISKSIZE=1440
 
 IMGFILE=bochs/orange.img
-
 if [ ! -f "$IMGFILE" ] ; then
-	echo "++ No!!! "
-	echo "++ $IMGFILE does not exist..."
-	echo "++ What are you trying to do????"
-	echo "++ Make sure to run 'ant run' and that directory 'bochs' exists"
-	echo "++ exiting..."
+	echo "// $IMGFILE does not exist..."
+	echo "// What are you trying to do????"
+	echo "// Make sure to run 'ant run' and that directory 'bochs' exists"
+	echo "// exiting..."
 	exit 1
 fi
-
 echo "$IMGFILE exists...[ok]"
-
 
 if [ "$DEST_DEV" ] ; then
 
@@ -34,12 +28,10 @@ if [ "$DEST_DEV" ] ; then
         echo -n "Please insert a floppy in $DEST_DEV and press [enter]..."
         read DUMMY
         echo
-
         echo "Writing image..."
         dd if=$IMGFILE of=$DEST_DEV bs=1k count=$DISKSIZE conv=sync || WERR=true
         echo "done."
 
 fi
-
 sync
 

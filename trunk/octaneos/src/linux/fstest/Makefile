@@ -1,21 +1,17 @@
 #
-#
-## Berlin Brown
+# Berlin Brown
 #
 # Makefile for fs test
-# - [ main program ]
-#
 
 CC = gcc
 CFLAGS = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
 
 all: runfs
 
-
-# -- [ define the objects to compile ] --
+# // define the objects to compile
 OBJS = fs.o
 
-# -- [ suffixes ]  --
+# // suffixes
 .c.o:
 	@echo " [ compiling Standard C file ] "
 	$(CC) $(CFLAGS) -c $<

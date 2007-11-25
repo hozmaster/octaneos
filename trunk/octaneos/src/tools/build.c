@@ -20,7 +20,6 @@
 #include <asm/boot.h>
 
 
-
 #define DEFAULT_MAJOR_ROOT 0
 #define DEFAULT_MINOR_ROOT 0
 
@@ -202,8 +201,6 @@ int main(int argc, char **argv) {
     sz -= l;
   } // end of the whlie
   close(fd);
-
-
  
   //
   // Normally, we would write the sizes at the end of the

@@ -4,8 +4,6 @@
  * bigbinc@hotmail.com
  *
  * $Id: demo.S,v 1.1 2004/03/14 03:23:59 bigbinc Exp $
- *
- *
  */
 
 
@@ -21,10 +19,6 @@ begbss:
 .text
 
 hello:	jmp hello
-
-
-#
-# -- End --
 
 .text
 endtext:

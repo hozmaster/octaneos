@@ -17,7 +17,6 @@
 /*
  * gzip declarations
  */
-
 #define OF(args)  args
 #define STATIC static
 

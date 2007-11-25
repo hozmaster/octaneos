@@ -29,23 +29,19 @@ makedev () {
 		
 	
 }
-
 # End of the function
 
-# ++  [ symlink name target ] 
+# Symlink name target
 symlink () {
-
 	echo ">> Symlink $1 -->> $2"
-
 	# The symlinks will probably be broken
-	ln -s $2 $DEV_DIR/$1
-	
+	ln -s $2 $DEV_DIR/$1	
 } 
 
 
 if [ $DEV_DIR = "/dev" ] ; then
 
-	echo "++=== Major Error ===++"
+	echo "=== Major Error ==="
 	echo " ErrorBot: We cannot edit the root 'dev' directory"
 	echo " 		There must be something wrong with "
 	echo "		your current directory...."
@@ -53,9 +49,8 @@ if [ $DEV_DIR = "/dev" ] ; then
 	exit 1
 fi
 
-echo " ++ [ Device Creation Script ] ++"
+echo " /// Device Creation Script ///"
 echo " >> Running..."
-
 
 makedev mem c 1 1 root kmem 660
 makedev kmem c 1 2 root kmem 660
@@ -122,6 +117,5 @@ makedev cua2 c 5 66 root uucp 660
 makedev ttyS3 c 4 67 root tty 666
 makedev cua3 c 5 67 root uucp 660
 
-echo "...done [ Device Creation ]"
-
+echo "...done /// Device Creation ///"
 exit 0

@@ -25,11 +25,5 @@ void usage(void) {
 // Create all nodes within this function 
 //
 int main(int argc, char **argv) {
-
-  
-  
   return 0;
-
-  
-
-} // end of the main ++;
+} // End of function //

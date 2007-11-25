@@ -2,12 +2,19 @@
 //
 // Berlin Brown
 //
-// bigbinc@hotmail.com
-//
-//
 // $Id: fs.c,v 1.2 2004/04/06 15:41:46 bigbinc Exp $
 //
-//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+// CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+// EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+// PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+// LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+// NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+// SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,23 +22,16 @@
 #include <unistd.h>
 #include <errno.h>
 
-
 #define _GNU_SOURCE
 #include <getopt.h>
 
-//
 // getopt_long - see unistd.h
-
-//
 // see... getopt_long - unistd.h
-//
-//
-//struct option: 
+// struct option: 
 //              const char *name;
 //              int has_arg;
 //              int *flag;
 //              int val;
-
 
 static struct option long_options[] = {
       {"help",    0, NULL, 'h'},
@@ -39,31 +39,24 @@ static struct option long_options[] = {
       {"options", 0, NULL, 'o'},
 };
 
-
 static void usage(void) {
-
   fprintf(stderr, "usage: runfs \n");
-
-} // end of the functino ---=-=-
+}
 
 int main(int argc, char **argv) {
   
   char *_tmp;
-
   printf(".... [ Running program ] ....\n");  
 
   if (getuid() != 0) {
     fprintf(stderr, "Note: You must be root to use this application!\n");
-  } // end of the if --=-=-=-==
-  
+  }  
   while(1) {
 
     int c;
     int index = 0;
-
     c = getopt_long(argc, argv, "h:v:o:", 
 		    long_options, &index);
-
     if (c == -1)
       break;
 
@@ -87,11 +80,7 @@ int main(int argc, char **argv) {
       usage();
       break;
 
-    };
-    
-
-  } // end of the while search through the options
-
+    };    
+  }
   return 0;
-
-} // end of the function main -=--==-==-=-=--
+}
