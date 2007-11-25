@@ -1,6 +1,5 @@
 #
-# $Id$
-#
+# Copyright (C) 2003, 2007 Berlin Brown
 # boot - Makefile
 #
 all:

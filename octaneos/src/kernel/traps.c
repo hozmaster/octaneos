@@ -1,6 +1,5 @@
 //
-//
-// Berlin Brown
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: traps.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
 //
@@ -93,38 +92,37 @@ void panic(const char *str)
   __sprintf(buf, "======================================\n", str); __puts(buf);
 
   get_all_registers();
-
   for(;;);
 
 }
 
-// ## Exception 01
+// Exception 01
 void handler_divide_error(void)
 {
   panic("Divide Error");  
 }
 
 
-// ## Exception 02
+// Exception 02
 void handler_debug_error(void)
 {
   panic("Debug Exception");
   
 }
 
-// ## Exception 03
+// Exception 03
 void handler_nmi_error(void)
 {
   panic("NMI-Error");  
 }
 
-// ## Exception 04
+// Exception 04
 void handler_breakpoint_error(void)
 {
   panic("Breakpoint Found");  
 }
 
-// ## Exception 05
+// Exception 05
 void handler_overflow_error(void)
 {
 
@@ -132,7 +130,7 @@ void handler_overflow_error(void)
 }
 
 
-// ## Exception 06
+// Exception 06
 void handler_bounds_error(void)
 {
 
@@ -141,80 +139,78 @@ void handler_bounds_error(void)
 }
 
 
-// ## Invalid Op-Code -- 7
+// Invalid Op-Code -- 7
 void handler_invalid_opcode_error(void)
 {
    panic("Invalid opcode");
 }
 
-// ## Exception 8
+// Exception 8
 void handler_device_error(void)
 {
   panic("Coprocessor Not Available");
 }
 
-// ## Exception 9
+// Exception 9
 void handler_doublefault_error(void)
 {
   panic("Double-Fault Exception");
 }
 
-// ## Exception 10
+// Exception 10
 void handler_segmentover_error(void)
 {
   panic("Coprocessor Segment Overrun Exception");
 }
 
-// ## Exception 11
+// Exception 11
 void handler_tss_error(void)
 {
   panic("Invalid TSS\n");
 }
 
 
-// ## Exception 12
+// Exception 12
 void handler_segmentna_error(void) {
 
   panic("Segment Not Present");
 
 }
 
-// ## Exception 13
+// Exception 13
 void handler_stackexception_error(void) {
 
   panic("Stack Exception");
 
 }
 
-// ## Exception 14
+// Exception 14
 void handler_triple_error(void) {
 
   panic("Triple-Fault");
 
 }
 
-// ## Exception 15
+// Exception 15
 void handler_pagefault_error(void) {
 
   panic("Page-Fault");
 
 }
 
-// ## Exception 16
+// Exception 16
 void handler_intelx_error(void) {
   
   panic("Intel0002");
 
 }
 
-// ## Exception 17
+// Exception 17
 void handler_coprocessor_error(void) {
-
   panic("Coprocessor Error 002");
-
 }
 
-//=========== (end) Exception Handlers ==================
+//=========== Exception Handlers ==================
 
 void _set_intr_gate(unsigned int n, void *addr)
 {

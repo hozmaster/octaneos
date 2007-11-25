@@ -1,9 +1,9 @@
 //
-// Berlin Brown
+// Copyright (C) 2003, 2007 Berlin Brown
 //
 // $Id: misc_print.c,v 1.4 2005/05/26 00:06:53 bigbinc Exp $
 //
-// printing for debugging mainly
+// Printing API for debugging
 //
 // This should be library independent
 // you need to link this with any other object

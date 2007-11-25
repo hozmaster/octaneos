@@ -1,5 +1,5 @@
-//
-// BerlinBrown (berlin.brown@gmail.com)
+// 
+// Copyright (C) 2003, 2007 Berlin Brown (berlin.brown@gmail.com)
 // 
 // $Id: main.c,v 1.30 2005/05/26 00:06:54 bigbinc Exp $
 //
