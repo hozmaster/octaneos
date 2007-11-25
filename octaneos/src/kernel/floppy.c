@@ -24,7 +24,6 @@
 // (char)spec1  0xCF
 // 
 // dor = digital output_register
-
 // typically the dma buffer region must be 64k = 64 * 1024
 //
 // from newos: [
@@ -36,8 +35,6 @@
 //  dma_flipflop = 0xc,
 //  dma_page = 0x81,
 //  ] 
-//
-// We need the dma buffer region to be below a MB
 //
 
 #include <system/system.h>
@@ -153,13 +150,10 @@ static void floppy_copy_buffer(void *from, void *to) {
 
 void view_floppy_data(void)
 {
-
-  char buf[80];
-  
+  char buf[80];  
   __sprintf(buf,  " >>>>>>>>>> [ flg:%d %d ] seek:%d rst: %d recal:%d drv:%d\n", 
 	    _test_floppy_state, _test_floppy_hits, private_seek, private_reset, private_recalibrate, private_current_drive);
   __puts(buf);
-
   public_hexdump((void *)new_floppy_area, _HEXROWS_8);
 }
 
@@ -194,13 +188,11 @@ static void recalibrate_interrupt(void)
 }
 
 static void recalibrate_floppy(void)
-{
-  
+{  
   private_recalibrate = 0;
   private_current_track = 0;
   
-  floppy_swap_interrupt = recalibrate_interrupt;
-  
+  floppy_swap_interrupt = recalibrate_interrupt; 
   // 0x07 = FD_RECALIBRATE - move to track = 0
   output_byte_fdc(0x07);  
   output_byte_fdc(private_head << 2 | private_current_drive);
@@ -238,9 +230,6 @@ static void _debug_floppy_timer(void) {
 
 }
 
-//
-//  [ floppy_on_interrupt ]
-//
 static void floppy_on_interrupt(void)
 {
 
@@ -260,12 +249,10 @@ static void floppy_on_interrupt(void)
       floppy_transfer_data();
       
     }
-
 }
 
 //
 // Use with floppy_on:
-//
 // turn floppy on - trys to set the current_output_register
 //
 // to the current drive, to the current drive
@@ -273,20 +260,17 @@ static void floppy_on_interrupt(void)
 static void turn_floppy_on(unsigned int the_floppy_number)
 {
 
-  _disable_interrupts();
-  
+  _disable_interrupts();  
   unsigned char mask = 0x10 << the_floppy_number;
-
   cli();
 
   mask |= current_output_register;
-
   if (!private_selected) {
     
     mask &= 0xFC;
     mask |= the_floppy_number;
 
-  } // end of the if -==-=-=
+  }
   
   if (mask != current_output_register) {
     /// [ 3f2 = floppy digital output register ]
@@ -738,7 +722,6 @@ static short _get_version(void)
 {
 
   char buf[80];
-
   long r;
   unsigned char reply[_MAX_REPLIES];
   int _res = -1;
@@ -913,7 +896,6 @@ static void deprecated_turn_floppy_off(void) {
 
 }
 
-
 void __debug_floppy(void) {
 
 }
@@ -972,7 +954,6 @@ void floppy_get_drives(void)
 }
 
 static void _setup_dma_floppy_area(void) {
-
   int i;  
   // Note: from the linux kernel code
   // this pointer must be aligned so that it is not on a 64kb region
@@ -985,13 +966,11 @@ static void _setup_dma_floppy_area(void) {
   }
 }
 
-//
 // Initialize the floppy device
 // see main.c - invoked at the entry point
 void floppy_init(void) {
 
 #if 1
-
   // block_request = current_request
   _setup_dma_floppy_area();
   _test_floppy_state = 1;
