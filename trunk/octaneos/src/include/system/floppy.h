@@ -14,6 +14,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define FLOPPY_IRQ 6
+#define FLOPPY_DMA 2
+
 typedef enum {
     FDC_WRITE = 0,
     FDC_READ  = 1

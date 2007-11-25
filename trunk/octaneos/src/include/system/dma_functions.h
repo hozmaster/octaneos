@@ -4,7 +4,7 @@
 // $Id: dma_functions.h,v 1.4 2005/05/26 00:06:45 bigbinc Exp $
 //
 //==========================================================
-// large chunks from linux kernel dma.h
+// see linux kernel dma.h for more info
 //==========================================================
 // second phase of header variables
 //
@@ -19,15 +19,15 @@
 //==========================================================
 static __inline__ void enable_dma(unsigned int dmanr)
 {
-  if (dmanr<=3)
+  if (dmanr <= 3)
     outb(dmanr,  _DMA1_MASK_REG);
   else
-    outb(dmanr & 3,  _DMA2_MASK_REG);
+    outb(dmanr & 3, _DMA2_MASK_REG);
 }
 
 static __inline__ void clear_dma_flipflop(unsigned int dmanr)
 {
-  if (dmanr<=3)
+  if (dmanr <= 3)
     outb(0,  _DMA1_CLEAR_FF_REG);
   else
     outb(0,  _DMA2_CLEAR_FF_REG);
