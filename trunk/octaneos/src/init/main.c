@@ -49,8 +49,6 @@ extern void _jiffy_delay(void);
 extern void floppy_init(void);
 extern void __debug_floppy(void);
 
-extern void new_floppy_init(void);
-
 //
 // End of floppy functions
 
@@ -70,7 +68,6 @@ char  *__vidmem = (char *)0xb8000;
 //
 static void _video_draw_char(const char _c, int _x, int _y) {
 
-  // 
   // black = 0
   // blue = 1
   // green = 2
@@ -155,9 +152,10 @@ asmlinkage void start_kernel(void) {
   _video_draw_char('t', 79,5);
   _video_draw_char('X', 79,6);
 
+  // Draw a banner line of the right side of the screen
   for (_i = 7; _i < 24; _i++) {
     _video_draw_char(' ', 79,_i);
-  } // end of the for 
+  }
 	
   // Setup Code
 
@@ -187,7 +185,6 @@ asmlinkage void start_kernel(void) {
     _jiffy_delay_setup(100);
     _jiffy_start();
     _jiffy_delay();
-
     __sprintf(buf, "."); __puts(buf);
     
   } // end of the for 
@@ -196,9 +193,7 @@ asmlinkage void start_kernel(void) {
   block_devices_init();
   
   /// ** deprecated while testing the new floppy driver **
-  /// floppy_init();
-  
-  __test_floppy();
+  floppy_init(); 
 
   // ==================== LOCKDOWN ========================  
   for(;;)
