@@ -1,7 +1,6 @@
-###**********************************************
+#################################################
 ### ReadMe.txt document
-### Berlin Brown
-### berlin.brown@gmail.com
+### Copyright (C) 2003, 2007 Berlin Brown
 ###
 ### $Id: README.txt,v 1.6 2005/05/15 15:55:54 bigbinc Exp $
 ###
@@ -11,7 +10,7 @@
 ### A PARTICULAR PURPOSE ARE DISCLAIMED.
 ###
 ### See LICENSE.OCTANE for more details
-###**********************************************
+#################################################
 
 =================================================
  * Installing/Build
