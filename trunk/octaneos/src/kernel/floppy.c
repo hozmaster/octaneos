@@ -13,7 +13,6 @@
 //------------------------------------------------
 // ** Revision History and Notes **
 //------------------------------------------------
-//     
 // size         2880
 // sect         18
 // head         2
@@ -22,26 +21,92 @@
 // (char)gap    0x1B
 // (char)rate   0x00
 // (char)spec1  0xCF
-// 
-// dor = digital output_register
-// typically the dma buffer region must be 64k = 64 * 1024
-//
-// from newos: [
-//  dma_address = 4
-//  dma_count = 5,
-//  dma_command = 8,
-//  dma_channelMask = 0xa,
-//  dma_mode = 0xb,
-//  dma_flipflop = 0xc,
-//  dma_page = 0x81,
-//  ] 
 //
 
 #include <system/system.h>
 #include <asm/io.h>
+
+#include <system/octane_types.h>
 #include <system/alpha.h>
 #include <system/beta.h>
 #include <system/dma_functions.h>
+#include <system/floppy.h>
+
+/* Floppy Drive Controller IO ports */
+enum
+{
+    FDC_BPRI = 0x3F0, /* Base port of the primary controller   */
+    FDC_BSEC = 0x370, /* Base port of the secondary controller */
+    FDC_DOR  = 0x002, /* RW: Digital Output Register           */
+    FDC_MSR  = 0x004, /* R : Main Status Register              */
+    FDC_DRS  = 0x004, /* W : Data Rate Select Register         */
+    FDC_DATA = 0x005, /* RW: Data Register                     */
+    FDC_DIR  = 0x007, /* R : Digital Input Register            */
+    FDC_CCR  = 0x007  /* W : Configuration Control Register    */
+};
+
+
+/* Command bytes (these are NEC765 commands + options such as MFM, etc) */
+enum
+{
+    CMD_SPECIFY = 0x03, /* Specify drive timings   */
+    CMD_WRITE   = 0xC5, /* Write data (+ MT,MFM)   */
+    CMD_READ    = 0xE6, /* Read data (+ MT,MFM,SK) */
+    CMD_SENSEI  = 0x08, /* Sense interrupt status  */
+    CMD_READID  = 0x4A, /* Read sector Id (+ MFM)  */
+    CMD_RECAL   = 0x07, /* Recalibrate             */
+    CMD_SEEK    = 0x0F, /* Seek track              */
+    CMD_VERSION = 0x10  /* Get FDC version         */
+};
+
+/* Bits for Fdd.flags */
+enum
+{
+    DF_CHANGED = 1 << 0, /* Disk has been changed during the last command */
+    DF_SPINUP  = 1 << 1, /* Motor spinup time elapsed, ready to transfer  */
+    DF_SPINDN  = 1 << 2  /* Motor spindown time started                   */
+};
+
+
+/* Geometry and other format specifications for floppy disks */
+static const floppy_format_ref floppy_formats[32] = {
+  /*  SIZE SPT HD TRK STR GAP3  RATE SRHUT GAP3F  NAME          NR DESCRIPTION   */
+    {    0,  0, 0,  0, 0, 0x00, 0x00, 0x00, 0x00, NULL    }, /*  0 no testing    */
+    {  720,  9, 2, 40, 0, 0x2A, 0x02, 0xDF, 0x50, "d360"  }, /*  1 360KB PC      */
+    { 2400, 15, 2, 80, 0, 0x1B, 0x00, 0xDF, 0x54, "h1200" }, /*  2 1.2MB AT      */
+    {  720,  9, 1, 80, 0, 0x2A, 0x02, 0xDF, 0x50, "D360"  }, /*  3 360KB SS 3.5" */
+    { 1440,  9, 2, 80, 0, 0x2A, 0x02, 0xDF, 0x50, "D720"  }, /*  4 720KB 3.5"    */
+    {  720,  9, 2, 40, 1, 0x23, 0x01, 0xDF, 0x50, "h360"  }, /*  5 360KB AT      */
+    { 1440,  9, 2, 80, 0, 0x23, 0x01, 0xDF, 0x50, "h720"  }, /*  6 720KB AT      */
+    { 2880, 18, 2, 80, 0, 0x1B, 0x00, 0xCF, 0x6C, "H1440" }, /*  7 1.44MB 3.5"   */
+    { 5760, 36, 2, 80, 0, 0x1B, 0x43, 0xAF, 0x54, "E2880" }, /*  8 2.88MB 3.5"   */
+    { 6240, 39, 2, 80, 0, 0x1B, 0x43, 0xAF, 0x28, "E3120" }, /*  9 3.12MB 3.5"   */
+
+    { 2880, 18, 2, 80, 0, 0x25, 0x00, 0xDF, 0x02, "h1440" }, /* 10 1.44MB 5.25"  */
+    { 3360, 21, 2, 80, 0, 0x1C, 0x00, 0xCF, 0x0C, "H1680" }, /* 11 1.68MB 3.5"   */
+    {  820, 10, 2, 41, 1, 0x25, 0x01, 0xDF, 0x2E, "h410"  }, /* 12 410KB 5.25"   */
+    { 1640, 10, 2, 82, 0, 0x25, 0x02, 0xDF, 0x2E, "H820"  }, /* 13 820KB 3.5"    */
+    { 2952, 18, 2, 82, 0, 0x25, 0x00, 0xDF, 0x02, "h1476" }, /* 14 1.48MB 5.25"  */
+    { 3444, 21, 2, 82, 0, 0x25, 0x00, 0xDF, 0x0C, "H1722" }, /* 15 1.72MB 3.5"   */
+    {  840, 10, 2, 42, 1, 0x25, 0x01, 0xDF, 0x2E, "h420"  }, /* 16 420KB 5.25"   */
+    { 1660, 10, 2, 83, 0, 0x25, 0x02, 0xDF, 0x2E, "H830"  }, /* 17 830KB 3.5"    */
+    { 2988, 18, 2, 83, 0, 0x25, 0x00, 0xDF, 0x02, "h1494" }, /* 18 1.49MB 5.25"  */
+    { 3486, 21, 2, 83, 0, 0x25, 0x00, 0xDF, 0x0C, "H1743" }, /* 19 1.74MB 3.5"   */
+
+    { 1760, 11, 2, 80, 0, 0x1C, 0x09, 0xCF, 0x00, "h880"  }, /* 20 880KB 5.25"   */
+    { 2080, 13, 2, 80, 0, 0x1C, 0x01, 0xCF, 0x00, "D1040" }, /* 21 1.04MB 3.5"   */
+    { 2240, 14, 2, 80, 0, 0x1C, 0x19, 0xCF, 0x00, "D1120" }, /* 22 1.12MB 3.5"   */
+    { 3200, 20, 2, 80, 0, 0x1C, 0x20, 0xCF, 0x2C, "h1600" }, /* 23 1.6MB 5.25"   */
+    { 3520, 22, 2, 80, 0, 0x1C, 0x08, 0xCF, 0x2e, "H1760" }, /* 24 1.76MB 3.5"   */
+    { 3840, 24, 2, 80, 0, 0x1C, 0x20, 0xCF, 0x00, "H1920" }, /* 25 1.92MB 3.5"   */
+    { 6400, 40, 2, 80, 0, 0x25, 0x5B, 0xCF, 0x00, "E3200" }, /* 26 3.20MB 3.5"   */
+    { 7040, 44, 2, 80, 0, 0x25, 0x5B, 0xCF, 0x00, "E3520" }, /* 27 3.52MB 3.5"   */
+    { 7680, 48, 2, 80, 0, 0x25, 0x63, 0xCF, 0x00, "E3840" }, /* 28 3.84MB 3.5"   */
+
+    { 3680, 23, 2, 80, 0, 0x1C, 0x10, 0xCF, 0x00, "H1840" }, /* 29 1.84MB 3.5"   */
+    { 1600, 10, 2, 80, 0, 0x25, 0x02, 0xDF, 0x2E, "D800"  }, /* 30 800KB 3.5"    */
+    { 3200, 20, 2, 80, 0, 0x1C, 0x00, 0xCF, 0x2C, "H1600" }  /* 31 1.6MB 3.5"    */
+};
 
 
 #define _BLOCK_SIZE    1024
@@ -54,8 +119,6 @@
 // -- --------------- _CURRENT_BLOCK_REQ
 #define _CURRENT_BLOCK_REQ (public_block_devices[0x02].current_request)
 #define _CURRENT_BLOCK_DEV_ (public_block_devices[0x02])
-
-extern void new_floppy_init(void);
 
 extern void _jiffy_delay_setup(int);
 extern void _jiffy_start(void);
@@ -120,8 +183,8 @@ static volatile int _test_floppy_hits = 0;
 //
 // see kernelhead.S for the location of floppy_area
 //
-// [ note: new_floppy_area does not exist below 1MB, 
-///  deprecated to work the ISA dma ] 
+// note: new_floppy_area does not exist below 1MB, 
+//  deprecated to work the ISA dma ] 
 extern unsigned char tmp_floppy_area[_BLOCK_SIZE];
 
 //
@@ -686,8 +749,7 @@ static int floppy_get_results(void)
     return -9;
 
   for (counter = 0 ; counter < 10000 ; counter++)
-    {
-      
+    {      
       // [ 0x3f4 = FD_STATUS ]       
       status = inb_p(0x3f4) & (_FDC_STATUS_DIR | 
 			       _FDC_STATUS_READY | 
@@ -750,9 +812,9 @@ static short _get_version(void)
 
 }
 
-//***********************************************
+//-----------------------------------------------
 // output byte to FD_DATA = 0x3f
-//***********************************************
+//-----------------------------------------------
 static void output_byte_fdc(char byte) {
 
   char buf[80];
@@ -969,41 +1031,26 @@ static void _setup_dma_floppy_area(void) {
 // Initialize the floppy device
 // see main.c - invoked at the entry point
 void floppy_init(void) {
+	
+	unsigned k;
+    unsigned cmos_drive0;
+    unsigned cmos_drive1;
+    int      res;
+    WORD     dma_seg = 0, dma_off = 0;
 
-#if 1
-  // block_request = current_request
-  _setup_dma_floppy_area();
-  _test_floppy_state = 1;
+	char buf[80];
 
-  // fill - in block device struct data
-  // See block_devices.c
-  // Note the floppy is major number = 2   
-  public_block_devices[0x02].request_function = do_floppy_request;
-   
-  // data 0x0C to port { 0x3f2 }
-  // enable FDC
-  // Step 1.
-  outb(current_output_register, 0x3f2);
- 
-  // Step 2.
-  // and then load the interrupt
-  // this probably needs to before trying to write the floppy controller  
-  handle_interrupt(0x06);
-  
-  // Step 3.
-  // 0x02 = FLOPPY_DMA  
-  request_dma(0x02);  
-    
-  // Step 4.
-  // super swap out floppy interrupt
-  // set low-level function to nothing 
-  floppy_swap_interrupt = _unexpected_floppy_interrupt;
-  _get_version();
+	// Setup the IRQ and DMA
+	handle_interrupt(FLOPPY_IRQ);
+	__sprintf(buf, "INFO: IRQ6 handler installed\n"); __puts(buf);
 
-#else
-
-  new_floppy_init();
-
-#endif
+	if (request_dma(FLOPPY_DMA)) {
+		__sprintf(buf, "ERROR: Unable to grab DMA%d for the floppy driver\n", FLOPPY_DMA);
+		__puts(buf);
+	} else {
+		__sprintf(buf, "INFO: Able to get DMA%d for the floppy driver\n", FLOPPY_DMA);
+		__puts(buf);
+	}
+	
 
 }
