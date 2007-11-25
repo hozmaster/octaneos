@@ -1,7 +1,5 @@
 ###**********************************************
-###
-### ReadMe
-###
+### ReadMe.txt document
 ### Berlin Brown
 ### berlin.brown@gmail.com
 ###
@@ -60,15 +58,13 @@
 	
 		7.  that is all....
 	
-		8. oh yea!, you could run ./WriteDisk to go to /dev/fd0
-	
-	
+		8. (optional) Run ./WriteDisk to go to /dev/fd0
+		
 	Note:  you should be able to plug and play an
 	grub version you want.  I have tried both 0.93 and 0.94
 	that is year(2004) so by the time you read this
 	they will be on version 12.0.0 and hopefully grub
 	will work.
-	
 	
 	Note: YOU MUST change your .bochsrc file the bochs directory.
 	change the line where it asks for your BIOS and change that
