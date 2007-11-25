@@ -59,8 +59,7 @@ fastdep: dummy
 	$(TOPDIR)/scripts/mkdep $(CFLAGS) $(EXTRA_CFLAGS) -- $(wildcard *.[chS]) > .depend
 
 # 
-#  End of make dependencies
-#
+# End of make dependencies
 clean:
 	rm -f asm/*.s
 	rm -f *~
