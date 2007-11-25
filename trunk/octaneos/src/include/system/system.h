@@ -1,11 +1,10 @@
 //
-// Berlin Brown
+// Copyright (C) 2003, 2007 Berlin Brown
 //
-// bigbinc@hotmail.com
-//
-// $Id: system.h,v 1.16 2005/05/26 00:06:45 bigbinc Exp $
-//
-// system.h
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED.
 
 #ifndef __SYSTEM_H_
 #define __SYSTEM_H_
@@ -34,8 +33,6 @@
 #define SYMBOL_NAME_STR(X) #X
 #define SYMBOL_NAME(X) X
 
-
-// ++++++++++++++ assembly block ++++++++++++++++++++++++
 #ifdef __ASSEMBLY__
 
 #define ALIGN __ALIGN
@@ -47,7 +44,6 @@
   SYMBOL_NAME_LABEL(name)
 
 #endif  
-// ++++++++++++++ end of assembly block ++++++++++++++++++
 
 #define __KERNEL_CS 0x10
 #define __KERNEL_DS 0x18
@@ -198,8 +194,7 @@ struct __TSS_object {
 
 //////////////
 // task switcher
-//
-// 
+//////////////
 
 #define switch_task(tss)    \
     __asm__("cli\n\t"       \
@@ -215,9 +210,6 @@ struct __TSS_object {
 extern int __sprintf(char *, const char *, ...);
 extern void __puts(const char *);
 
-//
-// Note once and for all -=-==-== [ NULL ]
-//
 #ifndef NULL
 #define NULL ((void *) 0)
 #endif
@@ -232,9 +224,8 @@ extern int __sprintf(char * buf, const char *fmt, ...);
 extern void public_add_timer(long, void (*)(void));
 extern void public_hexdump(void *, int);
 
-
 //
-// defined for use with hexdump -
+// defined for use with hexdump
 //
 #define _HEXROWS_4    32
 #define _HEXROWS_8    64
