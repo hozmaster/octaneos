@@ -9,6 +9,12 @@
 ### See LICENSE.OCTANE for more details
 
 -------------------------------------------------
+ * 11/24/2007
+-------------------------------------------------
+	Resources for Floppy Disk Controller:
+	http://www.osdev.org/wiki/Floppy_Disk_Controller
+	
+-------------------------------------------------
  * 5/19/2005:
 -------------------------------------------------
 	- floppy.c - it looks like the interrupt is working,
