@@ -5,9 +5,6 @@
 //
 // $Id: dma_functions.c,v 1.1 2004/03/29 13:44:57 bigbinc Exp $
 //
-//
-//  Written by Hennus Bergman, 1992
-//
 
 #include <system/alpha.h>
 
@@ -18,8 +15,7 @@ static volatile unsigned int dma_chan_busy[MAX_DMA_CHANNELS] = {
 static __inline__ unsigned int mutex_atomic_swap(volatile unsigned int *p, 
 						 unsigned int newval)
 {
-  unsigned int semval = newval;
-    
+  unsigned int semval = newval;    
   asm __volatile__ (
 		    "xchgl %2, %0\n"         \
 		    : "=r" (semval)          \
@@ -27,9 +23,7 @@ static __inline__ unsigned int mutex_atomic_swap(volatile unsigned int *p,
 		    );
 
   return semval;
-
-} // end of the function +++++
-
+}
 
 int request_dma(unsigned int dmanr)
 {
@@ -41,23 +35,20 @@ int request_dma(unsigned int dmanr)
   else
     return 0;
   
-
 } // end of the functino +++
 
-void free_dma(unsigned int dmanr)
-{
+void free_dma(unsigned int dmanr) {
   
   char buf[80];
-
   if (dmanr >= MAX_DMA_CHANNELS) {
     __sprintf(buf, "Trying to free DMA%d\n", dmanr);
     __puts(buf);
     return;
-  } // end of the if 
+  }
   
   if (mutex_atomic_swap(&dma_chan_busy[dmanr], 0) == 0) {
     __sprintf(buf, "Trying to free free DMA%d\n", dmanr);
     __puts(buf);
-  } // end of the if ===
+  }
 
-} // end of the function +++
+}
