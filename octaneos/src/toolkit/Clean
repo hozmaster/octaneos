@@ -9,7 +9,7 @@
 # $Id: Clean,v 1.4 2005/05/21 06:08:10 bigbinc Exp $
 #
 echo
-echo "**======================================**"
+echo "======================================"
 echo
 echo "If you run Clean, you will have to run the java code again!"
 echo " [to re-run the java build: type 'ant run']"
@@ -20,7 +20,6 @@ echo -n "Are you sure you want to continue....?(y/n)"
 read INPUT1
 
 if [ $INPUT1 = "y" ] ; then
-
         echo "** Cleaning directory..."
         rm -f *~
         rm -f *.o
@@ -32,9 +31,7 @@ if [ $INPUT1 = "y" ] ; then
 	rm -f .firstrun
 fi
 
-#
-# We at least can clean img file, please...
-#
+# We at least can clean img file
 echo
 echo " ** (Info): Sorry but I have to at least clean the image file"
 echo " .... bochs/orange.img.... deleting"

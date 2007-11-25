@@ -1,28 +1,31 @@
 #
-##
 # Berlin Brown
-#  bigbinc@hotmail.com
+# berlin.brown@gmail.com
 #
 # $Id: Makefile,v 1.2 2005/05/21 06:08:10 bigbinc Exp $
 #
-#  Make for gzipped style objects
-# are we having fun yet?
-# #
+# Make for gzipped entities
 #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Didnt care much for the name head.o
-#  same as boot/head.o?
-#
 HEAD = zboothead.o
 
 SYSTEM = ../preZSystem
 
-#
 # I set it up so that the gzip code is all in misc
-#  - this code once again is not important to the system
-#   	this code gets us to the system
+# this code once again is not important to the system
+# this code gets us to the system
 #
-
 zOBJECTS = $(HEAD) misc.o
 
 
@@ -57,7 +60,6 @@ CFLAGS =  $(CUR_CFLAGS) -Wall -Wstrict-prototypes -Wno-trigraphs -O2 \
 #
 # Why am I in this makefile?
 #  - build a zipped kernel
-#
 all:	zSystem
 
 zSystem: piggy.o $(zOBJECTS) demo.o
@@ -69,14 +71,12 @@ zSystem: piggy.o $(zOBJECTS) demo.o
 
 #
 # I changed the name from the normal head.S
-#
 zboothead.o: zboothead.S
 	$(CC) $(AFLAGS) -traditional -c zboothead.S 
 
 
 #
 # debug objects
-#
 demo.S:
 	$(CPP) $(AFLAGS) $(AFLAGS_KERNEL) -traditional -o $*.s demo.S 
 
@@ -89,13 +89,7 @@ demo.s: demo.S
 
 #
 # Looks confusing, but not really, but it is important
-#  basically, we are zipping our object file and kernel and drivers
-#   
-#   The funky part is the SECTIONS blah... all this is finding is the
-#   size of our object, that is all, see below 'input_len'
-#    ...got milk...?   (is this line copyrighted?)
-#    
-#
+# basically, we are zipping our object file and kernel and drivers  
 piggy.o: $(SYSTEM)
 	@echo "**"
 	@echo "** Creating Kernel gzipped piggy-back"
@@ -111,8 +105,8 @@ piggy.o: $(SYSTEM)
 
 $(SYSTEM):
 	@echo
-	@echo "** ErrorBot:"
-	@echo "** error: I cannot let you compile $(SYSTEM) from here."
+	@echo "** Error:"
+	@echo "** Error: I cannot let you compile $(SYSTEM) from here."
 	@echo "** Try from the topdir that is much better"
 	@echo
 	exit 1
@@ -120,7 +114,6 @@ $(SYSTEM):
 
 #
 # Clean - Clean garbage files
-#
 clean:
 	rm -f *.lnk
 	rm -f *.s *.o

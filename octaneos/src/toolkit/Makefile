@@ -6,7 +6,6 @@
 # Note: you can also use the 'Clean' script
 #
 # This one is a lite version
-#
 
 all:
 

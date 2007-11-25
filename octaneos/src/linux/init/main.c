@@ -481,7 +481,6 @@ static void __init smp_init(void)
 
 #endif
 
-
 static void rest_init(void)
 {
   kernel_thread(init, NULL, CLONE_FS | CLONE_FILES | CLONE_SIGNAL);
@@ -521,13 +520,11 @@ static void _video_draw_char(const char _c, int _x, int _y) {
   // white on blue 
   __attr = 0x17;
 
-
   // bold = 0/1
   // underline = 0/1
   // reverse = 0/1
   // blink = 0/1
   // color = color
-
   __attr ^= 0x08;		// bold
 
   __vidmem [ (( _x + (80 * _y)) * 2) + 0] = _c;
@@ -757,12 +754,8 @@ static int init(void * unused)
 {
 
   do_basic_setup();
-
   prepare_namespace();
-
-
   free_initmem();
-
 
   if (open("/dev/console", O_RDWR, 0) < 0)
     printk("Warning: unable to open an initial console.\n");

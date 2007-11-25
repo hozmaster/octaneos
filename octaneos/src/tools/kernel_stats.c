@@ -16,7 +16,6 @@
 
 int fd;
 
-
 void die(const char * str, ...)
 {
   va_list args;
@@ -39,11 +38,11 @@ void file_open(const char *name)
   if ((fd = open(name, O_RDONLY, 0)) < 0)
     die("Unable to open `%s': %m", name);
 
-} // end of the function
+} // End of Function
 
-//................................
-// =-=-=-=- [ main ] -=--==--=-===
-//................................
+//================================================
+// Main Entry Point
+//================================================
 int main(int argc, char **argv) {
   
   struct stat sb;

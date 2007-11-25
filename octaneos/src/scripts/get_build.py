@@ -16,8 +16,7 @@ from re import split
 
 if __name__=="__main__":
     
-    print "** Getting build and writing to file ..."
-    
+    print "** Getting build and writing to file ..."    
     f = open("build", "r")
     line = f.readline()
 
@@ -37,8 +36,7 @@ if __name__=="__main__":
     # over-write the existing build file
     fy = open("build", "w")
     fy.write("%d" % (ctr))
-    fy.close()
-    
+    fy.close()    
     fx = open("init/buildct.c", "w")
 
     # ++ Write the C file with the build ct ++
@@ -55,4 +53,4 @@ if __name__=="__main__":
     
     fx.close()
         
-# ++ [ End of Main ] ++
+# // End of Main //

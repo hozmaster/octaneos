@@ -1,13 +1,11 @@
 #!/bin/sh
 #
-#
 # VIEWIMAGE
 # - just check out the image
 # 
 # $Id: Report,v 1.2 2005/05/15 15:55:54 bigbinc Exp $
 #
 #
-
 
 CUR_DIR=`pwd`
 IMGDIR=${CUR_DIR}/tmp

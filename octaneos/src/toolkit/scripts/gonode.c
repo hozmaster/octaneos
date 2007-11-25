@@ -76,6 +76,5 @@ int gonode(int argc, char **argv) {
   } // end of the if 
 
   return 0;
-
-  
-} // end of the function ++
+ 
+} // End of the Function //

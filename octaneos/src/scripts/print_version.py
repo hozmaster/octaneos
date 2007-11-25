@@ -7,9 +7,8 @@
 #
 # $Id: print_version.py,v 1.2 2004/04/04 19:09:17 bigbinc Exp $
 #
-# - just print the version of the system to
+# Just print the version of the system to
 #    a C file so that it can be printed
-#
 
 import os
 import sys
@@ -42,6 +41,5 @@ def main(args):
     
     fx.close()
     
-
 if __name__ == '__main__':
     main(sys.argv[1:])
