@@ -1,0 +1,17 @@
+//
+// Copyright (C) 2003, 2007 Berlin Brown
+// types.h
+//
+// Description:
+// various c type definitions
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED.
+
+typedef unsigned long DWORD;
+typedef unsigned char BYTE;
+typedef unsigned short WORD;
+
+
