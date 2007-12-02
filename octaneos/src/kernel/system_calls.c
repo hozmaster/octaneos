@@ -14,9 +14,7 @@
 
 asmlinkage int system_debug(void) {
 
-  // 
   // note: eax input and eax output
-  // 
   char buf[80];
   
   __sprintf(buf, ">>> System Call Called <<<\n");
