@@ -31,6 +31,10 @@
 #include <system/floppy.h>
 #include <system/filesystem.h>
 
+// Note: the MAJOR_NR must be defined for the block device usage.
+#define MAJOR_NR FLOPPY_MAJOR
+#include <linux/block_devices.h>
+
 #define _BLOCK_SIZE    1024
 #define _FLOPPY_DMA    2
 #define _MAX_REPLIES   7
@@ -262,7 +266,6 @@ static unsigned char seek_track = 0;
 static unsigned char current_track = NO_TRACK;
 static unsigned char command = 0;
 static unsigned char fdc_version = 0x90;	/* FDC version code */
-
 
 static void select_callback(unsigned long unused)
 {

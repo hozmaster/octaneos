@@ -1,8 +1,6 @@
 //
 // Berlin Brown
-//
-//
-// bigbinc@hotmail.com
+//==========================================================
 //
 // $Id: scheduler.c,v 1.15 2005/05/26 00:06:53 bigbinc Exp $
 
@@ -15,12 +13,8 @@
 // - defined as _jiffies
 // note: jiffies is defined in interrupts
 //   - used by the timer_interrupt, it should be in this code
-//
-// == Based on Linux Kernel ================
-//
 // see scheduler init below 
 //
-// 
 // TSS - GDT layout
 //
 // 0 - null
@@ -37,20 +31,19 @@
 // 11 - LDT [ task x1 ]
 //
 // the task_switcher just jumps to the value in 
-//
+
 // tss.tr
-//
 //==========================================================
 
-#include <system/system.h>		// super-header, misc stuff
+#include <system/system.h>		    // super-header
 #include <system/system_calls.h>	// extern function call list
+#include <linux/wait.h>
+#include <linux/sched.h>
 
 extern descriptor_table _idt;
 extern descriptor_table gdt;
 
-
 #define TIMER_LIST_REQUESTS                 64
-
 
 struct class_timer_list {  
   long jiffies;
@@ -295,4 +288,35 @@ void scheduler_init(void) {
   // load the task register
   load_task_register(0x0);
 
+}
+
+static inline void __sleep_on(struct wait_queue **p, int state) {
+
+	unsigned long flags;
+	//struct wait_queue wait = { current, NULL };
+	struct wait_queue wait = { NULL, NULL };
+
+	if (!p)
+		return;
+
+	//if (current == task[0])
+	//	panic("task[0] trying to sleep");
+	//current->state = state;
+
+	add_wait_queue(p, &wait);
+	save_flags(flags);
+	sti();
+	schedule();
+	remove_wait_queue(p, &wait);
+	restore_flags(flags);
+}
+
+void interruptible_sleep_on(struct wait_queue **p)
+{
+	__sleep_on(p,TASK_INTERRUPTIBLE);
+}
+
+void sleep_on(struct wait_queue **p)
+{
+	__sleep_on(p,TASK_UNINTERRUPTIBLE);
 }
