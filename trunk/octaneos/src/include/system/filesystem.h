@@ -19,6 +19,8 @@
 #ifndef _OCTANE_FILESYSTEM_H
 #define _OCTANE_FILESYSTEM_H
 
+#include <linux/sched.h>
+
 #undef NR_OPEN
 #define NR_OPEN           256
 
@@ -59,11 +61,11 @@ struct request {
 	unsigned long sector;
 	unsigned long nr_sectors;
 	unsigned long current_nr_sectors;
-	char * buffer;
-	struct task_struct * waiting;
-	struct buffer_head * bh;
-	struct buffer_head * bhtail;
-	struct request * next;
+	char                *buffer;
+	struct task_struct  *waiting;
+	struct buffer_head  *bh;
+	struct buffer_head  *bhtail;
+	struct request      *next;
 };
 
 struct blk_dev_struct {
@@ -72,8 +74,61 @@ struct blk_dev_struct {
 };
 
 
-#ifdef MAJOR_NR
+struct sec_size {
+	unsigned block_size;
+	unsigned block_size_bits;
+};
 
+extern struct sec_size * blk_sec[MAX_BLKDEV];
+extern struct blk_dev_struct blk_dev[MAX_BLKDEV];
+extern struct wait_queue * wait_for_request;
+
+#define SECTOR_MASK (blksize_size[MAJOR_NR] &&                  \
+	blksize_size[MAJOR_NR][MINOR(CURRENT->dev)] ?               \
+	((blksize_size[MAJOR_NR][MINOR(CURRENT->dev)] >> 9) - 1) :  \
+	((BLOCK_SIZE >> 9)  -  1))
+
+#define SUBSECTOR(block) (CURRENT->current_nr_sectors > 0)
+
+extern int *blk_size[MAX_BLKDEV];
+extern int *blksize_size[MAX_BLKDEV];
+
+//************************************************
+//
+// Filesystem Datastructures
+//
+//************************************************
+typedef char buffer_block[BLOCK_SIZE];
+
+struct buffer_head {
+	char            *b_data;			/* pointer to data block (1024 bytes) */
+	unsigned long    b_size;		/* block size */
+	unsigned long    b_blocknr;	/* block number */
+	dev_t            b_dev;			/* device (0 = free) */
+	unsigned short   b_count;		/* users using this block */
+	unsigned char    b_uptodate;
+	unsigned char    b_dirt;		/* 0-clean,1-dirty */
+	unsigned char    b_lock;		/* 0 - ok, 1 -locked */
+	unsigned char    b_req;		/* 0 if the buffer has been invalidated */
+	unsigned char    b_list;		/* List that this buffer appears */
+	unsigned char    b_retain;         /* Expected number of times this will
+					   be used.  Put on freelist when 0 */
+	unsigned long    b_flushtime;      /* Time when this (dirty) buffer should be written */
+	unsigned long    b_lru_time;       /* Time when this buffer was last used. */
+	struct wait_queue  *b_wait;
+	struct buffer_head *b_prev;		/* doubly linked list of hash-queue */
+	struct buffer_head *b_next;
+	struct buffer_head *b_prev_free;	/* doubly linked list of buffers */
+	struct buffer_head *b_next_free;
+	struct buffer_head *b_this_page;	/* circular list of buffers in one page */
+	struct buffer_head *b_reqnext;		/* request queue */
+};
+
+
+//************************************************
+// Define Major device interrupts
+//************************************************
+#ifdef MAJOR_NR
 
 #if (MAJOR_NR == MEM_MAJOR)
 
@@ -108,7 +163,116 @@ static void floppy_off(unsigned int nr);
 #define DEVICE_ON(device)
 #define DEVICE_OFF(device)
 
+#else
+#error "Unknown Block Device"
 #endif // If major NR
 #endif // If major NR device check
+//************************************************
+
+//************************************************
+// Define Current Block Device Timer Interrupts
+//************************************************
+
+#ifndef CURRENT
+#define CURRENT (blk_dev[MAJOR_NR].current_request)
+#endif
+
+#define CURRENT_DEV DEVICE_NR(CURRENT->dev)
+
+#ifdef DEVICE_INTR
+void (*DEVICE_INTR)(void) = NULL;
+#endif
+
+
+#ifdef DEVICE_TIMEOUT
+// == BEGIN IF ===============
+
+#define SET_TIMER                 \
+((timer_table[DEVICE_TIMEOUT].expires = jiffies + TIMEOUT_VALUE), \
+(timer_active |= 1<<DEVICE_TIMEOUT))
+
+#define CLEAR_TIMER               \
+timer_active &= ~(1<<DEVICE_TIMEOUT)
+
+#define SET_INTR(x)               \
+if ((DEVICE_INTR = (x)) != NULL)  \
+	SET_TIMER;                    \
+else                              \
+	CLEAR_TIMER;
+
+// == ELSE ===================
+#else
+
+#define SET_INTR(x) (DEVICE_INTR = (x))
+
+// == END IF ===============
+#endif
+
+
+static void (DEVICE_REQUEST)(void);
+
+static void end_request(int uptodate)
+{
+	struct request       *req;
+	struct buffer_head   *bh;
+	struct task_struct   *p;
+
+	req = CURRENT;
+	req->errors = 0;
+	if (!uptodate) {
+		printk(DEVICE_NAME " I/O error\n");
+		printk("dev %04lX, sector %lu\n",
+		       (unsigned long)req->dev, req->sector);
+		req->nr_sectors--;
+		req->nr_sectors &= ~SECTOR_MASK;
+		req->sector += (BLOCK_SIZE / 512);
+		req->sector &= ~SECTOR_MASK;		
+	}
+
+	if ((bh = req->bh) != NULL) {
+		req->bh = bh->b_reqnext;
+		bh->b_reqnext = NULL;
+		bh->b_uptodate = uptodate;
+		unlock_buffer(bh);
+		if ((bh = req->bh) != NULL) {
+			req->current_nr_sectors = bh->b_size >> 9;
+			if (req->nr_sectors < req->current_nr_sectors) {
+				req->nr_sectors = req->current_nr_sectors;
+				printk("end_request: buffer-list destroyed\n");
+			}
+			req->buffer = bh->b_data;
+			return;
+		}
+	}
+	DEVICE_OFF(req->dev);
+	CURRENT = req->next;
+	if ((p = req->waiting) != NULL) {
+		req->waiting = NULL;
+		p->swapping = 0;
+		p->state = TASK_RUNNING;
+		if (p->counter > current->counter)
+			need_resched = 1;
+	}
+	req->dev = -1;
+	wake_up(&wait_for_request);
+}
+
+#ifdef DEVICE_INTR
+#define CLEAR_INTR SET_INTR(NULL)
+#else
+#define CLEAR_INTR
+#endif
+
+#define INIT_REQUEST                                   \
+	if (!CURRENT) {                                    \
+		CLEAR_INTR;                                    \
+		return;                                        \
+	}                                                  \
+	if (MAJOR(CURRENT->dev) != MAJOR_NR)               \
+		panic(DEVICE_NAME ": request list destroyed"); \
+	if (CURRENT->bh) {                                 \
+		if (!CURRENT->bh->b_lock)                      \
+			panic(DEVICE_NAME ": block not locked");   \
+	}
 
 #endif // End of Filesystem.h
