@@ -1,8 +1,5 @@
-
 //
-// Berlin Brown
-//
-// bigbinc@hotmail.com
+//Copyright (C) 2003, 2007 Berlin Brown
 //
 // modded for 486 only
 //
