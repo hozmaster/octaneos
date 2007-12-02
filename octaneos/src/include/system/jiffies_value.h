@@ -8,7 +8,6 @@
 #ifndef ___JIFFIES_H_
 #define ___JIFFIES_H_
 
-
 // see interrupts.c..
 extern volatile unsigned long _jiffies;
 

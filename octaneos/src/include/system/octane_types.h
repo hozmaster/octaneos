@@ -10,7 +10,11 @@
 // LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
 // A PARTICULAR PURPOSE ARE DISCLAIMED.
 
+#ifndef _OCTANE_TYPES_H
+#define _OCTANE_TYPES_H
+
 typedef unsigned long DWORD;
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 
+#endif // Octane Types
