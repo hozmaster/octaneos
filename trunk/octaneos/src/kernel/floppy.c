@@ -397,11 +397,13 @@ static int floppy_change(struct buffer_head * bh)
 	return 0;
 }
 
-#define copy_buffer(from,to) \
-__asm__("cld ; rep ; movsl" \
-	: \
-	:"c" (BLOCK_SIZE/4),"S" ((long)(from)),"D" ((long)(to)) \
-	:"cx","di","si")
+static __inline__ void copy_buffer(void *from, void *to)
+{
+	ulong	*p1 = (ulong *)from, *p2 = (ulong *)to;
+	int		cnt;
+	for( cnt = 512/4; cnt; cnt-- )
+		*p2++ = *p1++;
+}
 
 static void setup_DMA(void)
 {
