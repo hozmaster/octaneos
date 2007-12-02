@@ -49,4 +49,8 @@ struct	itimerval {
 	struct	timeval it_value;
 };
 
+#define HD_TIMER2	24
+
+
+
 #endif
