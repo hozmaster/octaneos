@@ -17,13 +17,11 @@
 #define asmlinkage
 #endif
 
-
 #ifdef __cplusplus
 #define CPP_ASMLINKAGE extern "C"
 #else
 #define CPP_ASMLINKAGE
 #endif
-
 
 #define SYMBOL_NAME_LABEL(X) X/**/:
 
@@ -259,8 +257,6 @@ struct timer_struct {
 
 extern unsigned long timer_active;
 extern struct timer_struct timer_table[32];
-
-#define HZ 100
 
 #define VERIFY_READ 0
 #define VERIFY_WRITE 1
