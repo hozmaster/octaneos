@@ -27,7 +27,6 @@
 
 #include <system/octane_types.h>
 #include <system/alpha.h>
-#include <system/beta.h>
 #include <system/dma_functions.h>
 #include <system/floppy.h>
 #include <system/filesystem.h>
@@ -52,6 +51,7 @@ static unsigned char running = 0;
 
 #define TYPE(x) ((x)>>2)
 #define DRIVE(x) ((x)&0x03)
+
 
 /*
  * Note that MAX_ERRORS=X doesn't imply that we retry every bad read
@@ -92,23 +92,6 @@ static unsigned char reply_buffer[MAX_REPLIES];
 #define ST1 (reply_buffer[1])
 #define ST2 (reply_buffer[2])
 #define ST3 (reply_buffer[3])
-
-static struct file_operations floppy_fops = {
-	NULL,			        // lseek - default 
-	block_read,		        // read - general block-dev read 
-	block_write,            // write - general block-dev write 
-	NULL,			        // readdir - bad 
-	NULL,			        // select 
-	fd_ioctl,		        // ioctl 
-	NULL,			        // mmap 
-	floppy_open,	        // open 
-	floppy_release,	        // release 
-	block_fsync,	        // fsync 
-	NULL,			        // fasync 
-	check_floppy_change,	// media_change 
-	NULL			        // revalidate 
-};
-
 
 /*
  * This struct defines the different floppy types.
@@ -280,6 +263,7 @@ static unsigned char current_track = NO_TRACK;
 static unsigned char command = 0;
 static unsigned char fdc_version = 0x90;	/* FDC version code */
 
+
 static void select_callback(unsigned long unused)
 {
 	floppy_ready();
@@ -442,7 +426,7 @@ static void setup_DMA(void)
 	} else if (addr >= LAST_DMA_ADDR) {
 		addr = (long) tmp_floppy_area;
 		if (command == FD_WRITE)
-			copy_buffer(CURRENT->buffer,tmp_floppy_area);
+			copy_buffer(CURRENT->buffer, tmp_floppy_area);
 	}
 	cli();
 	disable_dma(FLOPPY_DMA);
@@ -1278,7 +1262,7 @@ static void config_types(void)
  * /dev/PS0 etc), and disallows simultaneous access to the same
  * drive with different device numbers.
  */
-static int floppy_open(struct inode * inode, struct file * filp)
+static int floppy_open(struct inode *inode, struct file *filp)
 {
 	int drive;
 	int old_dev;
@@ -1320,7 +1304,23 @@ static int check_floppy_change(dev_t dev)
 	i = floppy_change(bh);
 	brelse(bh);
 	return i;
-}
+};
+
+static struct file_operations floppy_fops = {
+	NULL,			        // lseek - default 
+	block_read,		        // read - general block-dev read 
+	block_write,            // write - general block-dev write 
+	NULL,			        // readdir - bad 
+	NULL,			        // select 
+	fd_ioctl,		        // ioctl 
+	NULL,			        // mmap 
+	floppy_open,	        // open 
+	floppy_release,	        // release 
+	block_fsync,	        // fsync 
+	NULL,			        // fasync 
+	check_floppy_change,	// media_change 
+	NULL			        // revalidate 
+};
 
 static void floppy_interrupt(int unused)
 {
