@@ -160,12 +160,6 @@ struct format_descr {
 	unsigned int device,head,track;
 };
 
-//************************************************
-// Major Devices
-//************************************************
-
-#define MAX_CHRDEV 32
-#define MAX_BLKDEV 32
 
 /*
  * assignments

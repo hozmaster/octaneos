@@ -22,6 +22,7 @@
 #include <linux/tasks.h>
 #include <linux/fpu_emu.h>
 #include <system/octane_types.h>
+#include <linux/wait.h>
 
 #define NEW_SWAP
 
@@ -188,40 +189,6 @@ struct rlimit {
 #define	PRIO_PGRP	    1
 #define	PRIO_USER	    2
 
-//************************************************
-// WAIT.H defines
-//************************************************
-
-#define WNOHANG		0x00000001
-#define WUNTRACED	0x00000002
-
-#define __WCLONE	0x80000000
-
-struct wait_queue {
-	struct task_struct * task;
-	struct wait_queue * next;
-};
-
-struct semaphore {
-	int count;
-	struct wait_queue * wait;
-};
-
-#define MUTEX ((struct semaphore) { 1, NULL })
-
-struct select_table_entry {
-	struct wait_queue wait;
-	struct wait_queue **wait_address;
-};
-
-typedef struct select_table_struct {
-	int nr;
-	struct select_table_entry *entry;
-} select_table;
-
-#define __MAX_SELECT_TABLE_ENTRIES (4096 / sizeof (struct select_table_entry))
-
-
 #define EXEC_PAGESIZE	4096
 
 #ifndef NGROUPS
@@ -297,12 +264,12 @@ extern unsigned long avenrun[]; /* Load averages */
 #define FIRST_TASK task[0]
 #define LAST_TASK task[NR_TASKS-1]
 
-#define TASK_RUNNING		0
-#define TASK_INTERRUPTIBLE	1
+#define TASK_RUNNING		    0
+#define TASK_INTERRUPTIBLE	    1
 #define TASK_UNINTERRUPTIBLE	2
-#define TASK_ZOMBIE		3
-#define TASK_STOPPED		4
-#define TASK_SWAPPING		5
+#define TASK_ZOMBIE		        3
+#define TASK_STOPPED		    4
+#define TASK_SWAPPING		    5
 
 #ifndef NULL
 #define NULL ((void *) 0)
@@ -424,12 +391,12 @@ struct mm_struct {
 	unsigned long min_flt, maj_flt, cmin_flt, cmaj_flt;
 	int swappable:1;
 #ifdef NEW_SWAP
-	unsigned long old_maj_flt;	/* old value of maj_flt */
+	unsigned long old_maj_flt;  /* old value of maj_flt */
 	unsigned long dec_flt;		/* page fault count of the last time */
 	unsigned long swap_cnt;		/* number of pages to swap on next pass */
-	short swap_table;		/* current page table */
-	short swap_page;		/* current page */
-#endif NEW_SWAP
+	short swap_table;		    /* current page table */
+	short swap_page;		    /* current page */
+#endif
 	struct vm_area_struct * mmap;
 };
 
@@ -533,7 +500,7 @@ extern int need_resched;
 
 #define CURRENT_TIME (xtime.tv_sec)
 
-extern void sleep_on(struct wait_queue ** p);
+extern void sleep_on(struct wait_queue **p);
 extern void interruptible_sleep_on(struct wait_queue ** p);
 extern void wake_up(struct wait_queue ** p);
 extern void wake_up_interruptible(struct wait_queue ** p);
@@ -787,4 +754,5 @@ extern struct desc_struct default_ldt;
 			:"m" (current->debugreg[register]) \
 			:"dx");
 
+// End of Sched.h
 #endif
