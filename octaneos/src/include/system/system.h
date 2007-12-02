@@ -234,4 +234,35 @@ extern void public_hexdump(void *, int);
 #define _HEXROWS_8    64
 #define _HEXROWS_16   128
 
+//**********************************************************
+//
+// Timer Defines
+//
+//**********************************************************
+#define BLANK_TIMER	0
+#define BEEP_TIMER	1
+#define RS_TIMER	2
+#define HD_TIMER	16
+#define FLOPPY_TIMER	17
+#define SCSI_TIMER 	18
+#define NET_TIMER	19
+#define SOUND_TIMER	20
+#define COPRO_TIMER	21
+#define TAPE_QIC02_TIMER	22
+#define MCD_TIMER	23
+#define HD_TIMER2	24
+
+struct timer_struct {
+	unsigned long expires;
+	void (*fn)(void);
+};
+
+extern unsigned long timer_active;
+extern struct timer_struct timer_table[32];
+
+#define HZ 100
+
+#define VERIFY_READ 0
+#define VERIFY_WRITE 1
+
 #endif 
