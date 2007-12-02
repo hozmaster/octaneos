@@ -133,7 +133,8 @@
 
 	Code is provided under a GPLv3 license
 	http://www.gnu.org/licenses/gpl.txt
-
+	
+	Copyright (c) 2007, Berlin Brown (Newspiritcompany.com)
 =================================================
  * Contact
 =================================================
