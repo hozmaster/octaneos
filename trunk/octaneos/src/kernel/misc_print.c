@@ -61,11 +61,10 @@ unsigned char  __orig_video_lines;
 #define SPECIAL	32
 #define LARGE	64
 
-
 #define INT_MAX                ((int)(~0U>>1))
 #define INT_MIN                (-INT_MAX - 1)
 
-// ==========## IO Code ##==================================
+// ========== IO Code ==================================
 
 #define __SLOW_DOWN_IO "\noutb %%al,$0x80"
 #define SLOW_DOWN_IO __SLOW_DOWN_IO
@@ -220,12 +219,10 @@ void load_misc_kprint(void)
   vidport = 0x3d4;
   
   lines = __orig_video_lines;
-  cols = __orig_video_cols;
- 
+  cols = __orig_video_cols; 
   __sprintf(buf, "[debug kprinting loaded]\n"); __puts(buf);
  
 }
-
 
 
 static inline unsigned char __toupper(unsigned char c)
@@ -767,14 +764,25 @@ static int __vsprintf(char *buf, const char *fmt, va_list args)
 	return __vsnprintf(buf, 0xFFFFFFFFUL, fmt, args);
 } // end of the functino
 
-int __sprintf(char * buf, const char *fmt, ...)
+int __sprintf(char *buf, const char *fmt, ...)
 {
 	va_list args;
 	int i;
-
 	va_start(args, fmt);
 	i=__vsprintf(buf,fmt,args);
 	va_end(args);
+	return i;
+}
+
+int printk(const char *fmt, ...)
+{
+	int i = 0;
+	char buf[128];	
+	va_list args;
+	va_start(args, fmt);
+	i = __vsprintf(buf, fmt, args);
+	va_end(args);
+	__puts(buf);
 	return i;
 }
 
