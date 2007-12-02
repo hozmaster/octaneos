@@ -24,6 +24,10 @@
 #define _IO_DMA1_BASE        0x00
 #define _IO_DMA2_BASE	     0xC0
 
+//==========================================================
+// see dma_functions.h
+//==========================================================
+
 #define _DMA1_CMD_REG		 0x08
 #define _DMA1_STAT_REG		 0x08
 #define _DMA1_REQ_REG        0x09
@@ -75,35 +79,6 @@
 #define _DMA_MODE_READ	         0x44
 #define _DMA_MODE_WRITE	         0x48
 #define _DMA_MODE_CASCADE        0xC0
-
-//==========================================================
-// see dma_functions.h
-//==========================================================
-
-#define FD_STATUS       0x3f4
-#define FD_DATA         0x3f5
-#define FD_DOR          0x3f2
-#define FD_DIR          0x3f7
-#define FD_DCR          0x3f7
-
-// fdc status data
-
-#define _FDC_STATUS_BUSYMASK 0x0F
-#define _FDC_STATUS_BUSY     0x10
-#define _FDC_STATUS_DMA      0x20
-#define _FDC_STATUS_DIR      0x40
-#define _FDC_STATUS_READY    0x80
-
-#define FD_RECALIBRATE          0x07
-#define FD_SEEK                 0x0F
-#define FD_READ                 0xE6
-#define FD_WRITE                0xC5
-#define FD_SENSEI               0x08
-#define FD_SPECIFY              0x03
-#define FD_FORMAT               0x4D
-#define FD_VERSION              0x10
-#define FD_CONFIGURE            0x13
-#define FD_PERPENDICULAR        0x12
 
 #define DMA_READ        0x46
 #define DMA_WRITE       0x4A

@@ -84,7 +84,6 @@ typedef struct descr_struct {
 #define __MAX_DEBUG_TASKS           3
 #define _FIRST_TSS            0x08
 
-
 //
 // In those rare-cases, we may need the values of the following registers
 //
@@ -110,8 +109,6 @@ struct debug_registers {
   long __esp;
   int  __ss;
 };
-
-
 
 struct TSS_object {
 
@@ -204,9 +201,8 @@ struct __TSS_object {
             :               \
             )
 
-//
-// for low-level kernel debugging
-//
+// Print functions for low-level kernel debugging
+// Operation defined in misc_print.c
 extern int __sprintf(char *, const char *, ...);
 extern void __puts(const char *);
 
@@ -217,9 +213,16 @@ extern void __puts(const char *);
 // - see kernel/fs_super.c - root device, typically 0x200 = floppyx
 extern int ROOT_DEV;
 
-extern void __puts(const char *);
-extern int __sprintf(char * buf, const char *fmt, ...); 
+//**********************************************************
+//
+// Major Devices
+//
+//**********************************************************
+#define FLOPPY_MAJOR_DEV	2
 
+extern void __puts(const char *);
+extern int __sprintf(char *buf, const char *fmt, ...); 
+extern int printk(const char *fmt, ...); 
 
 extern void public_add_timer(long, void (*)(void));
 extern void public_hexdump(void *, int);
