@@ -51,6 +51,4 @@ struct	itimerval {
 
 #define HD_TIMER2	24
 
-
-
 #endif
