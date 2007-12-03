@@ -656,7 +656,7 @@ extern inline void remove_wait_queue(struct wait_queue ** p, struct wait_queue *
 
 extern inline void select_wait(struct wait_queue ** wait_address, select_table * p)
 {
-	struct select_table_entry * entry;
+	struct select_table_entry *entry;
 
 	if (!p || !wait_address)
 		return;
@@ -664,7 +664,7 @@ extern inline void select_wait(struct wait_queue ** wait_address, select_table *
 		return;
  	entry = p->entry + p->nr;
 	entry->wait_address = wait_address;
-	entry->wait.task = current;
+	//entry->wait.task = current;
 	entry->wait.next = NULL;
 	add_wait_queue(wait_address,&entry->wait);
 	p->nr++;

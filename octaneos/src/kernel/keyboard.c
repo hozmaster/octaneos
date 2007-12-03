@@ -10,7 +10,6 @@
 // keyboard driver
 //
 
-
 #include <system/system.h>
 #include <asm/io.h>
 
@@ -24,9 +23,7 @@ void __debug_keyboard_interrupt(void) {
 
 void load_keyboard_driver(void) {
 
-  // GO with the keyboard_interrupt
-  __disable_irq(0x01);
-
+  disable_irq(0x01);
   handle_interrupt(0x01);
 
 }

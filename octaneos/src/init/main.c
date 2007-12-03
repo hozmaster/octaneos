@@ -3,10 +3,21 @@
 // 
 // $Id: main.c,v 1.30 2005/05/26 00:06:54 bigbinc Exp $
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED.
+// Octane OS (Operating System)
+// Copyright (C) 2007 Berlin Brown
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 // See LICENSE.OCTANE for more details
 
@@ -163,10 +174,6 @@ asmlinkage void start_kernel(void) {
   __sprintf(buf, "=========== [ Project Akita ] ===========\n"); __puts(buf);
   __sprintf(buf, "[ Build: %ld; since { 5/15/2005 } %s]\n", 
 		  	main_get_build_count, main_get_version); __puts(buf);
-
-  // Set the root device to the FLOPPY
-  // system.h to fs_super.c
-  ROOT_DEV = 0x200;
     
   // now lets load the IDT
   load_exception_table();
@@ -174,7 +181,6 @@ asmlinkage void start_kernel(void) {
   load_interrupts();
   load_keyboard_driver();
 
-  floppy_get_drives();      
   _diff = check_timer_irq();
       
   // another check
@@ -189,8 +195,6 @@ asmlinkage void start_kernel(void) {
     
   } // end of the for 
   __sprintf(buf, " ]\n"); __puts(buf);
-
-  block_devices_init();
   
   /// ** deprecated while testing the new floppy driver **
   floppy_init(); 
@@ -202,7 +206,7 @@ asmlinkage void start_kernel(void) {
     _jiffy_start();
     _jiffy_delay();
 
-    if ((_jiffies % 60000) == 0)
+    if ((jiffies % 60000) == 0)
     {      
       __sprintf(buf, "[%d]",__debug_scan_code);
       __puts(buf);
