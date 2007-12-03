@@ -384,13 +384,15 @@ static int floppy_change(struct buffer_head * bh)
 	}
 	if (!bh)
 		return 0;
-	if (bh->b_dirt)
-		ll_rw_block(WRITE, 1, &bh);
-	else {
-		buffer_track = -1;
-		bh->b_uptodate = 0;
-		ll_rw_block(READ, 1, &bh);
-	}
+
+	// (bh->b_dirt)
+	//	ll_rw_block(WRITE, 1, &bh);
+	//else {
+	//	buffer_track = -1;
+	//	bh->b_uptodate = 0;
+	//	ll_rw_block(READ, 1, &bh);
+	//}
+
 	wait_on_buffer(bh);
 	if (changed_floppies & mask) {
 		changed_floppies &= ~mask;
@@ -1113,12 +1115,14 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 	drive = MINOR(inode->i_rdev);
 	switch (cmd) {
 		case FDFMTBEG:
-			if (!suser())
-				return -EPERM;
+			// (!suser())
+			//	return -EPERM;
+
 			return 0;
 		case FDFMTEND:
-			if (!suser())
-				return -EPERM;
+			// (!suser())
+			//	return -EPERM;
+
 			cli();
 			fake_change |= 1 << (drive & 3);
 			sti();
@@ -1137,8 +1141,9 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 				    (char *) param+cnt);
 			return 0;
 		case FDFMTTRK:
-			if (!suser())
-				return -EPERM;
+			// (!suser())
+			//	return -EPERM;
+
 			if (fd_ref[drive & 3] != 1)
 				return -EBUSY;
 			cli();
@@ -1176,8 +1181,9 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			check_disk_change(inode->i_rdev);
 			return 0;
  	}
-	if (!suser())
-		return -EPERM;
+	// (!suser())
+	//	return -EPERM;
+
 	if (drive < 0 || drive > 3)
 		return -EINVAL;
 	switch (cmd) {
