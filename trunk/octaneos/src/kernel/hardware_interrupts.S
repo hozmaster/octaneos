@@ -20,21 +20,21 @@
 	cld;		\
 	push %gs;	\
 	push %fs;	\
-        push %es;	\
-        push %ds;	\
-        pushl %eax;	\
-        pushl %ebp;	\
-        pushl %edi;	\
-        pushl %esi;	\
-        pushl %edx;	\
-        pushl %ecx;	\
-        pushl %ebx;	\
-        movl $SYMBOL_NAME(__KERNEL_DS),%edx;	\
-        mov %dx,%ds;	\
-        mov %dx,%es;	\
-        movl $SYMBOL_NAME(__USER_DS),%edx;	\
-        mov %dx,%fs;	\
-        movl $0,%edx;
+    push %es;	\
+    push %ds;	\
+    pushl %eax;	\
+    pushl %ebp;	\
+    pushl %edi;	\
+    pushl %esi;	\
+    pushl %edx;	\
+    pushl %ecx;	\
+    pushl %ebx;	\
+    movl $SYMBOL_NAME(__KERNEL_DS),%edx;	\
+    mov %dx,%ds;	\
+    mov %dx,%es;	\
+    movl $SYMBOL_NAME(__USER_DS),%edx;	\
+    mov %dx,%fs;	\
+    movl $0,%edx;
 
 #define RESTORE_ALL \
 	popl %ebx; \
@@ -189,7 +189,7 @@ ENTRY(hw_interrupt_entry_06)
 	movl %esp,%ebx
 	pushl %ebx
 	pushl $0
-	call SYMBOL_NAME(lowlevel_floppy_interrupt)
+	# call SYMBOL_NAME(lowlevel_floppy_interrupt)
 	addl $8,%esp
 	cli
 	PIC_CLOSE_FIRST(0x40)

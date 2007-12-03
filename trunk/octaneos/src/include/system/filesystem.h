@@ -26,6 +26,10 @@
 // Major Devices
 //************************************************
 
+#define MAJOR(a) (int)((unsigned short)(a) >> 8)
+#define MINOR(a) (int)((unsigned short)(a) & 0xFF)
+#define MKDEV(a,b) ((int)((((a) & 0xff) << 8) | ((b) & 0xff)))
+
 #undef NR_OPEN
 #define NR_OPEN           256
 
@@ -122,29 +126,27 @@ typedef char buffer_block[BLOCK_SIZE];
 
 struct buffer_head {
 	char            *b_data;			/* pointer to data block (1024 bytes) */
-	unsigned long    b_size;		/* block size */
-	unsigned long    b_blocknr;	/* block number */
-	dev_t            b_dev;			/* device (0 = free) */
-	unsigned short   b_count;		/* users using this block */
+	unsigned long    b_size;		    /* block size */
+	unsigned long    b_blocknr;	        /* block number */
+	dev_t            b_dev;			    /* device (0 = free) */
+	unsigned short   b_count;		    /* users using this block */
 	unsigned char    b_uptodate;
-	unsigned char    b_dirt;		/* 0-clean,1-dirty */
-	unsigned char    b_lock;		/* 0 - ok, 1 -locked */
-	unsigned char    b_req;		/* 0 if the buffer has been invalidated */
-	unsigned char    b_list;		/* List that this buffer appears */
-	unsigned char    b_retain;         /* Expected number of times this will
-					   be used.  Put on freelist when 0 */
-	unsigned long    b_flushtime;      /* Time when this (dirty) buffer should be written */
-	unsigned long    b_lru_time;       /* Time when this buffer was last used. */
+	unsigned char    b_dirt;		    /* 0-clean,1-dirty */
+	unsigned char    b_lock;		    /* 0 - ok, 1 -locked */
+	unsigned char    b_req;		        /* 0 if the buffer has been invalidated */
+	unsigned char    b_list;		    /* List that this buffer appears */
+	unsigned char    b_retain;          /* Expected number of times this will
+					                       be used.  Put on freelist when 0 */
+	unsigned long    b_flushtime;       /* Time when this (dirty) buffer should be written */
+	unsigned long    b_lru_time;        /* Time when this buffer was last used. */
 	struct wait_queue  *b_wait;
-	struct buffer_head *b_prev;		/* doubly linked list of hash-queue */
+	struct buffer_head *b_prev;		    /* doubly linked list of hash-queue */
 	struct buffer_head *b_next;
 	struct buffer_head *b_prev_free;	/* doubly linked list of buffers */
 	struct buffer_head *b_next_free;
 	struct buffer_head *b_this_page;	/* circular list of buffers in one page */
 	struct buffer_head *b_reqnext;		/* request queue */
 };
-
-
 struct inode {
 	dev_t		     i_dev;
 	unsigned long	 i_ino;
@@ -262,7 +264,7 @@ static void end_request(int uptodate)
 		req->bh = bh->b_reqnext;
 		bh->b_reqnext = NULL;
 		bh->b_uptodate = uptodate;
-		unlock_buffer(bh);
+		//unlock_buffer(bh);
 		if ((bh = req->bh) != NULL) {
 			req->current_nr_sectors = bh->b_size >> 9;
 			if (req->nr_sectors < req->current_nr_sectors) {

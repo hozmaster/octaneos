@@ -5,20 +5,9 @@
 //
 // $Id: interrupts.c,v 1.15 2005/05/26 00:06:53 bigbinc Exp $
 //
-// to load an irq
-// * load the pic:
-// * enable the irq
-// * and based on the linux code, timer irqs can be weird
-//        vector = assign_irq_vector(0);
-//        set_intr_gate(vector, interrupt[0]);
-//
-// see io_apic.c
-//
 
 /*
-  
 IRQs jump to:
-
 action->handler(irq, action->dev_id, regs);
 
  Note:
@@ -29,7 +18,7 @@ action->handler(irq, action->dev_id, regs);
  disable_none,
  ack_none,
  end_none
- interrupt_handler000 --->>> 
+ interrupt_handler000
  save_regs
  
  do_IRQ --->> handler
@@ -38,7 +27,8 @@ action->handler(irq, action->dev_id, regs);
 
 #include <system/system.h>
 #include <asm/io.h>
-
+#include <linux/errno.h>
+#include <linux/signal.h>
 
 #define HZ 100
 #define CLOCK_TICK_RATE 1193180
@@ -47,12 +37,10 @@ action->handler(irq, action->dev_id, regs);
 
 asmlinkage void get_all_registers(void);
 
+// jiffies used a lot in scheduler.c
+volatile unsigned long jiffies = 0;
 
-// jiffies used a lot in scheduler.c...
-volatile unsigned long _jiffies = 0;
-
-
-// defined in bad_interrupts.S in assembly --
+// defined in bad_interrupts.S in assembly
 
 asmlinkage void __bad_interrupt_00_01(void);
 asmlinkage void __bad_interrupt_01_02(void);
@@ -93,17 +81,10 @@ extern void scheduler_timer_helper(void);
 
 extern struct TSS_object _tss;
 
-//==========================================================
-// Function Definitions
-//==========================================================
-
 unsigned long _get_jiffy_value(void)
 {
-  
-  return _jiffies;
-
+  return jiffies;
 }
-
 
 void __xloop_delay(unsigned long loops)
 {
@@ -116,85 +97,145 @@ void __xloop_delay(unsigned long loops)
 		       "2:\tdecl %0\n\tjns 2b"
 		       :"=&a" (d0)
 		       :"0" (loops));
-
 }
 
 int check_timer_irq(void)
 {
-  unsigned int __tmp01 =  _jiffies;
+  unsigned int __tmp01 =  jiffies;
   sti();    
   __xloop_delay(0xf0000); 
-  return _jiffies  - __tmp01;
-    
+  return jiffies  - __tmp01;    
 }
 
-void __disable_irq(unsigned int irq)
-{
-	
-  unsigned int mask = 1 << irq;
-  unsigned long flags;
-  
-  
-  cached_irq_mask |= mask;
-  if (irq & 8)
-    outb(cached_A1,0xA1);
-  else
-    outb(cached_21,0x21);
-  
-}
-
-void __enable_irq(unsigned int irq)
-{
-
-  unsigned int mask = ~(1 << irq);
-  unsigned long flags;
-  
-  cached_irq_mask &= mask;
-  if (irq & 8)
-    outb(cached_A1,0xA1);
-  else
-    outb(cached_21,0x21);
-
-}
-
-
-//
-// This gets called on the interrupt
-//
-//
-// as of 4/10/2004 - deprecated
-//
 void __debug_timer_irq(void) {
   _disable_interrupts();
-
-  _jiffies++;
+  jiffies++;
 
   //switch_task(_tss[0]);
-
-  // turn em back on....
+  // turn em back on
   _enable_interrupts();
-
 }
 
 void _public_timer_irq(void)
 {
-	
   _disable_interrupts();
-  _jiffies++;
-
+  jiffies++;
   scheduler_timer_helper();
-
   _enable_interrupts();
 
 }
 
-void print_tmp_ctr(void) {
+int irqaction(unsigned int irq, struct sigaction *new_sa)
+{
+	struct sigaction *sa;
+	unsigned long flags;
 
+	if (irq > 15)
+		return -EINVAL;
+
+	//sa = irq + irq_sigaction;
+	if (sa->sa_mask)
+		return -EBUSY;
+	if (!new_sa->sa_handler)
+		return -EINVAL;
+	save_flags(flags);
+	cli();
+	*sa = *new_sa;
+	sa->sa_mask = 1;
+
+	//if (sa->sa_flags & SA_INTERRUPT)
+	//	set_intr_gate(0x20+irq,fast_interrupt[irq]);
+	//else
+	//	set_intr_gate(0x20+irq,interrupt[irq]);
+
+	if (irq < 8) {
+		cache_21 &= ~(1<<irq);
+		outb(cache_21,0x21);
+	} else {
+		cache_21 &= ~(1<<2);
+		cache_A1 &= ~(1<<(irq-8));
+		outb(cache_21,0x21);
+		outb(cache_A1,0xA1);
+	}
+	restore_flags(flags);
+	return 0;
+}
+
+void disable_irq(unsigned int irq_nr) {
+
+	unsigned long flags;
+	unsigned char mask;
+	mask = 1 << (irq_nr & 7);
+	save_flags(flags);
+	if (irq_nr < 8) {
+		cli();
+		cache_21 |= mask;
+		outb(cache_21,0x21);
+		restore_flags(flags);
+		return;
+	}
+	cli();
+	cache_A1 |= mask;
+	outb(cache_A1,0xA1);
+	restore_flags(flags);
+}
+
+void enable_irq(unsigned int irq_nr)
+{
+	unsigned long flags;
+	unsigned char mask;
+
+	mask = ~(1 << (irq_nr & 7));
+	save_flags(flags);
+	if (irq_nr < 8) {
+		cli();
+		cache_21 &= mask;
+		outb(cache_21,0x21);
+		restore_flags(flags);
+		return;
+	}
+	cli();
+	cache_A1 &= mask;
+	outb(cache_A1,0xA1);
+	restore_flags(flags);
+}
+
+
+void free_irq(unsigned int irq)
+{
+	//struct sigaction *sa = irq + irq_sigaction;
+	unsigned long flags;
+	if (irq > 15) {
+		printk("Trying to free IRQ%d\n",irq);
+		return;
+	}
+	//if (!sa->sa_mask) {
+	//	printk("Trying to free free IRQ%d\n",irq);
+	//	return;
+	//}
+	save_flags(flags);
+	cli();
+	if (irq < 8) {
+		cache_21 |= 1 << irq;
+		outb(cache_21,0x21);
+	} else {
+		cache_A1 |= 1 << (irq-8);
+		outb(cache_A1,0xA1);
+	}
+
+	//set_intr_gate(0x20+irq, _bad_interrupt[irq]);
+
+	//sa->sa_handler = NULL;
+	//sa->sa_flags = 0;
+	//sa->sa_mask = 0;
+	//sa->sa_restorer = NULL;
+	restore_flags(flags);
+}
+
+void print_tmp_ctr(void) {
   char buf[80];
- 
-  __sprintf(buf, "CTR_DEBUG : %d\n", _jiffies);
-  __puts(buf);
-  
+  __sprintf(buf, "CTR_DEBUG : %d\n", jiffies);
+  __puts(buf); 
 }
 
 void handle_interrupt(int _irq_no)
@@ -246,7 +287,6 @@ void handle_interrupt(int _irq_no)
       outb(cache_A1,0xA1);
       
     }
-
   restore_flags(flags);
 
 }
@@ -320,20 +360,14 @@ void load_interrupts(void) {
   _set_intr_gate(0x20+13, __bad_interrupt_13_20);
   _set_intr_gate(0x20+14, __bad_interrupt_14_40);
   _set_intr_gate(0x20+15, __bad_interrupt_15_80);
-  __disable_irq(0);
-
+  disable_irq(0);
   
   //.................................................................
-  //
   // program the 8253 - Interval Timer
-  //
-  // set frequency of out timer and stuff
-  //
+  // Set frequency of out timer and stuff
   // http://www.cclinf.polito.it
-  //
   // LATCH = 11931.8 gives to 8253 (in output) 
   // a frequency of 1193180 / 11931.8 = 100 Hz, so period = 10ms
-  //
   //.................................................................
 
   outb_p(0x34,0x43);

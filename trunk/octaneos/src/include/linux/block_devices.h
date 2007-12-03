@@ -88,6 +88,7 @@ static void floppy_off(unsigned int nr);
 #define DEVICE_NAME "floppy"
 #define DEVICE_INTR do_floppy
 #define DEVICE_REQUEST do_fd_request
+#define DEVICE_REQUEST NULL
 #define DEVICE_NR(device) ((device) & 3)
 #define DEVICE_ON(device) floppy_on(DEVICE_NR(device))
 #define DEVICE_OFF(device) floppy_off(DEVICE_NR(device))
@@ -116,7 +117,6 @@ static void floppy_off(unsigned int nr);
 	((BLOCK_SIZE >> 9)  -  1))
 
 #define SUBSECTOR(block) (CURRENT->current_nr_sectors > 0)
-
 
 #endif // If major NR device check
 //************************************************

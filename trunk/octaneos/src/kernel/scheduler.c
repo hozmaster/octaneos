@@ -45,6 +45,23 @@ extern descriptor_table gdt;
 
 #define TIMER_LIST_REQUESTS                 64
 
+//int time_status = TIME_BAD;     /* clock synchronization status */
+long time_offset = 0;           /* time adjustment (us) */
+long time_constant = 0;         /* pll time constant */
+//long time_tolerance = MAXFREQ;  /* frequency tolerance (ppm) */
+long time_precision = 1; 	    /* clock precision (us) */
+long time_maxerror = 0x70000000;/* maximum error */
+long time_esterror = 0x70000000;/* estimated error */
+long time_phase = 0;            /* phase offset (scaled us) */
+long time_freq = 0;             /* frequency offset (scaled ppm) */
+long time_adj = 0;              /* tick adjust (scaled 1 / HZ) */
+long time_reftime = 0;          /* time at last adjustment (s) */
+
+long time_adjust = 0;
+long time_adjust_step = 0;
+
+int need_resched = 0;
+
 struct class_timer_list {  
   long jiffies;
   void (*timer_function)();
@@ -54,6 +71,10 @@ struct class_timer_list {
 
 static struct class_timer_list private_timer_list[TIMER_LIST_REQUESTS];
 static struct class_timer_list *private_next_timer = NULL;
+
+unsigned long timer_active = 0;
+struct timer_struct timer_table[32];
+static struct timer_list *next_timer = NULL;
 
 extern void _set_system_gate(unsigned int, void *);
 
@@ -243,17 +264,13 @@ void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)
 }
 
 static void clear_timer_interrupts(void)
-{
-  
+{  
   int i;
   private_next_timer = NULL;
   for (i = 0; i < TIMER_LIST_REQUESTS; i++) {
-
     private_timer_list[i].jiffies = 0;
     private_timer_list[i].timer_function = NULL;
-
   }
-
 }	
 
 //	
@@ -265,9 +282,6 @@ void scheduler_init(void) {
 
   clear_timer_interrupts();
     
-  // [ ++++ this has to link to the SWITCH_ function +++ ] 
-  // [ typically going to link to the tss-tr             ]
-
   // set the tss memory location for 3 tasks
   // Note: 8 represents the first tss, see above
 	     
@@ -306,7 +320,7 @@ static inline void __sleep_on(struct wait_queue **p, int state) {
 	add_wait_queue(p, &wait);
 	save_flags(flags);
 	sti();
-	schedule();
+	//schedule();
 	remove_wait_queue(p, &wait);
 	restore_flags(flags);
 }
@@ -320,3 +334,87 @@ void sleep_on(struct wait_queue **p)
 {
 	__sleep_on(p,TASK_UNINTERRUPTIBLE);
 }
+
+void add_timer(struct timer_list * timer)
+{
+	unsigned long flags;
+	struct timer_list ** p;
+
+	if (!timer)
+		return;
+	timer->next = NULL;
+	p = &next_timer;
+	save_flags(flags);
+	cli();
+	while (*p) {
+		if ((*p)->expires > timer->expires) {
+			(*p)->expires -= timer->expires;
+			timer->next = *p;
+			break;
+		}
+		timer->expires -= (*p)->expires;
+		p = &(*p)->next;
+	}
+	*p = timer;
+	restore_flags(flags);
+}
+
+int del_timer(struct timer_list * timer)
+{
+	unsigned long flags;
+	unsigned long expires = 0;
+	struct timer_list **p;
+
+	p = &next_timer;
+	save_flags(flags);
+	cli();
+	while (*p) {
+		if (*p == timer) {
+			if ((*p = timer->next) != NULL)
+				(*p)->expires += timer->expires;
+			timer->expires += expires;
+			restore_flags(flags);
+			return 1;
+		}
+		expires += (*p)->expires;
+		p = &(*p)->next;
+	}
+	restore_flags(flags);
+	return 0;
+}
+
+/*
+ * wake_up doesn't wake up stopped processes - they have to be awakened
+ * with signals or similar.
+ *
+ * Note that this doesn't need cli-sti pairs: interrupts may not change
+ * the wait-queue structures directly, but only call wake_up() to wake
+ * a process. The process itself must remove the queue once it has woken.
+ */
+void wake_up(struct wait_queue **q)
+{
+	struct wait_queue *tmp;
+	struct task_struct * p;
+	if (!q || !(tmp = *q))
+		return;
+	do {
+		if ((p = tmp->task) != NULL) {
+			if ((p->state == TASK_UNINTERRUPTIBLE) ||
+			    (p->state == TASK_INTERRUPTIBLE)) {
+				p->state = TASK_RUNNING;
+
+				//if (p->counter > current->counter)
+				//	need_resched = 1;
+			}
+		}
+		if (!tmp->next) {
+			printk("wait_queue is bad (eip = %08lx)\n",((unsigned long *) q)[-1]);
+			printk("        q = %p\n",q);
+			printk("       *q = %p\n",*q);
+			printk("      tmp = %p\n",tmp);
+			break;
+		}
+		tmp = tmp->next;
+	} while (tmp != *q);
+}
+

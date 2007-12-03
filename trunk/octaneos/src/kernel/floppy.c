@@ -18,8 +18,8 @@
 //------------------------------------------------
 //
 
-// Most be defined for determining device in filesystem.h
-#define MAJOR_NR FLOPPY_MAJOR_DEV
+// Note: the MAJOR_NR must be defined for the block device usage.
+#define MAJOR_NR FLOPPY_MAJOR
 
 #include <linux/errno.h>
 #include <system/system.h>
@@ -31,8 +31,6 @@
 #include <system/floppy.h>
 #include <system/filesystem.h>
 
-// Note: the MAJOR_NR must be defined for the block device usage.
-#define MAJOR_NR FLOPPY_MAJOR
 #include <linux/block_devices.h>
 
 #define _BLOCK_SIZE    1024
@@ -267,6 +265,11 @@ static unsigned char current_track = NO_TRACK;
 static unsigned char command = 0;
 static unsigned char fdc_version = 0x90;	/* FDC version code */
 
+void (*do_floppy)(void) = NULL;
+
+static void do_rd_request(void) {
+}
+
 static void select_callback(unsigned long unused)
 {
 	floppy_ready();
@@ -348,12 +351,14 @@ static void floppy_off(unsigned int nr)
 void request_done(int uptodate)
 {
 	timer_active &= ~(1 << FLOPPY_TIMER);
+	/*
 	if (format_status != FORMAT_BUSY)
 		end_request(uptodate);
 	else {
 		format_status = uptodate ? FORMAT_OKAY : FORMAT_ERROR;
 		wake_up(&format_done);
 	}
+	*/
 }
 
 /*
@@ -393,7 +398,7 @@ static int floppy_change(struct buffer_head * bh)
 	//	ll_rw_block(READ, 1, &bh);
 	//}
 
-	wait_on_buffer(bh);
+	//wait_on_buffer(bh);
 	if (changed_floppies & mask) {
 		changed_floppies &= ~mask;
 		recalibrate = 1;
@@ -437,7 +442,8 @@ static void setup_DMA(void)
 	}
 	cli();
 	disable_dma(FLOPPY_DMA);
-	clear_dma_ff(FLOPPY_DMA);
+
+	//clear_dma_ff(FLOPPY_DMA);
 	set_dma_mode(FLOPPY_DMA, (command == FD_READ)? DMA_MODE_READ : DMA_MODE_WRITE);
 	set_dma_addr(FLOPPY_DMA, addr);
 	set_dma_count(FLOPPY_DMA, count);
@@ -1133,12 +1139,12 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			if (drive > 3) this_floppy = &floppy_type[drive >> 2];
 			else if ((this_floppy = current_type[drive & 3]) == NULL)
 				    return -ENODEV;
-			i = verify_area(VERIFY_WRITE,(void *) param,sizeof(struct floppy_struct));
-			if (i)
-				return i;
-			for (cnt = 0; cnt < sizeof(struct floppy_struct); cnt++)
-				put_fs_byte(((char *) this_floppy)[cnt],
-				    (char *) param+cnt);
+
+			//i = verify_area(VERIFY_WRITE,(void *) param,sizeof(struct floppy_struct));
+			//if (i)
+			//	return i;
+			//for (cnt = 0; cnt < sizeof(struct floppy_struct); cnt++)
+			//	put_fs_byte(((char *) this_floppy)[cnt], (char *) param+cnt);
 			return 0;
 		case FDFMTTRK:
 			// (!suser())
@@ -1149,9 +1155,10 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			cli();
 			while (format_status != FORMAT_NONE)
 				sleep_on(&format_done);
-			for (cnt = 0; cnt < sizeof(struct format_descr); cnt++)
-				((char *) &format_req)[cnt] = get_fs_byte(
-				    (char *) param+cnt);
+
+			//for (cnt = 0; cnt < sizeof(struct format_descr); cnt++)
+			//	((char *) &format_req)[cnt] = get_fs_byte((char *) param+cnt);
+
 			format_req.device = drive;
 			format_status = FORMAT_WAIT;
 			format_errors = 0;
@@ -1173,12 +1180,12 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			wake_up(&format_done);
 			return okay ? 0 : -EIO;
 		case FDFLUSH:
-			if (!permission(inode, 2))
-				return -EPERM;
+			//if (!permission(inode, 2))
+			//	return -EPERM;
 			cli();
 			fake_change |= 1 << (drive & 3);
 			sti();
-			check_disk_change(inode->i_rdev);
+			//check_disk_change(inode->i_rdev);
 			return 0;
  	}
 	// (!suser())
@@ -1194,9 +1201,7 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			break;
 		case FDSETPRM:
 		case FDDEFPRM:
-			memcpy_fromfs(user_params+drive,
-				(void *) param,
-				sizeof(struct floppy_struct));
+			//memcpy_fromfs(user_params+drive, (void *) param, sizeof(struct floppy_struct));
 			current_type[drive] = &user_params[drive];
 			floppy_sizes[drive] = user_params[drive].size >> 1;
 			if (cmd == FDDEFPRM)
@@ -1288,16 +1293,18 @@ static int floppy_open(struct inode *inode, struct file *filp)
 	fd_ref[drive]++;
 	fd_device[drive] = inode->i_rdev;
 	buffer_drive = buffer_track = -1;
-	if (old_dev && old_dev != inode->i_rdev)
-		invalidate_buffers(old_dev);
-	if (filp && filp->f_mode)
-		check_disk_change(inode->i_rdev);
+
+	//if (old_dev && old_dev != inode->i_rdev)
+	//	invalidate_buffers(old_dev);
+
+	//if (filp && filp->f_mode)
+	//	check_disk_change(inode->i_rdev);
 	return 0;
 }
 
 static void floppy_release(struct inode * inode, struct file * filp)
 {
-	fsync_dev(inode->i_rdev);
+	//fsync_dev(inode->i_rdev);
 	if (!fd_ref[inode->i_rdev & 3]--) {
 		printk("floppy_release with fd_ref == 0");
 		fd_ref[inode->i_rdev & 3] = 0;
@@ -1310,10 +1317,10 @@ static int check_floppy_change(dev_t dev)
 	int i;
 	struct buffer_head * bh;
 
-	if (!(bh = getblk(dev,0,1024)))
-		return 0;
+	//if (!(bh = getblk(dev,0,1024)))
+	//	return 0;
 	i = floppy_change(bh);
-	brelse(bh);
+	//brelse(bh);
 	return i;
 };
 
@@ -1335,12 +1342,11 @@ static struct file_operations floppy_fops = {
 
 static void floppy_interrupt(int unused)
 {
-	void (*handler)(void) = DEVICE_INTR;
-
-	DEVICE_INTR = NULL;
-	if (!handler)
-		handler = unexpected_floppy_interrupt;
-	handler();
+	//void (*handler)(void) = DEVICE_INTR;
+	//DEVICE_INTR = NULL;
+	//if (!handler)
+	//	handler = unexpected_floppy_interrupt;
+	//handler();
 }
 
 /*
