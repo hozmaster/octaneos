@@ -1,14 +1,25 @@
 /*
  * Copyright (C) 2003, 2007 Berlin Brown
- * bigbinc@hotmail.com
  *
  * $Id: mini.S,v 1.1 2004/03/14 03:21:39 bigbinc Exp $
- *
  *
  * Linux parts copyrighted Linus Torvalds
  *
  * Note: of course the zipped kernel gets this code
  * 	this is where a lot of problems are caused.
+ *		
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 		
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.	
  */
 
 #define __ASSEMBLY__

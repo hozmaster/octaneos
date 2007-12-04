@@ -1,9 +1,25 @@
-#ifndef _ASM_IO_H
-#define _ASM_IO_H
 //
 // Copyright (C) 2003, 2007 Berlin Brown
 // $Id: io.h,v 1.4 2005/05/26 00:06:54 bigbinc Exp $
 //
+// Copyright (C) 2007 Berlin Brown
+// Octane OS (Operating System)
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#ifndef _ASM_IO_H
+#define _ASM_IO_H
 
 #ifdef SLOW_IO_BY_JUMPING
 #define __SLOW_DOWN_IO "\njmp 1f\n1:\tjmp 1f\n1:"
