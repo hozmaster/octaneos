@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (C) 2003, 2007 Berlin Brown
  *
  * $Id: lowlevel.S,v 1.4 2004/03/28 23:41:00 bigbinc Exp $ - misc assembly routines

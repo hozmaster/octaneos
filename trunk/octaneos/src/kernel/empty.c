@@ -1,5 +1,3 @@
-//
-//
 #define __KERNEL_CS     0x10
 #define __KERNEL_DS     0x18
 
@@ -12,7 +10,7 @@
 long user_stack [ PAGE_SIZE>>2 ];
 
 struct {
-  long * a;
+  long *a;
   short b;
 } stack_start = { &user_stack[PAGE_SIZE>>2], __KERNEL_DS };
 
