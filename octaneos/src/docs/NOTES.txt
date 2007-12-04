@@ -14,6 +14,8 @@
 	Initial startup checklist.  Starting up the application
 	is critical for the kernel.  All components must be in place.
 	Here is a checklist of startup operations from the linux 1.1.29 startup (init/main.c)
+	See:
+	http://octaneos.googlecode.com/svn/trunk/octaneos/src/docs/NOTES.txt
 	-------------------------------------------------
 	
 	Operation:                                            Critical?   File
