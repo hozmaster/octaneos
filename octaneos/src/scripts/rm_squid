@@ -1,9 +1,10 @@
 #!/bin/sh
 #
 # Berlin Brown
-# Scrit to remove backup files
+# Script to remove backup files
 # find (cur_dir) -name wildcard [option:type] regular_file
 # 		and print with newline
+#
 
 echo "INFO: Removing the (garbage/backup) *~ files..."
 find . -name '*~' -type f -print \
