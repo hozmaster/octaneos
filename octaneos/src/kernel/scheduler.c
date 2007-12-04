@@ -3,17 +3,9 @@
 //==========================================================
 //
 // $Id: scheduler.c,v 1.15 2005/05/26 00:06:53 bigbinc Exp $
-
 // sti - enable interrupts
 // cli - clear interrupt enable
 //
-// originally based on Alexei A. Frounze's code
-
-// gcc -O2 -fomit-frame-pointer -W -Wall
-// - defined as _jiffies
-// note: jiffies is defined in interrupts
-//   - used by the timer_interrupt, it should be in this code
-// see scheduler init below 
 //
 // TSS - GDT layout
 //

@@ -1,4 +1,5 @@
 ##################################################
+##
 ## Copyright (C) 2003, 2007 Berlin Brown
 ## $Id: Makefile,v 1.19 2005/05/26 00:06:53 bigbinc Exp $
 ##
@@ -13,6 +14,7 @@
 ## LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 ## NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 ## SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+##
 ##################################################
 
 LDFLAGS = -m elf_i386
