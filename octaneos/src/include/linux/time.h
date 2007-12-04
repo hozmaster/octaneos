@@ -1,5 +1,5 @@
 /*
- * filesystem.h
+ * time.h
  *
  * Copyright (C) 2003, 2007 Berlin Brown
  *
