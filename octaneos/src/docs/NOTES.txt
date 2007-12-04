@@ -8,82 +8,83 @@
 ###
 ### See LICENSE.OCTANE for more details
 
+
 -------------------------------------------------
  * 12/4/2007
 -------------------------------------------------
-	Initial startup checklist.  Starting up the application
-	is critical for the kernel.  All components must be in place.
-	Here is a checklist of startup operations from the linux 1.1.29 startup (init/main.c)
-	See:
-	http://octaneos.googlecode.com/svn/trunk/octaneos/src/docs/NOTES.txt
-	-------------------------------------------------
-	
-	Operation:                                            Critical?   File
-	-----------                                           ---------   ---------
+    Initial startup checklist.  Starting up the application
+    is critical for the kernel.  All components must be in place.
+    Here is a checklist of startup operations from the linux 1.1.29 startup (init/main.c)
+    See:
+    http://octaneos.googlecode.com/svn/trunk/octaneos/src/docs/NOTES.txt
+    -------------------------------------------------
+    
+    Operation:                                            Critical?   File
+    -----------                                           ---------   ---------
     set_call_gate(&default_ldt,lcall7)                  | Y         | ./include/asm/system.h:#define set_call_gate(a,addr)
- 	ROOT_DEV = ORIG_ROOT_DEV;                           | Y         | ./fs/super.c:dev_t ROOT_DEV = 0;
- 		
-	trap_init()                                         | Y         | ./kernel/traps.c:void trap_init(void)
-	init_IRQ()                                          | Y         | 
-																		./init/main.c:extern void init_IRQ(void);
-																		./init/main.c:  init_IRQ();
-																		./kernel/irq.c:void init_IRQ(void)
-	sched_init()                                        | M         |
-																		./init/main.c:  sched_init();
-																		./kernel/sched.c:void sched_init(void)
-	init_modules()                                      | N         |??
-	memory_start = blk_dev_init(memory_start,           | M         |
-								memory_end)              				./drivers/block/ll_rw_blk.c:long blk_dev_init(long mem_start, long mem_end)
-																		./init/main.c:extern long blk_dev_init(long,long);
-																		./init/main.c:  memory_start = blk_dev_init(memory_start,memory_end);
-	calibrate_delay()                                   | N         |
-																		./init/main.c:static void calibrate_delay(void)
-																		./init/main.c:  calibrate_delay();
-	mem_init(low_memory_start, memory_start,            | M         |
-								memory_end)              				./mm/memory.c:void mem_init(unsigned long start_low_mem,
-																		./mm/memory.c:  sound_mem_init();
-	buffer_init()                                       | N         |
-																		./fs/buffer.c:void buffer_init(void)
-																		./init/main.c:  buffer_init();
-	time_init()                                         | N         |
-																		./init/main.c:extern void time_init(void);
-																		./init/main.c:  time_init();
-																		./kernel/time.c:void time_init(void)
-	floppy_init()                                       | Y         |  ---	
-	printk(linux_banner)                                | N         |
-	move_to_user_mode()	                                | N         | ./include/asm/system.h:#define move_to_user_mode() 
-	if (!fork())                                        | Y         | ./kernel/fork.c:    
-		init()                                          | Y         |
-	for(;;)                                             
-		idle()                                          | Y         |
-	void init(void):                                    | 
-		setup()                                         |
-		(void) open("/dev/tty1",O_RDWR,0)               
-		(void) dup(0)	
-		execve("/etc/init",argv_init,envp_init)						./lib/execve.c: *  linux/lib/execve.c
-		execve("/bin/init",argv_init,envp_init)						./fs/exec.c: * sys_execve
-		execve("/sbin/init",argv_init,envp_init)
-		execve("/bin/sh",argv_rc,envp_rc)
-	
-	-------------------------------------------------
-	
+    ROOT_DEV = ORIG_ROOT_DEV;                           | Y         | ./fs/super.c:dev_t ROOT_DEV = 0;
+        
+    trap_init()                                         | Y         | ./kernel/traps.c:void trap_init(void)
+    init_IRQ()                                          | Y         | 
+                                                                        ./init/main.c:extern void init_IRQ(void);
+                                                                        ./init/main.c:  init_IRQ();
+                                                                        ./kernel/irq.c:void init_IRQ(void)
+    sched_init()                                        | M         |
+                                                                        ./init/main.c:  sched_init();
+                                                                        ./kernel/sched.c:void sched_init(void)
+    init_modules()                                      | N         |??
+    memory_start = blk_dev_init(memory_start,           | M         |
+                                memory_end)                             ./drivers/block/ll_rw_blk.c:long blk_dev_init(long mem_start, long mem_end)
+                                                                        ./init/main.c:extern long blk_dev_init(long,long);
+                                                                        ./init/main.c:  memory_start = blk_dev_init(memory_start,memory_end);
+    calibrate_delay()                                   | N         |
+                                                                        ./init/main.c:static void calibrate_delay(void)
+                                                                        ./init/main.c:  calibrate_delay();
+    mem_init(low_memory_start, memory_start,            | M         |
+                                memory_end)                             ./mm/memory.c:void mem_init(unsigned long start_low_mem,
+                                                                        ./mm/memory.c:  sound_mem_init();
+    buffer_init()                                       | N         |
+                                                                        ./fs/buffer.c:void buffer_init(void)
+                                                                        ./init/main.c:  buffer_init();
+    time_init()                                         | N         |
+                                                                        ./init/main.c:extern void time_init(void);
+                                                                        ./init/main.c:  time_init();
+                                                                        ./kernel/time.c:void time_init(void)
+    floppy_init()                                       | Y         |  ---  
+    printk(linux_banner)                                | N         |
+    move_to_user_mode()                                 | N         | ./include/asm/system.h:#define move_to_user_mode() 
+    if (!fork())                                        | Y         | ./kernel/fork.c:    
+        init()                                          | Y         |
+    for(;;)                                             
+        idle()                                          | Y         |
+    void init(void):                                    | 
+        setup()                                         |
+        (void) open("/dev/tty1",O_RDWR,0)               
+        (void) dup(0)   
+        execve("/etc/init",argv_init,envp_init)                     ./lib/execve.c: *  linux/lib/execve.c
+        execve("/bin/init",argv_init,envp_init)                     ./fs/exec.c: * sys_execve
+        execve("/sbin/init",argv_init,envp_init)
+        execve("/bin/sh",argv_rc,envp_rc)
+    
+    -------------------------------------------------
+    
 -------------------------------------------------
  * 11/24/2007
 -------------------------------------------------
-	Resources for Floppy Disk Controller:
-	http://www.osdev.org/wiki/Floppy_Disk_Controller
-	
+    Resources for Floppy Disk Controller:
+    http://www.osdev.org/wiki/Floppy_Disk_Controller
+    
 -------------------------------------------------
  * 5/19/2005:
 -------------------------------------------------
-	- floppy.c - it looks like the interrupt is working,
-		we get to floppy_on_interrupt(void)
-		but, it may not behaving correctly.
-		
-	 	And then we get to:
-	 	
-	 	public_add_timer(2, floppy_transfer_data);
-	 	
+    - floppy.c - it looks like the interrupt is working,
+        we get to floppy_on_interrupt(void)
+        but, it may not behaving correctly.
+        
+        And then we get to:
+        
+        public_add_timer(2, floppy_transfer_data);
+        
 Note: floppy major number = 2
 
 the way in with the "0" type codes 
