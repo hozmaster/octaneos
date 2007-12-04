@@ -19,7 +19,7 @@
 #ifndef _SYSTEM_ALPHA_H_
 #define _SYSTEM_ALPHA_H_
 
-#define _MAX_DMA_CHANNELS	8
+#define _MAX_DMA_CHANNELS	 8
 
 #define _IO_DMA1_BASE        0x00
 #define _IO_DMA2_BASE	     0xC0
@@ -80,12 +80,12 @@
 #define _DMA_MODE_WRITE	         0x48
 #define _DMA_MODE_CASCADE        0xC0
 
-#define DMA_READ        0x46
-#define DMA_WRITE       0x4A
+#define DMA_READ                 0x46
+#define DMA_WRITE                0x4A
 
-#define MAX_DMA_CHANNELS  8
+#define MAX_DMA_CHANNELS         8
 
-#define FDC_TYPE_STD    0x80
-#define FDC_TYPE_82077  0x90
+#define FDC_TYPE_STD             0x80
+#define FDC_TYPE_82077           0x90
 
 #endif 
