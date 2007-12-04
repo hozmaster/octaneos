@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2007 Berlin Brown
+ * Octane OS (Operating System)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef _LINUX_ERRNO_H
 #define _LINUX_ERRNO_H
 
@@ -5,7 +22,7 @@
 #define	ENOENT		 2	/* No such file or directory */
 #define	ESRCH		 3	/* No such process */
 #define	EINTR		 4	/* Interrupted system call */
-#define	EIO		 5	/* I/O error */
+#define	EIO		     5	/* I/O error */
 #define	ENXIO		 6	/* No such device or address */
 #define	E2BIG		 7	/* Arg list too long */
 #define	ENOEXEC		 8	/* Exec format error */
