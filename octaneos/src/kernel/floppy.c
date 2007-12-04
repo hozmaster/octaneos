@@ -1380,11 +1380,9 @@ void floppy_init(void)
 		fdc_version = FDC_TYPE_STD;
 	} else
 		fdc_version = reply_buffer[0];
+
 	if (fdc_version != FDC_TYPE_STD) 
 		printk(DEVICE_NAME ": FDC version 0x%x\n", fdc_version);
-
-    // ifndef FDC_FIFO_UNTESTED
-	// fdc_version = FDC_TYPE_STD;	/* force std fdc type; can't test other. */
 
 	/* Not all FDCs seem to be able to handle the version command
 	 * properly, so force a reset for the standard FDC clones,
