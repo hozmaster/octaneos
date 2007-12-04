@@ -2,8 +2,6 @@
 ### Root Makefile for ProjectAkita Operating System
 ###
 ### Copyright (c) 2005-2007 - Berlin Brown
-###
-### berlin.brown@gmail.com
 ###  
 ###   Version: 1.0.0
 ###   First System Tested: Mandrake Linux 9.1 3.2.2-3mdk (2005)
