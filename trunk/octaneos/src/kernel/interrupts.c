@@ -319,12 +319,10 @@ void print_register_list(struct debug_registers *check_registers) {
   __sprintf(buf, "    EAX: %x    ECX: %x    EBX: %x\n", check_registers->__eax,
 	    check_registers->__ecx, check_registers->__ebx);
   __puts(buf);
-
   __sprintf(buf, "    DS: %x    ES: %x    FS: %x\n", check_registers->__ds,
 	    check_registers->__es, check_registers->__fs);
   __puts(buf);
-
-    __sprintf(buf, "    EIP: %x    CS: %x    OLDAX: %x\n", check_registers->__eip,
+  __sprintf(buf, "    EIP: %x    CS: %x    OLDAX: %x\n", check_registers->__eip,
 	    check_registers->__cs, check_registers->__old_eax);
   __puts(buf);
 
