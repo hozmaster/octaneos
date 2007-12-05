@@ -1,13 +1,9 @@
 #!/usr/bin/python
 #
-# Berlin Brown
-# bigbinc@hotmail.com
-#
-#  just find the total lines of source we have
-#
 # $Id: get_build.py,v 1.7 2005/05/21 06:08:10 bigbinc Exp $
+# Berlin Brown
 #
-# python script, I hope you have python
+# Find the total lines of source we have
 #
 
 import string
@@ -16,22 +12,20 @@ from re import split
 
 if __name__=="__main__":
     
-    print "** Getting build and writing to file ..."    
+    print "INFO: Getting build and writing to file ..."    
     f = open("build", "r")
     line = f.readline()
 
-    ctr = 0
-    
+    ctr = 0    
     str = line
     
     # convert first chars to number
     val = int(str)
     ctr = val + 1
     line = f.readline()    
-
     f.close()
 
-    print " [[>> New Build Count: %d <<]]" % (ctr-1)
+    print ">>> New Build Count: %d <<<" % (ctr-1)
 
     # over-write the existing build file
     fy = open("build", "w")
@@ -49,8 +43,7 @@ if __name__=="__main__":
     fx.write("\n")
 
     fx.write("unsigned long main_get_build_count = %ld;" % ctr)
-    fx.write("\n//\n\n");
-    
+    fx.write("\n//\n\n");    
     fx.close()
         
 # // End of Main //
