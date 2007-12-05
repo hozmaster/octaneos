@@ -14,83 +14,83 @@
 #include <linux/linkage.h>
 #include <asm/segment.h>
 
-#define SAVE_ALL	\
-	cld;		\
-	push %gs;	\
-	push %fs;	\
-    push %es;	\
-    push %ds;	\
-    pushl %eax;	\
-    pushl %ebp;	\
-    pushl %edi;	\
-    pushl %esi;	\
-    pushl %edx;	\
-    pushl %ecx;	\
-    pushl %ebx;	\
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx;	\
-    mov %dx,%ds;	\
-    mov %dx,%es;	\
-    movl $SYMBOL_NAME(__USER_DS),%edx;	\
-    mov %dx,%fs;	\
+#define SAVE_ALL	   \
+	cld;		       \
+	push %gs;	       \
+	push %fs;	       \
+    push %es;	       \
+    push %ds;	       \
+    pushl %eax;	       \
+    pushl %ebp;	       \
+    pushl %edi;	       \
+    pushl %esi;	       \
+    pushl %edx;	       \
+    pushl %ecx;	       \
+    pushl %ebx;	       \
+    movl $SYMBOL_NAME(__KERNEL_DS),%edx; \
+    mov %dx,%ds;	   \
+    mov %dx,%es;	   \
+    movl $SYMBOL_NAME(__USER_DS),%edx;	 \
+    mov %dx,%fs;	   \
     movl $0,%edx;
 
-#define RESTORE_ALL \
-	popl %ebx; \
-	popl %ecx; \
-	popl %edx; \
-	popl %esi; \
-	popl %edi; \
-	popl %ebp; \
-	popl %eax; \
-	pop %ds; \
-	pop %es; \
-	pop %fs; \
-	pop %gs; \
-	addl $4,%esp; \
+#define RESTORE_ALL    \
+	popl %ebx;         \
+	popl %ecx;         \
+	popl %edx;         \
+	popl %esi;         \
+	popl %edi;         \ 
+	popl %ebp;         \
+	popl %eax;         \
+	pop %ds;           \
+	pop %es;           \  
+	pop %fs;           \
+	pop %gs;           \
+	addl $4,%esp;      \
 	iret
 	
 #define PIC_CLOSE_FIRST(mask)	\
-	inb $0x21,%al;		\
-	jmp 1f;			\
-1:	jmp 1f;			\
-1:	andb $~(mask),cache_21;	\
-    movb cache_21,%al;	\
+	inb $0x21,%al;		        \
+	jmp 1f;			            \
+1:	jmp 1f;			            \
+1:	andb $~(mask),cache_21;	    \
+    movb cache_21,%al;	        \
     outb %al,$0x21;
 
 #define PIC_CLOSE_SECOND(mask)	\
-	inb $0xA1,%al;		\
-	jmp 1f;			\
-1:	jmp 1f;			\
-1:	andb $~(mask),cache_A1;	\
-	movb cache_A1,%al;	\
+	inb $0xA1,%al;		        \
+	jmp 1f;			            \
+1:	jmp 1f;			            \
+1:	andb $~(mask),cache_A1;	    \
+	movb cache_A1,%al;	        \
     outb %al,$0xA1;
 			
 #define SETUP_PIC01(mask)	 \
-	inb $0x21,%al;		\
-	jmp 1f;			\
-1:	jmp 1f;			\
-1:	orb $mask,cache_21;	\
-	movb cache_21,%al;	\
-	outb %al,$0x21;		\
-	jmp 1f;			\
-1:	jmp 1f;			\
-1:	movb $0x20,%al;		\
+	inb $0x21,%al;		     \
+	jmp 1f;			         \
+1:	jmp 1f;			         \
+1:	orb $mask,cache_21;	     \
+	movb cache_21,%al;	     \
+	outb %al,$0x21;		     \
+	jmp 1f;			         \
+1:	jmp 1f;			         \
+1:	movb $0x20,%al;		     \
 	outb %al,$0x20;
 
 	
 #define SETUP_PIC02(mask)	\
-	inb $0xA1,%al;		\
-	jmp 1f;			\
-1:	jmp 1f;			\
-1:	orb $mask,cache_A1;	\
-	movb cache_A1,%al;	\
-	outb %al,$0xA1;		\
-	jmp 1f;			\
-1:	jmp 1f;			\
-1:	movb $0x20,%al;		\
-	outb %al,$0xA0;		\
-	jmp 1f;		        \
-1:	jmp 1f;			\
+	inb $0xA1,%al;		    \
+	jmp 1f;			        \
+1:	jmp 1f;			        \
+1:	orb $mask,cache_A1;	    \
+	movb cache_A1,%al;	    \
+	outb %al,$0xA1;		    \
+	jmp 1f;			        \
+1:	jmp 1f;			        \
+1:	movb $0x20,%al;		    \
+	outb %al,$0xA0;		    \
+	jmp 1f;		            \
+1:	jmp 1f;			        \
 1:	outb %al,$0x20;
 		
 #
@@ -167,5 +167,3 @@ ENTRY(hw_interrupt_entry_06)
 	cli
 	PIC_CLOSE_FIRST(0x40)
 	RESTORE_ALL
-
-
