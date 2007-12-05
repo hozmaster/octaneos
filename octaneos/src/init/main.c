@@ -1,25 +1,26 @@
-// 
-// Copyright (C) 2003, 2007 Berlin Brown (berlin.brown@gmail.com)
-// 
-// $Id: main.c,v 1.30 2005/05/26 00:06:54 bigbinc Exp $
-//
-// Octane OS (Operating System)
-// Copyright (C) 2007 Berlin Brown
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
-// See LICENSE.OCTANE for more details
+/* 
+ * Copyright (C) 2003, 2007 Berlin Brown (berlin.brown@gmail.com)
+ * 
+ * $Id: main.c,v 1.30 2005/05/26 00:06:54 bigbinc Exp $
+ *
+ * Octane OS (Operating System)
+ * Copyright (C) 2007 Berlin Brown
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * See LICENSE.OCTANE for more details
+ */
 
 #include <system/system.h>
 #include <asm/io.h>
@@ -69,37 +70,13 @@ extern int __public_debug(int);
 extern void mount_root(void);
 extern void public_timer_test(void);
 
-
 void __test_floppy(void);
-
 char  *__vidmem = (char *)0xb8000;
 
 //
 // Draw Characters
-//
 static void _video_draw_char(const char _c, int _x, int _y) {
-
-  // black = 0
-  // blue = 1
-  // green = 2
-  // cyan = 3
-  // red = 4
-  // magenta = 5
-  // brown = 6
-  // white = 7
-  // gray = 8
-  // light blue = 9
-  // light green = A
-  // light cyan = B
-  // light red = C
-  // light mag = D
-  // yellow = E
-  // white = F 
 	
-  // attr/char
-	
-  // foreground colors = 0,1,2,3,4,5,6,7
-  // bgcolors = 0,1,2,3,4,6,7
   unsigned char __attr = 0;
 	
   // white on blue 
@@ -112,67 +89,38 @@ static void _video_draw_char(const char _c, int _x, int _y) {
   // color = color
 
   __attr ^= 0x08;		// bold
-
   __vidmem [ (( _x + (80 * _y)) * 2) + 0] = _c;
   __vidmem [ (( _x + (80 * _y)) * 2) + 1 ] = __attr;
-	
 }
 
 static void _draw_char(char _c,int _x, int _y) {
-
-  __vidmem [ ( _x + 80 * _y ) * 2 ] = _c;	
-	
-}
-
-static void view_PIC(void) {
-
-  char buf[255];
-  unsigned int v;
-  v = inb(0xa1) << 8 | inb(0x21);
-
-  __sprintf(buf," [ PIC  IMR ] : %04x\n", v); __puts(buf);
-
-  v = inb(0xa0) << 8 | inb(0x20);
-  __sprintf(buf," [ PIC  IRR: %04x\n", v); __puts(buf);
-  
-  outb(0x0b,0xa0);
-  outb(0x0b,0x20);
-  v = inb(0xa0) << 8 | inb(0x20);
-  outb(0x0a,0xa0);
-  outb(0x0a,0x20); 
-  __sprintf(buf," [ PIC  ISR ] : %04x\n", v); __puts(buf);
-  v = inb(0x4d1) << 8 | inb(0x4d0);
-  __sprintf(buf," [ PIC ELCR ] : %04x\n", v); __puts(buf);
-  
+  __vidmem [ ( _x + 80 * _y ) * 2 ] = _c;		
 }
 
 //
 // Start Kernel
-//
 asmlinkage void start_kernel(void) {
 
   char buf[255];
   int _i = 0;
   int _diff = 0;
 
-  _video_draw_char('S', 79,0);
-  _video_draw_char('p', 79,1);
-  _video_draw_char('i', 79,2);
-  _video_draw_char('r', 79,3);
-  _video_draw_char('i', 79,4);
-  _video_draw_char('t', 79,5);
-  _video_draw_char('X', 79,6);
+  _video_draw_char('O', 79, 10);
+  _video_draw_char('c', 79, 11);
+  _video_draw_char('t', 79, 12);
+  _video_draw_char('a', 79, 13);
+  _video_draw_char('n', 79, 14);
+  _video_draw_char('e', 79, 15);
+  _video_draw_char(' ', 79, 16);
+  _video_draw_char(' ', 79, 17);
 
   // Draw a banner line of the right side of the screen
-  for (_i = 7; _i < 24; _i++) {
-    _video_draw_char(' ', 79,_i);
-  }
-	
-  // Setup Code
-
+  for (_i = 0; _i < 10; _i++)  { _video_draw_char(' ', 79,_i); }
+  for (_i = 18; _i < 22; _i++) { _video_draw_char(' ', 79,_i); }  
+   
   load_misc_kprint();  
-  __sprintf(buf, "=========== [ Project Akita ] ===========\n"); __puts(buf);
-  __sprintf(buf, "[ Build: %ld; since { 5/15/2005 } %s]\n", 
+  __sprintf(buf, "=========== Octane ===========\n"); __puts(buf);
+  __sprintf(buf, "@INFO: Build: %ld; since (10/15/2007) %s\n", 
 		  	main_get_build_count, main_get_version); __puts(buf);
     
   // now lets load the IDT
@@ -180,53 +128,25 @@ asmlinkage void start_kernel(void) {
   
   load_interrupts();
   load_keyboard_driver();
-
-  _diff = check_timer_irq();
       
-  // another check
   scheduler_init();  
-  __sprintf(buf, "delay [ "); __puts(buf);
-  for (_i = 0; _i < 5; _i++) {
-
-    _jiffy_delay_setup(100);
-    _jiffy_start();
-    _jiffy_delay();
-    __sprintf(buf, "."); __puts(buf);
-    
-  } // end of the for 
-  __sprintf(buf, " ]\n"); __puts(buf);
-  
-  /// ** deprecated while testing the new floppy driver **
   floppy_init(); 
 
-  // ==================== LOCKDOWN ========================  
-  for(;;)
-  {
+  for(;;) {  
     _jiffy_delay_setup(40);
     _jiffy_start();
     _jiffy_delay();
 
-    if ((jiffies % 60000) == 0)
-    {      
+    if ((jiffies % 60000) == 0) {  
       __sprintf(buf, "[%d]",__debug_scan_code);
       __puts(buf);
     }
-
-    if (__debug_scan_code != 0x00)
-    {
-      __sprintf(buf, "[%d]", __debug_scan_code);
-      __puts(buf);
-      
-      __debug_scan_code = 0x00;
-
-    }
-
   }
-	
 }
 
-//========================================================
+//------------------------------------------------
 // End of File
-//========================================================
+//------------------------------------------------
+
 
 
