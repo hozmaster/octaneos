@@ -14,6 +14,9 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * (Also see hardware_interrupts.S for asm definitions
+ * this file is synonymous with irq.c in the linux kernel)
  */
 
 #include <system/system.h>
@@ -215,7 +218,6 @@ void free_irq(unsigned int irq)
 	}
 
 	//set_intr_gate(0x20+irq, _bad_interrupt[irq]);
-
 	//sa->sa_handler = NULL;
 	//sa->sa_flags = 0;
 	//sa->sa_mask = 0;
@@ -249,7 +251,6 @@ void handle_interrupt(int _irq_no)
     
     // keyboard -- irq
     _set_intr_gate(0x20 + _irq_no, hw_interrupt_entry_01);
-
     break;
 
   case  6:
@@ -307,14 +308,11 @@ void load_remap_controller(void)
   outb(cached_21, 0x21);
   outb(cached_A1, 0xA1);
   
-} // end of the funtion +++
-
+} // End of the funtion 
 
 void print_register_list(struct debug_registers *check_registers) {
 
-  
   char buf[255];
-
   __sprintf(buf, " >> Checking registers <<\n"); __puts(buf);
   __sprintf(buf, "    EAX: %x    ECX: %x    EBX: %x\n", check_registers->__eax,
 	    check_registers->__ecx, check_registers->__ebx);

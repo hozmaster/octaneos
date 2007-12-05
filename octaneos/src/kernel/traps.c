@@ -73,20 +73,15 @@ void __blue_screen(void) {
   char _c = ' ';
   unsigned char __attr = 0;
   __attr = 0x17;  
-  __attr ^= 0x08;		// bold
-  
+  __attr ^= 0x08;		// bold  
   _x = 0;
   _y = 0;
 
   for (_y = 0; _y < 25; _y++) {
-
-    for (_x = 0; _x < 80; _x++) {
-   
+    for (_x = 0; _x < 80; _x++) {   
       __vidmem [ (( _x + (80 * _y)) * 2) + 0] = _c;
       __vidmem [ (( _x + (80 * _y)) * 2) + 1 ] = __attr;
-
-    }
-      
+    }      
   }
   
 }
@@ -94,13 +89,10 @@ void __blue_screen(void) {
 void panic(const char *str)
 {
   static char buf[1024];
-
   __blue_screen();
-
   __sprintf(buf, "======================================\n", str); __puts(buf);
   __sprintf(buf, ">> KERNEL PANIC << : %s\n", str); __puts(buf);
   __sprintf(buf, "======================================\n", str); __puts(buf);
-
   get_all_registers();
   for(;;);
 

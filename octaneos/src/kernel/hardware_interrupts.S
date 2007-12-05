@@ -7,6 +7,9 @@
  *
  * The actual work will get done by other C implementations, these
  * ASM based wrappers are only used to ensure proper stack manipulations.
+ *
+ * (Also see interrupts.c for C definitions
+ * this file is synonymous with irq.c in the linux kernel)
  */
 
 #define __ASSEMBLY__
@@ -157,7 +160,7 @@ ENTRY(hw_interrupt_entry_01)
 ENTRY(hw_interrupt_entry_06)
 	pushl $-0-2	
 	SAVE_ALL	
-    SETUP_PIC01(0x40)	
+    SETUP_PIC01(0x40)
 	sti
 	movl %esp,%ebx
 	pushl %ebx
