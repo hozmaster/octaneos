@@ -1,3 +1,7 @@
+------------------------------------
+ * The following devices are created on the image filesystem
+------------------------------------
+
 create mem	c 1 1 root:kmem 660
 create kmem	c 1 2 root:kmem 660
 create null	c 1 3 root:sys 666

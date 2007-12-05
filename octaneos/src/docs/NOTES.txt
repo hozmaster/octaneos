@@ -8,7 +8,6 @@
 ###
 ### See LICENSE.OCTANE for more details
 
-
 -------------------------------------------------
  * 12/4/2007
 -------------------------------------------------
@@ -24,15 +23,14 @@
     set_call_gate(&default_ldt,lcall7)                  | Y         | ./include/asm/system.h:#define set_call_gate(a,addr)
     ROOT_DEV = ORIG_ROOT_DEV;                           | Y         | ./fs/super.c:dev_t ROOT_DEV = 0;
         
-    trap_init()                                         | Y         | ./kernel/traps.c:void trap_init(void)
-    init_IRQ()                                          | Y         | 
+    ! trap_init()                                         | Y         | ./kernel/traps.c:void trap_init(void)
+    ! init_IRQ()                                          | Y         | 
                                                                         ./init/main.c:extern void init_IRQ(void);
                                                                         ./init/main.c:  init_IRQ();
                                                                         ./kernel/irq.c:void init_IRQ(void)
     sched_init()                                        | M         |
                                                                         ./init/main.c:  sched_init();
                                                                         ./kernel/sched.c:void sched_init(void)
-    init_modules()                                      | N         |??
     memory_start = blk_dev_init(memory_start,           | M         |
                                 memory_end)                             ./drivers/block/ll_rw_blk.c:long blk_dev_init(long mem_start, long mem_end)
                                                                         ./init/main.c:extern long blk_dev_init(long,long);
