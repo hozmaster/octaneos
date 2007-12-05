@@ -1,22 +1,26 @@
-//------------------------------------------------
-// Copyright (C) 2003, 2007 Berlin Brown
-//------------------------------------------------
-// $Id: floppy.c,v 1.25 2005/05/26 00:06:53 bigbinc Exp $
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED.
-//
-// See LICENSE.OCTANE for more details
-//
-// (Originally based on linux 1.0 src:
-// Copyright (C) 1991, 1992  Linus Torvalds
-//
-//------------------------------------------------
-// ** Revision History and Notes **
-//------------------------------------------------
-//
+/*
+ * Copyright (C) 2003, 2007 Berlin Brown (berlin.brown@gmail.com)
+ *
+ * File: floppy.c
+ *
+ * Octane OS (Operating System)
+ * Copyright (C) 2007 Berlin Brown
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * See LICENSE.OCTANE for more details
+ */
 
 // Note: the MAJOR_NR must be defined for the block device usage.
 #define MAJOR_NR FLOPPY_MAJOR
@@ -42,10 +46,10 @@
 static unsigned int changed_floppies = 0, fake_change = 0;
 
 static int initial_reset_flag = 0;
-static int need_configure = 1;		// for 82077 
+static int need_configure = 1;		// for 82077
 static int recalibrate = 0;
 static int reset = 0;
-static int recover = 0; // recalibrate immediately after resetting 
+static int recover = 0; // recalibrate immediately after resetting
 static int seek = 0;
 
 static unsigned char current_DOR = 0x0C;
@@ -66,7 +70,7 @@ static unsigned char running = 0;
  * Maximum disk size (in kilobytes). This default is used whenever the
  * current disk size is unknown.
  */
-#define MAX_DISK_SIZE 2880 // was 1440 -bb 
+#define MAX_DISK_SIZE 2880 // was 1440 -bb
 
 /*
  * Maximum number of sectors in a track buffer. Track buffering is disabled
@@ -102,16 +106,16 @@ static unsigned char reply_buffer[MAX_REPLIES];
  * be self-explanatory.
  */
 static struct floppy_struct floppy_type[] = {
-	{    0, 0,0, 0,0,0x00,0x00,0x00,0x00,NULL },	// no testing 
-	{  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,NULL },	// 360kB PC diskettes 
-	{ 2400,15,2,80,0,0x1B,0x00,0xDF,0x54,NULL },	// 1.2 MB AT-diskettes 
-	{  720, 9,2,40,1,0x2A,0x02,0xDF,0x50,NULL },	// 360kB in 720kB drive 
-	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,NULL },	// 3.5" 720kB diskette 
-	{  720, 9,2,40,1,0x23,0x01,0xDF,0x50,NULL },	// 360kB in 1.2MB drive 
-	{ 1440, 9,2,80,0,0x23,0x01,0xDF,0x50,NULL },	// 720kB in 1.2MB drive 
-	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,NULL },	// 1.44MB diskette 
-	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,NULL },	// 2.88MB diskette 
-	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,NULL },	// 2.88MB diskette 
+	{    0, 0,0, 0,0,0x00,0x00,0x00,0x00,NULL },	// no testing
+	{  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,NULL },	// 360kB PC diskettes
+	{ 2400,15,2,80,0,0x1B,0x00,0xDF,0x54,NULL },	// 1.2 MB AT-diskettes
+	{  720, 9,2,40,1,0x2A,0x02,0xDF,0x50,NULL },	// 360kB in 720kB drive
+	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,NULL },	// 3.5" 720kB diskette
+	{  720, 9,2,40,1,0x23,0x01,0xDF,0x50,NULL },	// 360kB in 1.2MB drive
+	{ 1440, 9,2,80,0,0x23,0x01,0xDF,0x50,NULL },	// 720kB in 1.2MB drive
+	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,NULL },	// 1.44MB diskette
+	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,NULL },	// 2.88MB diskette
+	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,NULL },	// 2.88MB diskette
 };
 
 /*
@@ -120,24 +124,24 @@ static struct floppy_struct floppy_type[] = {
  * the disk, the next format is tried. This uses the variable 'probing'.
  */
 static struct floppy_struct floppy_types[] = {
-	{  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,"360k/PC" }, // 360kB PC diskettes 
-	{  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,"360k/PC" }, // 360kB PC diskettes 
-	{ 2400,15,2,80,0,0x1B,0x00,0xDF,0x54,"1.2M" },	  // 1.2 MB AT-diskettes 
-	{  720, 9,2,40,1,0x23,0x01,0xDF,0x50,"360k/AT" }, // 360kB in 1.2MB drive 
-	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"720k" },	  // 3.5" 720kB diskette 
-	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"720k" },	  // 3.5" 720kB diskette 
-	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,"1.44M" },	  // 1.44MB diskette 
-	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"720k/AT" }, // 3.5" 720kB diskette 
-	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,"2.88M-AMI" },   // DUMMY  
-	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,"1.44M-AMI" },   // Dummy 
-	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,"2.88M" },   // 2.88MB diskette  
-	{ 2880,18,2,80,0,0x1B,0x40,0xCF,0x6C,"1.44MX" },   // 1.44MB diskette  
+	{  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,"360k/PC" }, // 360kB PC diskettes
+	{  720, 9,2,40,0,0x2A,0x02,0xDF,0x50,"360k/PC" }, // 360kB PC diskettes
+	{ 2400,15,2,80,0,0x1B,0x00,0xDF,0x54,"1.2M" },	  // 1.2 MB AT-diskettes
+	{  720, 9,2,40,1,0x23,0x01,0xDF,0x50,"360k/AT" }, // 360kB in 1.2MB drive
+	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"720k" },	  // 3.5" 720kB diskette
+	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"720k" },	  // 3.5" 720kB diskette
+	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,"1.44M" },	  // 1.44MB diskette
+	{ 1440, 9,2,80,0,0x2A,0x02,0xDF,0x50,"720k/AT" }, // 3.5" 720kB diskette
+	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,"2.88M-AMI" },   // DUMMY
+	{ 2880,18,2,80,0,0x1B,0x00,0xCF,0x6C,"1.44M-AMI" },   // Dummy
+	{ 5760,36,2,80,0,0x1B,0x43,0xAF,0x54,"2.88M" },   // 2.88MB diskette
+	{ 2880,18,2,80,0,0x1B,0x40,0xCF,0x6C,"1.44MX" },   // 1.44MB diskette
 };
 
 // Auto-detection: Disk type used until the next media change occurs.
-struct floppy_struct *current_type[4] = { NULL, 
-										  NULL, 
-										  NULL, 
+struct floppy_struct *current_type[4] = { NULL,
+										  NULL,
+										  NULL,
 										  NULL };
 
 // This type is tried first.
@@ -541,7 +545,7 @@ static void bad_flp_intr(void)
 		reset = 1;
 	else
 		recalibrate = 1;
-}	
+}
 
 
 /* Set perpendicular mode as required, based on data rate, if supported.
@@ -981,9 +985,9 @@ static void setup_format_params(void)
     /* allow for about 30ms for data transport per track */
     head_shift  = floppy->sect / 6;
     /* a ``cylinder'' is two tracks plus a little stepping time */
-    track_shift = 2 * head_shift + 1; 
+    track_shift = 2 * head_shift + 1;
     /* count backwards */
-    total_shift = floppy->sect - 
+    total_shift = floppy->sect -
 	((track_shift * track + head_shift * head) % floppy->sect);
 
     /* XXX: should do a check to see this fits in tmp_floppy_area!! */
@@ -1325,19 +1329,19 @@ static int check_floppy_change(dev_t dev)
 };
 
 static struct file_operations floppy_fops = {
-	NULL,			        // lseek - default 
-	block_read,		        // read - general block-dev read 
-	block_write,            // write - general block-dev write 
-	NULL,			        // readdir - bad 
-	NULL,			        // select 
-	fd_ioctl,		        // ioctl 
-	NULL,			        // mmap 
-	floppy_open,	        // open 
-	floppy_release,	        // release 
-	block_fsync,	        // fsync 
-	NULL,			        // fasync 
-	check_floppy_change,	// media_change 
-	NULL			        // revalidate 
+	NULL,			        // lseek - default
+	block_read,		        // read - general block-dev read
+	block_write,            // write - general block-dev write
+	NULL,			        // readdir - bad
+	NULL,			        // select
+	fd_ioctl,		        // ioctl
+	NULL,			        // mmap
+	floppy_open,	        // open
+	floppy_release,	        // release
+	block_fsync,	        // fsync
+	NULL,			        // fasync
+	check_floppy_change,	// media_change
+	NULL			        // revalidate
 };
 
 static void floppy_interrupt(int unused)
@@ -1381,7 +1385,7 @@ void floppy_init(void)
 	} else
 		fdc_version = reply_buffer[0];
 
-	if (fdc_version != FDC_TYPE_STD) 
+	if (fdc_version != FDC_TYPE_STD)
 		printk(DEVICE_NAME ": FDC version 0x%x\n", fdc_version);
 
 	/* Not all FDCs seem to be able to handle the version command

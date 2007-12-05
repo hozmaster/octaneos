@@ -11,13 +11,13 @@
  * should be compiled with ASSEMBLY defined
  * --
  *  Original Copyright (C) 1991, 1992  Linus Torvalds
- * -- 
+ * --
  */
 
 .text
-#include <linux/tasks.h>	/* only tasks = 128	*/
-#include <linux/linkage.h>	/* SYMBOL_NAME, etc	*/
-#include <asm/segment.h>	/* KERNEL_DS, etc	*/
+#include <linux/tasks.h>    /* only tasks = 128 */
+#include <linux/linkage.h>  /* SYMBOL_NAME, etc */
+#include <asm/segment.h>    /* KERNEL_DS, etc   */
 
 #define __PAGE_OFFSET           (0xC0000000)
 
@@ -32,155 +32,155 @@
 
 
 startup_32:
-	cld
-	movl $(__KERNEL_DS), %eax
-	movl %eax,%ds
-	movl %eax,%es
-	movl %eax,%fs
-	movl %eax,%gs
+    cld
+    movl $(__KERNEL_DS), %eax
+    movl %eax,%ds
+    movl %eax,%es
+    movl %eax,%fs
+    movl %eax,%gs
 
 # // Setup Stack
 
-	lss 	stack_start,%esp
+    lss     stack_start,%esp
 
-	xorl %eax, %eax
-	movl $SYMBOL_NAME(_edata),%edi
-	movl $SYMBOL_NAME(_end),%ecx
-	subl %edi,%ecx
-	cld
-	rep
-	stosb
+    xorl %eax, %eax
+    movl $SYMBOL_NAME(_edata),%edi
+    movl $SYMBOL_NAME(_end),%ecx
+    subl %edi,%ecx
+    cld
+    rep
+    stosb
 
 # // Enter 32-bit setup
-	call setup_idt
-	
-	xorl %eax, %eax
-1:	incl %eax
-	movl %eax, 0x000000
-	cmpl %eax, 0x100000
-	je 1b
+    call setup_idt
 
-	pushl $0
-	popfl
+    xorl %eax, %eax
+1:  incl %eax
+    movl %eax, 0x000000
+    cmpl %eax, 0x100000
+    je 1b
 
-	movl $0x90000, %esi
-	movl $SYMBOL_NAME(empty_zero_page),%edi
-	movl $512, %ecx
-	cld
-	rep
-	movsl
-	xorl %eax, %eax
-	movl $512, %ecx
-	rep
-	stosl
+    pushl $0
+    popfl
 
-	cmpw $(CL_MAGIC),CL_MAGIC_ADDR
-	jne 1f
-	movl $SYMBOL_NAME(empty_zero_page)+2048,%edi
-	movzwl CL_OFFSET,%esi
-	addl $(CL_BASE_ADDR),%esi
-	movl $2048,%ecx
-	rep
-	movsb
+    movl $0x90000, %esi
+    movl $SYMBOL_NAME(empty_zero_page),%edi
+    movl $512, %ecx
+    cld
+    rep
+    movsl
+    xorl %eax, %eax
+    movl $512, %ecx
+    rep
+    stosl
+
+    cmpw $(CL_MAGIC),CL_MAGIC_ADDR
+    jne 1f
+    movl $SYMBOL_NAME(empty_zero_page)+2048,%edi
+    movzwl CL_OFFSET,%esi
+    addl $(CL_BASE_ADDR),%esi
+    movl $2048,%ecx
+    rep
+    movsb
 1:
 
 # // Assuming 486 or better
-	movl $1, %eax
-	.byte 0x0f, 0xa2
-	andl $0xf00, %eax
-	shrl $8, %eax
+    movl $1, %eax
+    .byte 0x0f, 0xa2
+    andl $0xf00, %eax
+    shrl $8, %eax
 
-	movl %cr0,%eax
-	andl $0x80000011,%eax
-	orl $0x50022,%eax
-	jmp 2f
-2:								  
-	movl %eax, %cr0
+    movl %cr0,%eax
+    andl $0x80000011,%eax
+    orl $0x50022,%eax
+    jmp 2f
+2:
+    movl %eax, %cr0
 
-	call check_x87
-	call setup_paging
+    call check_x87
+    call setup_paging
 
-	lgdt gdt_descr
-	lidt idt_descr
+    lgdt gdt_descr
+    lidt idt_descr
 
 
 # Jump to start_kernel ++
 # change the current selector with the code below
-	ljmp $(__KERNEL_CS),$1f
+    ljmp $(__KERNEL_CS),$1f
 1:      movl $(__KERNEL_DS),%eax
-	movl %eax,%ds
-	movl %eax,%es
-	movl %eax,%fs
-	movl %eax,%gs
-	lss stack_start,%esp
+    movl %eax,%ds
+    movl %eax,%es
+    movl %eax,%fs
+    movl %eax,%gs
+    lss stack_start,%esp
 
-	xorl %eax,%eax
-	lldt %ax
+    xorl %eax,%eax
+    lldt %ax
 
-	pushl %eax
-	pushl %eax
-	pushl %eax
-	cld
-	call SYMBOL_NAME(start_kernel)
+    pushl %eax
+    pushl %eax
+    pushl %eax
+    cld
+    call SYMBOL_NAME(start_kernel)
 loopit:
-	jmp loopit
+    jmp loopit
 
 #
 # Perform x87 checks
 #
 check_x87:
-	clts
-	fninit
-	fstsw %ax
+    clts
+    fninit
+    fstsw %ax
 ALIGN
 1:
-	.byte 0xDB,0xE4
-	ret
-		
+    .byte 0xDB,0xE4
+    ret
+
 /*
  * Function Definitions
  */
 setup_idt:
-	lea ignore_int,%edx
-	movl $(__KERNEL_CS << 16),%eax
-	movw %dx,%ax
-	movw $0x8E00,%dx
-	lea SYMBOL_NAME(_idt),%edi
-	mov $256,%ecx
+    lea ignore_int,%edx
+    movl $(__KERNEL_CS << 16),%eax
+    movw %dx,%ax
+    movw $0x8E00,%dx
+    lea SYMBOL_NAME(_idt),%edi
+    mov $256,%ecx
 rp_sidt:
-	movl %eax,(%edi)
-	movl %edx,4(%edi)
-	addl $8,%edi
-	dec %ecx
-	jne rp_sidt
-	ret
+    movl %eax,(%edi)
+    movl %edx,4(%edi)
+    addl $8,%edi
+    dec %ecx
+    jne rp_sidt
+    ret
 int_msg:
-	.asciz "Unknown interrupt\n"
-	ALIGN
+    .asciz "Unknown interrupt\n"
+    ALIGN
 ignore_int:
-	cld
-	pushl %eax
-	pushl %ecx
-	pushl %edx
-	pushl %ds
-	pushl %es
-	pushl %fs
-	movl $(__KERNEL_DS),%eax
-	movl %eax,%ds
-	movl %eax,%es
-	movl %eax,%fs
-	pushl $int_msg
-	
-	#call SYMBOL_NAME(printk)
+    cld
+    pushl %eax
+    pushl %ecx
+    pushl %edx
+    pushl %ds
+    pushl %es
+    pushl %fs
+    movl $(__KERNEL_DS),%eax
+    movl %eax,%ds
+    movl %eax,%es
+    movl %eax,%fs
+    pushl $int_msg
 
-	popl %eax
-	popl %fs
-	popl %es
-	popl %ds
-	popl %edx
-	popl %ecx
-	popl %eax
-	iret
+    #call SYMBOL_NAME(printk)
+
+    popl %eax
+    popl %fs
+    popl %es
+    popl %ds
+    popl %edx
+    popl %ecx
+    popl %eax
+    iret
 
 ALIGN
 setup_paging:
@@ -205,13 +205,13 @@ setup_paging:
         orl $0x80000000,%eax
         movl %eax,%cr0
         ret
-	
-	
+
+
 
 /*
  * End of Functions and Code
  */
-	
+
 .org 0x1000
 ENTRY(swapper_pg_dir)
 
@@ -227,16 +227,16 @@ ENTRY(empty_zero_page)
 .org 0x5000
 
 .org 0x6000
-	
-# ++ Note: These are used by the floppy block drivers 
-# 	in the kernel code
+
+# Note: These are used by the floppy block drivers
+#   in the kernel code
 # [ see... kernel/floppy.c where this is used ]
 ENTRY(tmp_floppy_area)
-	.fill 1024,1,0
+    .fill 1024,1,0
 
 ENTRY(floppy_track_buffer)
-	.fill 512*2*18,1,0
-	
+    .fill 512*2*18,1,0
+
 
 # -------------------- [ begin data section ] -------------
 
@@ -244,34 +244,33 @@ ENTRY(stext)
 ENTRY(_stext)
 .data
 
-# ++ Descriptor Tables and such ++
+# Descriptor Tables
 
 ALIGN
 .word 0
 
 ENTRY(idt_descr)
-	.word 256*8-1
-	.long 0xc0000000+SYMBOL_NAME(_idt)
-	.align 4
+    .word 256*8-1
+    .long 0xc0000000+SYMBOL_NAME(_idt)
+    .align 4
 ENTRY(_idt)
-	.fill 256,8,0
+    .fill 256,8,0
 
 
 ALIGN
 .word 0
 ENTRY(gdt_descr)
-	.word (8+2*NR_TASKS)*8-1
-	.long 0xc0000000+SYMBOL_NAME(gdt)
+    .word (8+2*NR_TASKS)*8-1
+    .long 0xc0000000+SYMBOL_NAME(gdt)
 
-		
 ALIGN
 ENTRY(gdt)
-	.quad 0x0000000000000000
-	.quad 0x0000000000000000
-	.quad 0xc0c39a000000ffff
-	.quad 0xc0c392000000ffff
-	.quad 0x00cbfa000000ffff
-	.quad 0x00cbf2000000ffff
-	.quad 0x0000000000000000
-	.quad 0x0000000000000000
-	.fill 2*NR_TASKS,8,0
+    .quad 0x0000000000000000
+    .quad 0x0000000000000000
+    .quad 0xc0c39a000000ffff
+    .quad 0xc0c392000000ffff
+    .quad 0x00cbfa000000ffff
+    .quad 0x00cbf2000000ffff
+    .quad 0x0000000000000000
+    .quad 0x0000000000000000
+    .fill 2*NR_TASKS,8,0

@@ -1,31 +1,26 @@
-//
-// Berlin Brown
-//==========================================================
-//
-// $Id: scheduler.c,v 1.15 2005/05/26 00:06:53 bigbinc Exp $
-// sti - enable interrupts
-// cli - clear interrupt enable
-//
-//
-// TSS - GDT layout
-//
-// 0 - null
-// 1 - kernel code segment
-// 2 - kernel data segment
-// 3 - user code segment
-// 4 - user data segment
-//
-// TSS layout  
-// 
-// 8 - TSS [ task 0 ]
-// 9 - LDT [ task 0 ]
-// 10 - TSS [ task 1 ]
-// 11 - LDT [ task x1 ]
-//
-// the task_switcher just jumps to the value in 
-
-// tss.tr
-//==========================================================
+/*
+ * Copyright (C) 2003, 2007 Berlin Brown (berlin.brown@gmail.com)
+ *
+ * File: scheduler.c
+ *
+ * Octane OS (Operating System)
+ * Copyright (C) 2007 Berlin Brown
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * See LICENSE.OCTANE for more details
+ */
 
 #include <system/system.h>		    // super-header
 #include <system/system_calls.h>	// extern function call list
@@ -54,7 +49,7 @@ long time_adjust_step = 0;
 
 int need_resched = 0;
 
-struct class_timer_list {  
+struct class_timer_list {
   long jiffies;
   void (*timer_function)();
   struct class_timer_list *next;
@@ -70,7 +65,7 @@ static struct timer_list *next_timer = NULL;
 
 extern void _set_system_gate(unsigned int, void *);
 
-// defined in [ exceptions.S ] 
+// defined in [ exceptions.S ]
 asmlinkage int system_call(void);
 
 //.....................................................
@@ -78,7 +73,7 @@ asmlinkage int system_call(void);
 
 // see system_calls.h = int_function_ptr = int (*int_function_ptr)()
 int_function_ptr system_call_table [] = {
-	system_debug,				// [ 0 ] 
+	system_debug,				// [ 0 ]
 };
 
 //.....................................................
@@ -119,7 +114,7 @@ int_function_ptr system_call_table [] = {
 	__load_tss_helper(((char *) (n)),((int)(addr)),235,"0x89")
 
 #define _load_ldt_descriptor(n,addr,size) \
-	__load_tss_helper(((char *) (n)),((int)(addr)),((size << 3) - 1),"0x82")				
+	__load_tss_helper(((char *) (n)),((int)(addr)),((size << 3) - 1),"0x82")
 
 
 struct TSS_object _tss[__MAX_DEBUG_TASKS];
@@ -155,22 +150,22 @@ void scheduler_timer_helper(void)
 
   // [ declare function pointer ]
   void (*local_call_timer_function)(void);
-     
+
   if (private_next_timer)
   {
 
     //  [ decrement the timer, on zero, actually call the function ]
     private_next_timer->jiffies--;
 
-    while (private_next_timer && 
+    while (private_next_timer &&
 	   private_next_timer->jiffies <= 0) {
 
       local_call_timer_function = private_next_timer->timer_function;
-      
+
       private_next_timer->timer_function = NULL;
       private_next_timer = private_next_timer->next;
 
-      
+
       // run the function saved function ----! GO !
       local_call_timer_function();
 
@@ -188,19 +183,19 @@ void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)
   struct class_timer_list *p = NULL;
 
   if (!function_for_timer) {
-    
+
     return;
-    
+
   }
   _disable_interrupts();
   if (jiffies_timer_count <= 0)
   {
 
-    // finally call the fnuction 
+    // finally call the fnuction
     (function_for_timer)();
-    
+
   } else {
-    
+
     for (p = private_timer_list; p < (private_timer_list + TIMER_LIST_REQUESTS); p++)
     {
 
@@ -211,72 +206,72 @@ void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)
       }
 
     }
-    
+
     if (p >= private_timer_list + TIMER_LIST_REQUESTS) {
-      
+
       __sprintf(buf, "No free timer request slots");
       __puts(buf);
-      
+
       return;
-      
+
     }
-    
+
     // assign the new timer function
-    p->timer_function  = function_for_timer;      
+    p->timer_function  = function_for_timer;
     p->jiffies = jiffies_timer_count;
-    
+
     // increment the list value
     // next  = NULL, but the saved equals something, hehe
-    p->next = private_next_timer;          
+    p->next = private_next_timer;
     private_next_timer = p;
-    
+
     while(
 	  p->next &&
 	  (p->next->jiffies < p->jiffies))
 	{
-      
+
       p->jiffies -= p->next->jiffies;
       function_for_timer = p->timer_function;
-      
+
       p->timer_function = p->next->timer_function;
       p->next->timer_function = function_for_timer;
-      
+
       jiffies_timer_count = p->jiffies;
       p->jiffies = p->next->jiffies;
-      
+
       p->next->jiffies = jiffies_timer_count;
       p = p->next;
-      
-      // ok, timer value set, now use 
-      // scheduler timer helper to actually use it      
-    } 
-  }  
+
+      // ok, timer value set, now use
+      // scheduler timer helper to actually use it
+    }
+  }
   _enable_interrupts();
-     
+
 }
 
 static void clear_timer_interrupts(void)
-{  
+{
   int i;
   private_next_timer = NULL;
   for (i = 0; i < TIMER_LIST_REQUESTS; i++) {
     private_timer_list[i].jiffies = 0;
     private_timer_list[i].timer_function = NULL;
   }
-}	
+}
 
-//	
+//
 // called by init/main.c
-//	
+//
 void scheduler_init(void) {
 
   int _task_offset = -1;
 
   clear_timer_interrupts();
-    
+
   // set the tss memory location for 3 tasks
   // Note: 8 represents the first tss, see above
-	     
+
   _task_offset = 0;
   _load_tss_descriptor((gdt + 0x08), &_tss[0]);
 
@@ -290,7 +285,7 @@ void scheduler_init(void) {
   // set the system software interrupt
   // see: traps.c  for the actual function definition
   _set_system_gate(0x80, &system_call);
- 
+
   // load the task register
   load_task_register(0x0);
 
