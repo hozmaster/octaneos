@@ -3,8 +3,7 @@
  *
  * $Id: bad_interrupts.S,v 1.1 2004/03/15 00:55:19 bigbinc Exp $
  *
- * default bad interrupts
- *
+ * Implementation for default bad interrupts
  */
 
 #define __ASSEMBLY__
@@ -12,30 +11,30 @@
 #include <linux/linkage.h>
 #include <asm/segment.h>
 
-# use FIRST [ 0 to 7 ] [ 8 - 16 -- second ]
+# Functions Defined:
+# Use FIRST [ 0 to 7 ] [ 8 - 16 -- second ]
+# bad_interrupt_00_01
+# bad_interrupt_01_02
+# bad_interrupt_02_04
+# bad_interrupt_03_08
+# bad_interrupt_04_10
+# bad_interrupt_05_20
+# bad_interrupt_06_40
+# bad_interrupt_07_80
 	
-#	__bad_interrupt_00_01
-#	__bad_interrupt_01_02
-#	__bad_interrupt_02_04
-#	__bad_interrupt_03_08
-#	__bad_interrupt_04_10
-#	__bad_interrupt_05_20
-#	__bad_interrupt_06_40
-#	__bad_interrupt_07_80
-	
-#	__bad_interrupt_08_01
-#	__bad_interrupt_09_02
-#	__bad_interrupt_10_04
-#	__bad_interrupt_11_08
-#	__bad_interrupt_12_10
-#	__bad_interrupt_13_20
-#	__bad_interrupt_14_40
-#	__bad_interrupt_15_80
+# bad_interrupt_08_01
+# bad_interrupt_09_02
+# bad_interrupt_10_04
+# bad_interrupt_11_08
+# bad_interrupt_12_10
+# bad_interrupt_13_20
+# bad_interrupt_14_40
+# bad_interrupt_15_80
 	
 #  ============================= 00 ========================
 
 .align 4
-ENTRY(__bad_interrupt_00_01)
+ENTRY(bad_interrupt_00_01)
 	# /// Save Most registers
 	cld
 	push %es
@@ -57,8 +56,6 @@ ENTRY(__bad_interrupt_00_01)
 1:	jmp 1f
 1:	movb $0x20,%al
 	outb %al,$0x20
-			
-	# [ ++ Restore ++ ]
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -69,7 +66,7 @@ ENTRY(__bad_interrupt_00_01)
 # ============================= 01 ========================
 
 .align 4
-ENTRY(__bad_interrupt_01_02)
+ENTRY(bad_interrupt_01_02)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -90,10 +87,7 @@ ENTRY(__bad_interrupt_01_02)
         jmp 1f
 1:	jmp 1f
 1:	movb $0x20,%al
-	outb %al,$0x20
-			
-
-	# [ ++ Restore ++ ]
+	outb %al,$0x20	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -104,7 +98,7 @@ ENTRY(__bad_interrupt_01_02)
 # ============================= 02 ========================
 
 .align 4
-ENTRY(__bad_interrupt_02_04)
+ENTRY(bad_interrupt_02_04)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -119,16 +113,13 @@ ENTRY(__bad_interrupt_02_04)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x04,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
-        movb SYMBOL_NAME(cache_21),%al
-        outb %al,$0x21
-        jmp 1f
+1:	orb $0x04,SYMBOL_NAME(cache_21)		
+    movb SYMBOL_NAME(cache_21),%al
+    outb %al,$0x21
+    jmp 1f
 1:	jmp 1f
 1:	movb $0x20,%al
-	outb %al,$0x20
-			
-
-	# [ ++ Restore ++ ]
+	outb %al,$0x20			
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -139,7 +130,7 @@ ENTRY(__bad_interrupt_02_04)
 # ============================= 03 ========================
 
 .align 4
-ENTRY(__bad_interrupt_03_08)
+ENTRY(bad_interrupt_03_08)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -155,15 +146,12 @@ ENTRY(__bad_interrupt_03_08)
 	jmp 1f
 1:	jmp 1f
 1:	orb $0x08,SYMBOL_NAME(cache_21)		# /// MASK CODE
-        movb SYMBOL_NAME(cache_21),%al
-        outb %al,$0x21
-        jmp 1f
+    movb SYMBOL_NAME(cache_21),%al
+    outb %al,$0x21
+    jmp 1f
 1:	jmp 1f
 1:	movb $0x20,%al
 	outb %al,$0x20
-			
-
-	# [ ++ Restore ++ ]
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -174,7 +162,7 @@ ENTRY(__bad_interrupt_03_08)
 # /// ============================= 04 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_04_10)
+ENTRY(bad_interrupt_04_10)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -189,16 +177,14 @@ ENTRY(__bad_interrupt_04_10)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x10,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
-        movb SYMBOL_NAME(cache_21),%al
-        outb %al,$0x21
-        jmp 1f
+1:	orb $0x10,SYMBOL_NAME(cache_21)		
+    movb SYMBOL_NAME(cache_21),%al
+    outb %al,$0x21
+    jmp 1f
 1:	jmp 1f
 1:	movb $0x20,%al
 	outb %al,$0x20
-			
-
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -209,7 +195,7 @@ ENTRY(__bad_interrupt_04_10)
 # /// ============================= 05 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_05_20)
+ENTRY(bad_interrupt_05_20)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -224,7 +210,7 @@ ENTRY(__bad_interrupt_05_20)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x20,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
+1:	orb $0x20,SYMBOL_NAME(cache_21)		
         movb SYMBOL_NAME(cache_21),%al
         outb %al,$0x21
         jmp 1f
@@ -233,7 +219,7 @@ ENTRY(__bad_interrupt_05_20)
 	outb %al,$0x20
 			
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -244,7 +230,7 @@ ENTRY(__bad_interrupt_05_20)
 # /// ============================= 06 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_06_40)
+ENTRY(bad_interrupt_06_40)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -259,7 +245,7 @@ ENTRY(__bad_interrupt_06_40)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x40,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
+1:	orb $0x40,SYMBOL_NAME(cache_21)		
         movb SYMBOL_NAME(cache_21),%al
         outb %al,$0x21
         jmp 1f
@@ -268,7 +254,7 @@ ENTRY(__bad_interrupt_06_40)
 	outb %al,$0x20
 			
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -279,7 +265,7 @@ ENTRY(__bad_interrupt_06_40)
 # /// ============================= 07 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_07_80)
+ENTRY(bad_interrupt_07_80)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -294,7 +280,7 @@ ENTRY(__bad_interrupt_07_80)
 	inb $0x21,%al
 	jmp 1f
 1:	jmp 1f
-1:	orb $0x80,SYMBOL_NAME(cache_21)		# ++++ MASK CODE +++++
+1:	orb $0x80,SYMBOL_NAME(cache_21)		
         movb SYMBOL_NAME(cache_21),%al
         outb %al,$0x21
         jmp 1f
@@ -303,7 +289,7 @@ ENTRY(__bad_interrupt_07_80)
 	outb %al,$0x20
 			
 	
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -314,7 +300,7 @@ ENTRY(__bad_interrupt_07_80)
 # /// ============================= 08 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_08_01)
+ENTRY(bad_interrupt_08_01)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -347,7 +333,7 @@ ENTRY(__bad_interrupt_08_01)
 	
 			
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -358,7 +344,7 @@ ENTRY(__bad_interrupt_08_01)
 # /// ============================= 09 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_09_02)
+ENTRY(bad_interrupt_09_02)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -387,11 +373,11 @@ ENTRY(__bad_interrupt_09_02)
 1:	jmp 1f
 1:	outb %al,$0x20
 
-	# ++ END SECOND ++  ================================
+	# END SECOND  ================================
 	
 			
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -402,7 +388,7 @@ ENTRY(__bad_interrupt_09_02)
 # /// ============================= 10 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_10_04)
+ENTRY(bad_interrupt_10_04)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -431,10 +417,10 @@ ENTRY(__bad_interrupt_10_04)
 1:	jmp 1f
 1:	outb %al,$0x20
 
-	# ++ END SECOND ++  ================================
+	# END SECOND  ================================
 				
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -445,7 +431,7 @@ ENTRY(__bad_interrupt_10_04)
 # /// ============================= 11 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_11_08)
+ENTRY(bad_interrupt_11_08)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -474,11 +460,11 @@ ENTRY(__bad_interrupt_11_08)
 1:	jmp 1f
 1:	outb %al,$0x20
 
-	# ++ END SECOND ++  ================================
+	# END SECOND  ================================
 	
 			
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -489,7 +475,7 @@ ENTRY(__bad_interrupt_11_08)
 # /// ============================= 12 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_12_10)
+ENTRY(bad_interrupt_12_10)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -518,11 +504,11 @@ ENTRY(__bad_interrupt_12_10)
 1:	jmp 1f
 1:	outb %al,$0x20
 
-	# ++ END SECOND ++  ================================
+	# END SECOND  ================================
 
 			
 
-	# [ ++ Restore ++ ]
+	
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -534,7 +520,7 @@ ENTRY(__bad_interrupt_12_10)
 # /// ============================= 13 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_13_20)
+ENTRY(bad_interrupt_13_20)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -562,12 +548,7 @@ ENTRY(__bad_interrupt_13_20)
 1:	jmp 1f
 1:	outb %al,$0x20
 
-	# ++ END SECOND ++  ================================
-	
-
-			
-
-	# [ ++ Restore ++ ]
+	# END SECOND  ================================
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -580,7 +561,7 @@ ENTRY(__bad_interrupt_13_20)
 # /// ============================= 14 ========================	
 
 .align 4
-ENTRY(__bad_interrupt_14_40)
+ENTRY(bad_interrupt_14_40)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -609,11 +590,8 @@ ENTRY(__bad_interrupt_14_40)
 1:	jmp 1f
 1:	outb %al,$0x20
 
-	# ++ END SECOND ++  ================================
-	
+	# END SECOND  ================================
 					
-
-	# [ ++ Restore ++ ]
 	popl %ecx
 	popl %edx
 	popl %eax
@@ -621,12 +599,9 @@ ENTRY(__bad_interrupt_14_40)
 	pop %es
 	iret
 
-
-
 # /// ============================= 15 ========================	
-
 .align 4
-ENTRY(__bad_interrupt_15_80)
+ENTRY(bad_interrupt_15_80)
 	# /// Save Most Registers
 	cld
 	push %es
@@ -637,9 +612,7 @@ ENTRY(__bad_interrupt_15_80)
 	movl $SYMBOL_NAME(__KERNEL_DS),%edx
 	mov %dx,%ds
 	mov %dx,%es
-
-	# // SECOND /// ================================
-		
+	# // SECOND /// ================================		
 	inb $0xA1,%al
 	jmp 1f
 1:	jmp 1f	
@@ -653,17 +626,13 @@ ENTRY(__bad_interrupt_15_80)
 	jmp 1f
 1:	jmp 1f
 1:	outb %al,$0x20
-
-	# ++ END SECOND ++  ================================
-	
-	
-	# [ ++ Restore ++ ]
 	popl %ecx
 	popl %edx
 	popl %eax
 	pop %ds
 	pop %es
 	iret
+
 
 
 
