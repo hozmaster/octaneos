@@ -351,7 +351,7 @@ ENTRY(bad_interrupt_08)
 # /// ============================= 09 ========================
 
 .align 4
-ENTRY(bad_interrupt_09_02)
+ENTRY(bad_interrupt_09)
     # /// Save Most Registers
     cld
     push %es
@@ -391,7 +391,7 @@ ENTRY(bad_interrupt_09_02)
 # /// ============================= 10 ========================
 
 .align 4
-ENTRY(bad_interrupt_10_04)
+ENTRY(bad_interrupt_10)
     # /// Save Most Registers
     cld
     push %es
@@ -431,7 +431,7 @@ ENTRY(bad_interrupt_10_04)
 # /// ============================= 11 ========================
 
 .align 4
-ENTRY(bad_interrupt_11_08)
+ENTRY(bad_interrupt_11)
     # /// Save Most Registers
     cld
     push %es
@@ -471,7 +471,7 @@ ENTRY(bad_interrupt_11_08)
 # /// ============================= 12 ========================
 
 .align 4
-ENTRY(bad_interrupt_12_10)
+ENTRY(bad_interrupt_12)
     # /// Save Most Registers
     cld
     push %es
@@ -511,7 +511,7 @@ ENTRY(bad_interrupt_12_10)
 # /// ============================= 13 ========================
 
 .align 4
-ENTRY(bad_interrupt_13_20)
+ENTRY(bad_interrupt_13)
     # /// Save Most Registers
     cld
     push %es
@@ -550,7 +550,7 @@ ENTRY(bad_interrupt_13_20)
 # /// ============================= 14 ========================
 
 .align 4
-ENTRY(bad_interrupt_14_40)
+ENTRY(bad_interrupt_14)
     # /// Save Most Registers
     cld
     push %es
