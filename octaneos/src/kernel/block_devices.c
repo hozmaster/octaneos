@@ -23,7 +23,6 @@
  */
 
 #include <system/system.h>
-#include <system/alpha.h>
 #include <linux/block_devices.h>
 #include <linux/errno.h>
 

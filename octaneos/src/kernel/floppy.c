@@ -30,7 +30,6 @@
 #include <asm/io.h>
 
 #include <system/octane_types.h>
-#include <system/alpha.h>
 #include <system/dma_functions.h>
 #include <system/floppy.h>
 #include <system/filesystem.h>

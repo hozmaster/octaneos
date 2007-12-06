@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifndef __SYSTEM_H_
 #define __SYSTEM_H_
 
@@ -158,8 +157,6 @@ struct TSS_object {
 };
 
 
-// [ without the bitmap ]
-
 struct __TSS_object {
 
   unsigned long __esp0;
@@ -218,16 +215,6 @@ extern void __puts(const char *);
 #define NULL ((void *) 0)
 #endif
 
-// - see kernel/fs_super.c - root device, typically 0x200 = floppyx
-extern int ROOT_DEV;
-
-//**********************************************************
-//
-// Major Devices
-//
-//**********************************************************
-#define FLOPPY_MAJOR_DEV	2
-
 extern void __puts(const char *);
 extern int __sprintf(char *buf, const char *fmt, ...); 
 extern int printk(const char *fmt, ...); 
@@ -237,58 +224,9 @@ extern void public_hexdump(void *, int);
 
 //
 // defined for use with hexdump
-//
 #define _HEXROWS_4    32
 #define _HEXROWS_8    64
 #define _HEXROWS_16   128
-
-//**********************************************************
-//
-// Timer Defines
-//
-//**********************************************************
-#define BLANK_TIMER	0
-#define BEEP_TIMER	1
-#define RS_TIMER	2
-#define HD_TIMER	16
-#define FLOPPY_TIMER	17
-#define SCSI_TIMER 	18
-#define NET_TIMER	19
-#define SOUND_TIMER	20
-#define COPRO_TIMER	21
-#define TAPE_QIC02_TIMER	22
-#define MCD_TIMER	23
-#define HD_TIMER2	24
-
-struct timer_struct {
-	unsigned long expires;
-	void (*fn)(void);
-};
-
-extern unsigned long timer_active;
-extern struct timer_struct timer_table[32];
-
-/*
- * This is completely separate from the above, and is the
- * "new and improved" way of handling timers more dynamically.
- * Hopefully efficient and general enough for most things.
- *
- * The "hardcoded" timers above are still useful for well-
- * defined problems, but the timer-list is probably better
- * when you need multiple outstanding timers or similar.
- *
- * The "data" field is in case you want to use the same
- * timeout function for several timeouts. You can use this
- * to distinguish between the different invocations.
- */
-struct timer_list {
-	struct timer_list *next;
-	struct timer_list *prev;
-	unsigned long expires;
-	unsigned long data;
-	void (*function)(unsigned long);
-};
-
 
 #define VERIFY_READ 0
 #define VERIFY_WRITE 1

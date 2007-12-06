@@ -22,7 +22,8 @@
  * See LICENSE.OCTANE for more details
  */
 
-#include <system/alpha.h>
+#include <system/system.h>
+#include <system/dma_functions.h>
 
 static volatile unsigned int dma_chan_busy[MAX_DMA_CHANNELS] = {
   1, 0, 0, 0, 1, 0, 0, 0

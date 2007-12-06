@@ -40,7 +40,7 @@ extern void load_misc_kprint(void);
 
 // Exceptions
 extern void load_exception_table(void);
-extern void load_interrupts(void);
+extern void init_interrupts(void);
 extern int check_timer_irq(void);
 
 extern void load_keyboard_driver(void);
@@ -126,7 +126,7 @@ asmlinkage void start_kernel(void) {
   // now lets load the IDT
   load_exception_table();
   
-  load_interrupts();
+  init_interrupts();
   load_keyboard_driver();
       
   scheduler_init();  
