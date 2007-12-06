@@ -19,8 +19,6 @@
  *
  * See LICENSE.OCTANE for more details
  */
-#include <system/system.h>
-#include <system/alpha.h>
 
 void mount_root(void) {
 

@@ -206,7 +206,7 @@ void handler_reserved(void) {
 
 //=========== Exception Handlers ==================
 
-void _set_intr_gate(unsigned int n, void *addr) {
+void set_intr_gate(unsigned int n, void *addr) {
   __set_gate(_idt + n,14,0,addr);
 
 }
