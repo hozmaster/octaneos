@@ -15,7 +15,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * (Also see hardware_interrupts.S for asm definitions
+ * (Also see hardware_interrupts.S and bad_interrupts.S for asm definitions
  * this file is synonymous with irq.c in the linux kernel)
  */
 
@@ -35,24 +35,64 @@ asmlinkage void get_all_registers(void);
 volatile unsigned long jiffies = 0;
 
 // defined in bad_interrupts.S in assembly
+asmlinkage void bad_interrupt_00(void);
+asmlinkage void bad_interrupt_01(void);
+asmlinkage void bad_interrupt_02(void);
+asmlinkage void bad_interrupt_03(void);
+asmlinkage void bad_interrupt_04(void);
+asmlinkage void bad_interrupt_05(void);
+asmlinkage void bad_interrupt_06(void);
+asmlinkage void bad_interrupt_07(void);
 
-asmlinkage void __bad_interrupt_00_01(void);
-asmlinkage void __bad_interrupt_01_02(void);
-asmlinkage void __bad_interrupt_02_04(void);
-asmlinkage void __bad_interrupt_03_08(void);
-asmlinkage void __bad_interrupt_04_10(void);
-asmlinkage void __bad_interrupt_05_20(void);
-asmlinkage void __bad_interrupt_06_40(void);
-asmlinkage void __bad_interrupt_07_80(void);
+asmlinkage void bad_interrupt_08(void);
+asmlinkage void bad_interrupt_09(void);
+asmlinkage void bad_interrupt_10(void);
+asmlinkage void bad_interrupt_11(void);
+asmlinkage void bad_interrupt_12(void);
+asmlinkage void bad_interrupt_13(void);
+asmlinkage void bad_interrupt_14(void);
+asmlinkage void bad_interrupt_15(void);
 
-asmlinkage void __bad_interrupt_08_01(void);
-asmlinkage void __bad_interrupt_09_02(void);
-asmlinkage void __bad_interrupt_10_04(void);
-asmlinkage void __bad_interrupt_11_08(void);
-asmlinkage void __bad_interrupt_12_10(void);
-asmlinkage void __bad_interrupt_13_20(void);
-asmlinkage void __bad_interrupt_14_40(void);
-asmlinkage void __bad_interrupt_15_80(void);
+/**
+ * Array data structure for general and bad_interrupt callbacks
+ */
+static void (*bad_interrupt[16])(void) = {
+	bad_interrupt_01, 
+	bad_interrupt_02,
+	bad_interrupt_03, 
+	bad_interrupt_04,
+	bad_interrupt_05, 
+	bad_interrupt_06,
+	bad_interrupt_07, 
+	bad_interrupt_08,
+	bad_interrupt_09, 
+	bad_interrupt_10,
+	bad_interrupt_11, 
+	bad_interrupt_12,
+	bad_interrupt_13, 
+	bad_interrupt_14,
+	bad_interrupt_15, 
+	bad_interrupt_16
+};
+
+static void (*interrupt[16])(void) = {
+	hw_interrupt_entry_00, 
+	hw_interrupt_entry_01, 
+	NULL, 
+	NULL,
+	NULL, 
+	NULL, 
+	hw_interrupt_entry_06, 
+	NULL,
+	NULL, 
+	NULL, 
+	NULL, 
+	NULL,
+	NULL, 
+	NULL, 
+	NULL, 
+	NULL
+};
 
 // see.... hardware_interrupts.S
 asmlinkage hw_interrupt_entry_00(void);
@@ -326,42 +366,28 @@ void print_register_list(struct debug_registers *check_registers) {
 
 }
 
-void load_interrupts(void) {
+void init_interrupts(void) {
 
   load_remap_controller();
-
-  _set_intr_gate(0x20+0, __bad_interrupt_00_01);
-  _set_intr_gate(0x20+1, __bad_interrupt_01_02);
-  _set_intr_gate(0x20+2, __bad_interrupt_02_04);
-  _set_intr_gate(0x20+3, __bad_interrupt_03_08);
-  _set_intr_gate(0x20+4, __bad_interrupt_04_10);
-  _set_intr_gate(0x20+5, __bad_interrupt_05_20);
-  _set_intr_gate(0x20+6, __bad_interrupt_06_40);
-  _set_intr_gate(0x20+7, __bad_interrupt_07_80);
-
-  _set_intr_gate(0x20+8, __bad_interrupt_08_01);
-  _set_intr_gate(0x20+9, __bad_interrupt_09_02);
-  _set_intr_gate(0x20+10, __bad_interrupt_10_04);
-  _set_intr_gate(0x20+11, __bad_interrupt_11_08);
-  _set_intr_gate(0x20+12, __bad_interrupt_12_10);
-  _set_intr_gate(0x20+13, __bad_interrupt_13_20);
-  _set_intr_gate(0x20+14, __bad_interrupt_14_40);
-  _set_intr_gate(0x20+15, __bad_interrupt_15_80);
+  
+  // Set the 16 interrupts initially to (default) bad_interrupts
+  for (i = 0; i < 16 ; i++) {
+	  set_intr_gate(0x20+i, bad_interrupt[i]);
+  }
   disable_irq(0);
   
-  //.................................................................
+  //**********************************************
   // program the 8253 - Interval Timer
-  // Set frequency of out timer and stuff
-  // http://www.cclinf.polito.it
+  // Set frequency of our timer
   // LATCH = 11931.8 gives to 8253 (in output) 
   // a frequency of 1193180 / 11931.8 = 100 Hz, so period = 10ms
-  //.................................................................
+  //**********************************************
 
   outb_p(0x34,0x43);
   outb_p(TIMER_LATCH & 0xff, 0x40);
   outb(TIMER_LATCH >> 8 , 0x40);
 
-  // prepare the timer_interrupt...GO. ###
+  // prepare the timer_interrupt...GO
   handle_interrupt(0x00);
  
 }
