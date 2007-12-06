@@ -1,5 +1,4 @@
-
-		/*
+/*
  * Berlin Brown
  *
  * $Id: hardware_interrupts.S,v 1.6 2004/04/10 14:16:25 bigbinc Exp $
