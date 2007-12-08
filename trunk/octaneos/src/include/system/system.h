@@ -58,6 +58,12 @@
 #define __USER_CS   0x23
 #define __USER_DS   0x2B
 
+#define KERNEL_CS __KERNEL_CS
+#define KERNEL_DS __KERNEL_DS
+
+#define USER_CS   __USER_CS
+#define USER_DS   __USER_DS
+
 typedef struct descr_struct {
   
   unsigned long a;
@@ -88,7 +94,7 @@ typedef struct descr_struct {
 #define save_flags(x) __asm__ __volatile__("pushfl ; popl %0":"=g" (x):  :"memory")
 #define restore_flags(x) __asm__ __volatile__("pushl %0 ; popfl": :"g" (x):"memory")
 
-#define __MAX_DEBUG_TASKS           3
+#define __MAX_DEBUG_TASKS     3
 #define _FIRST_TSS            0x08
 
 //
@@ -191,19 +197,18 @@ struct __TSS_object {
   unsigned long __ldtr;
   unsigned int  __trace;
   unsigned int  __io_bitmap_address;
-
 };
 
 //////////////
 // task switcher
 //////////////
 
-#define switch_task(tss)    \
-    __asm__("cli\n\t"       \
+#define switch_task(tss)      \
+    __asm__("cli\n\t"         \
             "ljmp *0x0\n\t"   \
-            "sti"           \
-            :               \
-            :               \
+            "sti"             \
+            :                 \
+            :                 \
             )
 
 // Print functions for low-level kernel debugging
@@ -230,5 +235,12 @@ extern void public_hexdump(void *, int);
 
 #define VERIFY_READ 0
 #define VERIFY_WRITE 1
+
+#define INT_MAX         ((int)(~0U>>1))
+#define UINT_MAX        (~0U)
+#define LONG_MAX        ((long)(~0UL>>1))
+#define ULONG_MAX       (~0UL)
+
+#define STACK_MAGIC     0xdeadbeef
 
 #endif 
