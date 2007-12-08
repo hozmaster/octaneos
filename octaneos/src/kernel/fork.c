@@ -1,29 +1,4 @@
-/*
- *  linux/kernel/fork.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
 
-/*
- *  'fork.c' contains the help-routines for the 'fork' system call
- * (see also system_call.s).
- * Fork is rather simple, once you get the hang of it, but the memory
- * management can be a bitch. See 'mm/mm.c': 'copy_page_tables()'
- */
-
-#include <linux/errno.h>
-#include <linux/sched.h>
-#include <linux/kernel.h>
-#include <linux/mm.h>
-#include <linux/stddef.h>
-#include <linux/unistd.h>
-#include <linux/segment.h>
-#include <linux/ptrace.h>
-#include <linux/malloc.h>
-#include <linux/ldt.h>
-
-#include <asm/segment.h>
-#include <asm/system.h>
 
 asmlinkage void ret_from_sys_call(void) __asm__("ret_from_sys_call");
 

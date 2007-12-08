@@ -26,16 +26,23 @@
 #include <system/system_calls.h>	// extern function call list
 #include <linux/wait.h>
 #include <linux/sched.h>
+#include <linux/time.h>
+#include <linux/page.h>
+#include <linux/vm86.h>
+#include <linux/errno.h>
+#include <linux/kernel_stat.h>
+#include <linux/ptrace.h>
 
 extern descriptor_table _idt;
 extern descriptor_table gdt;
 
-#define TIMER_LIST_REQUESTS                 64
+#define TIMER_IRQ               0
+#define TIMER_LIST_REQUESTS     64
 
-//int time_status = TIME_BAD;     /* clock synchronization status */
+int time_status = TIME_BAD;     /* clock synchronization status */
 long time_offset = 0;           /* time adjustment (us) */
 long time_constant = 0;         /* pll time constant */
-//long time_tolerance = MAXFREQ;  /* frequency tolerance (ppm) */
+long time_tolerance = MAXFREQ;  /* frequency tolerance (ppm) */
 long time_precision = 1; 	    /* clock precision (us) */
 long time_maxerror = 0x70000000;/* maximum error */
 long time_esterror = 0x70000000;/* estimated error */
@@ -56,16 +63,12 @@ struct class_timer_list {
 
 }; // end of the struct
 
-static struct class_timer_list private_timer_list[TIMER_LIST_REQUESTS];
-static struct class_timer_list *private_next_timer = NULL;
-
 unsigned long timer_active = 0;
 struct timer_struct timer_table[32];
 static struct timer_list *next_timer = NULL;
 
 extern void _set_system_gate(unsigned int, void *);
 
-// defined in [ exceptions.S ]
 asmlinkage int system_call(void);
 
 //.....................................................
@@ -119,178 +122,6 @@ int_function_ptr system_call_table [] = {
 
 struct TSS_object _tss[__MAX_DEBUG_TASKS];
 
-static void public_another_test(void)
-{
-
-  char buf[80];
-
-  __sprintf(buf, "I am the second timer test, good-bye!\n");
-  __puts(buf);
-
-}
-
-void public_timer_test(void)
-{
-
-  char buf[80];
-
-  __sprintf(buf, "Timer called, have a nice day!\n");
-  __puts(buf);
-
-  public_add_timer(0xf00, public_another_test);
-
-}
-
-//... see interrupts.c - in timer_interrupt
-//       - called in jiffies increment code
-void scheduler_timer_helper(void)
-{
-
-  char buf[80];
-
-  // [ declare function pointer ]
-  void (*local_call_timer_function)(void);
-
-  if (private_next_timer)
-  {
-
-    //  [ decrement the timer, on zero, actually call the function ]
-    private_next_timer->jiffies--;
-
-    while (private_next_timer &&
-	   private_next_timer->jiffies <= 0) {
-
-      local_call_timer_function = private_next_timer->timer_function;
-
-      private_next_timer->timer_function = NULL;
-      private_next_timer = private_next_timer->next;
-
-
-      // run the function saved function ----! GO !
-      local_call_timer_function();
-
-    }
-
-  }
-
-}
-
-// Called whenever you want a to delay a function
-// by a set number of jiffies
-void public_add_timer(long jiffies_timer_count, void (*function_for_timer)(void)) {
-
-  char buf[80];
-  struct class_timer_list *p = NULL;
-
-  if (!function_for_timer) {
-
-    return;
-
-  }
-  _disable_interrupts();
-  if (jiffies_timer_count <= 0)
-  {
-
-    // finally call the fnuction
-    (function_for_timer)();
-
-  } else {
-
-    for (p = private_timer_list; p < (private_timer_list + TIMER_LIST_REQUESTS); p++)
-    {
-
-      // we found a free slot!
-      if (!p->timer_function)
-      {
-		break;
-      }
-
-    }
-
-    if (p >= private_timer_list + TIMER_LIST_REQUESTS) {
-
-      __sprintf(buf, "No free timer request slots");
-      __puts(buf);
-
-      return;
-
-    }
-
-    // assign the new timer function
-    p->timer_function  = function_for_timer;
-    p->jiffies = jiffies_timer_count;
-
-    // increment the list value
-    // next  = NULL, but the saved equals something, hehe
-    p->next = private_next_timer;
-    private_next_timer = p;
-
-    while(
-	  p->next &&
-	  (p->next->jiffies < p->jiffies))
-	{
-
-      p->jiffies -= p->next->jiffies;
-      function_for_timer = p->timer_function;
-
-      p->timer_function = p->next->timer_function;
-      p->next->timer_function = function_for_timer;
-
-      jiffies_timer_count = p->jiffies;
-      p->jiffies = p->next->jiffies;
-
-      p->next->jiffies = jiffies_timer_count;
-      p = p->next;
-
-      // ok, timer value set, now use
-      // scheduler timer helper to actually use it
-    }
-  }
-  _enable_interrupts();
-
-}
-
-static void clear_timer_interrupts(void)
-{
-  int i;
-  private_next_timer = NULL;
-  for (i = 0; i < TIMER_LIST_REQUESTS; i++) {
-    private_timer_list[i].jiffies = 0;
-    private_timer_list[i].timer_function = NULL;
-  }
-}
-
-//
-// called by init/main.c
-//
-void scheduler_init(void) {
-
-  int _task_offset = -1;
-
-  clear_timer_interrupts();
-
-  // set the tss memory location for 3 tasks
-  // Note: 8 represents the first tss, see above
-
-  _task_offset = 0;
-  _load_tss_descriptor((gdt + 0x08), &_tss[0]);
-
-  _task_offset = 1;
-  _load_tss_descriptor((gdt + ((_task_offset << 1) + _FIRST_TSS)), &_tss[1]);
-
-  _task_offset = 2;
-  _load_tss_descriptor((gdt + ((_task_offset << 1) + _FIRST_TSS)), &_tss[2]);
-
-  //
-  // set the system software interrupt
-  // see: traps.c  for the actual function definition
-  _set_system_gate(0x80, &system_call);
-
-  // load the task register
-  load_task_register(0x0);
-
-}
-
 static inline void __sleep_on(struct wait_queue **p, int state) {
 
 	unsigned long flags;
@@ -322,8 +153,8 @@ void sleep_on(struct wait_queue **p)
 	__sleep_on(p,TASK_UNINTERRUPTIBLE);
 }
 
-void add_timer(struct timer_list * timer)
-{
+void add_timer(struct timer_list *timer) {
+
 	unsigned long flags;
 	struct timer_list ** p;
 
@@ -406,69 +237,13 @@ void wake_up(struct wait_queue **q)
 }
 
 /*
- *  linux/kernel/sched.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- */
-
-/*
- * 'sched.c' is the main kernel file. It contains scheduling primitives
- * (sleep_on, wakeup, schedule etc) as well as a number of simple system
- * call functions (type getpid(), which just extracts a field from
- * current-task
- */
-
-#include <linux/config.h>
-#include <linux/signal.h>
-#include <linux/sched.h>
-#include <linux/timer.h>
-#include <linux/kernel.h>
-#include <linux/kernel_stat.h>
-#include <linux/fdreg.h>
-#include <linux/errno.h>
-#include <linux/time.h>
-#include <linux/ptrace.h>
-#include <linux/segment.h>
-#include <linux/delay.h>
-#include <linux/interrupt.h>
-#include <linux/tqueue.h>
-
-#include <asm/system.h>
-#include <asm/io.h>
-#include <asm/segment.h>
-
-#define TIMER_IRQ 0
-
-#include <linux/timex.h>
-
-/*
  * kernel variables
  */
 long tick = 1000000 / HZ;               /* timer interrupt period */
 volatile struct timeval xtime;		/* The current time */
 int tickadj = 500/HZ;			/* microsecs */
 
-DECLARE_TASK_QUEUE(tq_timer);
-
-/*
- * phase-lock loop variables
- */
-int time_status = TIME_BAD;     /* clock synchronization status */
-long time_offset = 0;           /* time adjustment (us) */
-long time_constant = 0;         /* pll time constant */
-long time_tolerance = MAXFREQ;  /* frequency tolerance (ppm) */
-long time_precision = 1; 	/* clock precision (us) */
-long time_maxerror = 0x70000000;/* maximum error */
-long time_esterror = 0x70000000;/* estimated error */
-long time_phase = 0;            /* phase offset (scaled us) */
-long time_freq = 0;             /* frequency offset (scaled ppm) */
-long time_adj = 0;              /* tick adjust (scaled 1 / HZ) */
-long time_reftime = 0;          /* time at last adjustment (s) */
-
-long time_adjust = 0;
-long time_adjust_step = 0;
-
-int need_resched = 0;
+//DECLARE_TASK_QUEUE(tq_timer);
 
 /*
  * Tell us the machine setup..
@@ -494,6 +269,7 @@ extern void mem_use(void);
 extern int timer_interrupt(void);
 asmlinkage int system_call(void);
 
+
 static unsigned long init_kernel_stack[1024] = { STACK_MAGIC, };
 struct task_struct init_task = INIT_TASK;
 
@@ -502,7 +278,7 @@ unsigned long volatile jiffies=0;
 struct task_struct *current = &init_task;
 struct task_struct *last_task_used_math = NULL;
 
-struct task_struct * task[NR_TASKS] = {&init_task, };
+struct task_struct *task[NR_TASKS] = {&init_task, };
 
 long user_stack [ PAGE_SIZE>>2 ] = { STACK_MAGIC, };
 
@@ -569,8 +345,8 @@ static unsigned long lost_ticks = 0;
  * The "confuse_gcc" goto is used only to get better assembly code..
  * Djikstra probably hates me.
  */
-asmlinkage void schedule(void)
-{
+asmlinkage void schedule(void) {
+
 	int c;
 	struct task_struct * p;
 	struct task_struct * next;
@@ -621,17 +397,6 @@ end_itimer:
 	}
 confuse_gcc1:
 
-/* this is the scheduler proper: */
-#if 0
-	/* give processes that go to sleep a bit higher priority.. */
-	/* This depends on the values for TASK_XXX */
-	/* This gives smoother scheduling for some things, but */
-	/* can be very unfair under some circumstances, so.. */
- 	if (TASK_UNINTERRUPTIBLE >= (unsigned) current->state &&
-	    current->counter < current->priority*2) {
-		++current->counter;
-	}
-#endif
 	c = -1000;
 	next = p = &init_task;
 	for (;;) {
@@ -666,43 +431,8 @@ asmlinkage int sys_pause(void)
 	return -ERESTARTNOHAND;
 }
 
-/*
- * wake_up doesn't wake up stopped processes - they have to be awakened
- * with signals or similar.
- *
- * Note that this doesn't need cli-sti pairs: interrupts may not change
- * the wait-queue structures directly, but only call wake_up() to wake
- * a process. The process itself must remove the queue once it has woken.
- */
-void wake_up(struct wait_queue **q)
-{
-	struct wait_queue *tmp;
-	struct task_struct * p;
 
-	if (!q || !(tmp = *q))
-		return;
-	do {
-		if ((p = tmp->task) != NULL) {
-			if ((p->state == TASK_UNINTERRUPTIBLE) ||
-			    (p->state == TASK_INTERRUPTIBLE)) {
-				p->state = TASK_RUNNING;
-				if (p->counter > current->counter)
-					need_resched = 1;
-			}
-		}
-		if (!tmp->next) {
-			printk("wait_queue is bad (eip = %08lx)\n",((unsigned long *) q)[-1]);
-			printk("        q = %p\n",q);
-			printk("       *q = %p\n",*q);
-			printk("      tmp = %p\n",tmp);
-			break;
-		}
-		tmp = tmp->next;
-	} while (tmp != *q);
-}
-
-void wake_up_interruptible(struct wait_queue **q)
-{
+void wake_up_interruptible(struct wait_queue **q) {
 	struct wait_queue *tmp;
 	struct task_struct * p;
 
@@ -727,8 +457,8 @@ void wake_up_interruptible(struct wait_queue **q)
 	} while (tmp != *q);
 }
 
-void __down(struct semaphore * sem)
-{
+void __down(struct semaphore * sem) {
+
 	struct wait_queue wait = { current, NULL };
 	add_wait_queue(&sem->wait, &wait);
 	current->state = TASK_UNINTERRUPTIBLE;
@@ -740,86 +470,6 @@ void __down(struct semaphore * sem)
 	remove_wait_queue(&sem->wait, &wait);
 }
 
-static inline void __sleep_on(struct wait_queue **p, int state)
-{
-	unsigned long flags;
-	struct wait_queue wait = { current, NULL };
-
-	if (!p)
-		return;
-	if (current == task[0])
-		panic("task[0] trying to sleep");
-	current->state = state;
-	add_wait_queue(p, &wait);
-	save_flags(flags);
-	sti();
-	schedule();
-	remove_wait_queue(p, &wait);
-	restore_flags(flags);
-}
-
-void interruptible_sleep_on(struct wait_queue **p)
-{
-	__sleep_on(p,TASK_INTERRUPTIBLE);
-}
-
-void sleep_on(struct wait_queue **p)
-{
-	__sleep_on(p,TASK_UNINTERRUPTIBLE);
-}
-
-static struct timer_list * next_timer = NULL;
-
-void add_timer(struct timer_list * timer)
-{
-	unsigned long flags;
-	struct timer_list ** p;
-
-	if (!timer)
-		return;
-	timer->next = NULL;
-	p = &next_timer;
-	save_flags(flags);
-	cli();
-	while (*p) {
-		if ((*p)->expires > timer->expires) {
-			(*p)->expires -= timer->expires;
-			timer->next = *p;
-			break;
-		}
-		timer->expires -= (*p)->expires;
-		p = &(*p)->next;
-	}
-	*p = timer;
-	restore_flags(flags);
-}
-
-int del_timer(struct timer_list * timer)
-{
-	unsigned long flags;
-	unsigned long expires = 0;
-	struct timer_list **p;
-
-	p = &next_timer;
-	save_flags(flags);
-	cli();
-	while (*p) {
-		if (*p == timer) {
-			if ((*p = timer->next) != NULL)
-				(*p)->expires += timer->expires;
-			timer->expires += expires;
-			restore_flags(flags);
-			return 1;
-		}
-		expires += (*p)->expires;
-		p = &(*p)->next;
-	}
-	restore_flags(flags);
-	return 0;
-}
-
-unsigned long timer_active = 0;
-struct timer_struct timer_table[32];
 
 /*
  * Hmm.. Changed this, as the GNU make sources (load.c) seems to
@@ -832,8 +482,8 @@ unsigned long avenrun[3] = { 0,0,0 };
 /*
  * Nr of active tasks - counted in fixed-point numbers
  */
-static unsigned long count_active_tasks(void)
-{
+static unsigned long count_active_tasks(void) {
+
 	struct task_struct **p;
 	unsigned long nr = 0;
 
@@ -845,8 +495,8 @@ static unsigned long count_active_tasks(void)
 	return nr;
 }
 
-static inline void calc_load(void)
-{
+static inline void calc_load(void) {
+
 	unsigned long active_tasks; /* fixed-point */
 	static int count = LOAD_FREQ;
 
@@ -869,8 +519,8 @@ static inline void calc_load(void)
  *
  * These were ported to Linux by Philip Gladstone.
  */
-static void second_overflow(void)
-{
+static void second_overflow(void) {
+
 	long ltemp;
 	/* last time the cmos clock got updated */
 	static long last_rtc_update=0;
@@ -931,8 +581,7 @@ static void second_overflow(void)
 /*
  * disregard lost ticks for now.. We don't care enough.
  */
-static void timer_bh(void * unused)
-{
+static void timer_bh(void *unused) {
 	unsigned long mask;
 	struct timer_struct *tp;
 
@@ -960,9 +609,8 @@ static void timer_bh(void * unused)
 	}
 }
 
-void tqueue_bh(void * unused)
-{
-	run_task_queue(&tq_timer);
+void tqueue_bh(void * unused) {
+	//run_task_queue(&tq_timer);
 }
 
 /*
@@ -971,11 +619,10 @@ void tqueue_bh(void * unused)
  * irq uses this to decide if it should update the user or system
  * times.
  */
-static void do_timer(struct pt_regs * regs)
-{
+static void do_timer(struct pt_regs *regs) {
+
 	unsigned long mask;
 	struct timer_struct *tp;
-
 	long ltemp;
 
 	/* Advance the phase, once it gets to one microsecond, then
@@ -1043,14 +690,6 @@ static void do_timer(struct pt_regs * regs)
 		current->stime++;
 		if(current != task[0])
 			kstat.cpu_system++;
-#ifdef CONFIG_PROFILE
-		if (prof_buffer && current != task[0]) {
-			unsigned long eip = regs->eip;
-			eip >>= 2;
-			if (eip < prof_len)
-				prof_buffer[eip]++;
-		}
-#endif
 	}
 	if (current != task[0] && 0 > --current->counter) {
 		current->counter = 0;
@@ -1084,15 +723,14 @@ static void do_timer(struct pt_regs * regs)
 			mark_bh(TIMER_BH);
 		}
 	}
-	if (tq_timer != &tq_last)
-		mark_bh(TQUEUE_BH);
+	//if (tq_timer != &tq_last)
+	//	mark_bh(TQUEUE_BH);
 	sti();
 }
 
-asmlinkage int sys_alarm(long seconds)
-{
-	struct itimerval it_new, it_old;
+asmlinkage int sys_alarm(long seconds) {
 
+	struct itimerval it_new, it_old;
 	it_new.it_interval.tv_sec = it_new.it_interval.tv_usec = 0;
 	it_new.it_value.tv_sec = seconds;
 	it_new.it_value.tv_usec = 0;
@@ -1100,38 +738,31 @@ asmlinkage int sys_alarm(long seconds)
 	return(it_old.it_value.tv_sec + (it_old.it_value.tv_usec / 1000000));
 }
 
-asmlinkage int sys_getpid(void)
-{
+asmlinkage int sys_getpid(void) {
 	return current->pid;
 }
 
-asmlinkage int sys_getppid(void)
-{
+asmlinkage int sys_getppid(void) {
 	return current->p_opptr->pid;
 }
 
-asmlinkage int sys_getuid(void)
-{
+asmlinkage int sys_getuid(void) {
 	return current->uid;
 }
 
-asmlinkage int sys_geteuid(void)
-{
+asmlinkage int sys_geteuid(void) {
 	return current->euid;
 }
 
-asmlinkage int sys_getgid(void)
-{
+asmlinkage int sys_getgid(void) {
 	return current->gid;
 }
 
-asmlinkage int sys_getegid(void)
-{
+asmlinkage int sys_getegid(void) {
 	return current->egid;
 }
 
-asmlinkage int sys_nice(long increment)
-{
+asmlinkage int sys_nice(long increment) {
 	int newprio;
 
 	if (increment < 0 && !suser())
@@ -1145,8 +776,8 @@ asmlinkage int sys_nice(long increment)
 	return 0;
 }
 
-static void show_task(int nr,struct task_struct * p)
-{
+static void show_task(int nr, struct task_struct *p) {
+
 	unsigned long free;
 	static char * stat_nam[] = { "R", "S", "D", "Z", "T", "W" };
 
@@ -1178,10 +809,9 @@ static void show_task(int nr,struct task_struct * p)
 		printk("\n");
 }
 
-void show_state(void)
-{
-	int i;
+void show_state(void) {
 
+	int i;
 	printk("                         free                        sibling\n");
 	printk("  task             PC    stack   pid father child younger older\n");
 	for (i=0 ; i<NR_TASKS ; i++)
@@ -1189,10 +819,10 @@ void show_state(void)
 			show_task(i,task[i]);
 }
 
-void sched_init(void)
-{
+void sched_init(void) {
+
 	int i;
-	struct desc_struct * p;
+	struct desc_struct *p;
 
 	bh_base[TIMER_BH].routine = timer_bh;
 	bh_base[TQUEUE_BH].routine = tqueue_bh;
@@ -1204,7 +834,7 @@ void sched_init(void)
 	p = gdt+2+FIRST_TSS_ENTRY;
 	for(i=1 ; i<NR_TASKS ; i++) {
 		task[i] = NULL;
-		p->a=p->b=0;
+		p->a = p->b = 0;
 		p++;
 		p->a=p->b=0;
 		p++;

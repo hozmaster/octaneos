@@ -106,27 +106,6 @@ int register_blkdev(unsigned int major,
 }
 
 /*
- *  linux/kernel/blk_dev/ll_rw.c
- *
- * Copyright (C) 1991, 1992 Linus Torvalds
- */
-
-/*
- * This handles all read/write requests to block devices
- */
-#include <linux/sched.h>
-#include <linux/kernel.h>
-#include <linux/kernel_stat.h>
-#include <linux/errno.h>
-#include <linux/string.h>
-#include <linux/config.h>
-#include <linux/locks.h>
-
-#include <asm/system.h>
-
-#include "blk.h"
-
-/*
  * The request-struct contains all necessary data
  * to load a nr of sectors into memory
  */
@@ -182,8 +161,8 @@ int * blksize_size[MAX_BLKDEV] = { NULL, NULL, };
  * NOTE: interrupts must be disabled on the way in, and will still
  *       be disabled on the way out.
  */
-static inline struct request * get_request(int n, int dev)
-{
+static inline struct request *get_request(int n, int dev) {
+
 	static struct request *prev_found = NULL, *prev_limit = NULL;
 	register struct request *req, *limit;
 
@@ -447,8 +426,8 @@ void ll_rw_page(int rw, int dev, int page, char * buffer)
    device. Currently the only restriction is that all buffers must belong to
    the same device */
 
-void ll_rw_block(int rw, int nr, struct buffer_head * bh[])
-{
+void ll_rw_block(int rw, int nr, struct buffer_head * bh[]) {
+
 	unsigned int major;
 	struct request plug;
 	int plugged;
@@ -583,33 +562,19 @@ void ll_rw_swap_file(int rw, int dev, unsigned int *b, int nb, char *buf)
 	}
 }
 
-long blk_dev_init(long mem_start, long mem_end)
-{
-	struct request * req;
+long blk_dev_init(long mem_start, long mem_end) {
 
+	struct request *req;
 	req = all_requests + NR_REQUEST;
 	while (--req >= all_requests) {
 		req->dev = -1;
 		req->next = NULL;
 	}
+
 	memset(ro_bits,0,sizeof(ro_bits));
-#ifdef CONFIG_BLK_DEV_HD
-	mem_start = hd_init(mem_start,mem_end);
-#endif
-#ifdef CONFIG_BLK_DEV_XD
-	mem_start = xd_init(mem_start,mem_end);
-#endif
-#ifdef CONFIG_CDU31A
-	mem_start = cdu31a_init(mem_start,mem_end);
-#endif
-#ifdef CONFIG_MCD
-	mem_start = mcd_init(mem_start,mem_end);
-#endif
-#ifdef CONFIG_SBPCD
-	mem_start = sbpcd_init(mem_start, mem_end);
-#endif CONFIG_SBPCD
-	if (ramdisk_size)
-		mem_start += rd_init(mem_start, ramdisk_size*1024);
+
+	//if (ramdisk_size)
+	//	mem_start += rd_init(mem_start, ramdisk_size * 1024);
 	return mem_start;
 }
 

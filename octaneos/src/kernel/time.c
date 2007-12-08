@@ -1,37 +1,3 @@
-/*
- *  linux/kernel/time.c
- *
- *  Copyright (C) 1991, 1992  Linus Torvalds
- *
- *  This file contains the interface functions for the various
- *  time related system calls: time, stime, gettimeofday, settimeofday,
- *			       adjtime
- */
-/*
- * Modification history kernel/time.c
- * 
- * 02 Sep 93    Philip Gladstone
- *      Created file with time related functions from sched.c and adjtimex() 
- * 08 Oct 93    Torsten Duwe
- *      adjtime interface update and CMOS clock write code
- * 02 Jul 94	Alan Modra
- *	fixed set_rtc_mmss, fixed time.year for >= 2000, new mktime
- */
-
-#include <linux/config.h>
-#include <linux/errno.h>
-#include <linux/sched.h>
-#include <linux/kernel.h>
-#include <linux/param.h>
-#include <linux/string.h>
-
-#include <asm/segment.h>
-#include <asm/io.h>
-
-#include <linux/mc146818rtc.h>
-#define RTC_ALWAYS_BCD 1
-
-#include <linux/timex.h>
 extern struct timeval xtime;
 
 /* converts date to days since 1/1/1970
