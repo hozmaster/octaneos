@@ -32,10 +32,9 @@
 
 #include <asm/system.h>
 #include <asm/segment.h>
-
  
-extern struct file_operations * get_blkfops(unsigned int);
-extern struct file_operations * get_chrfops(unsigned int);
+extern struct file_operations *get_blkfops(unsigned int);
+extern struct file_operations *get_chrfops(unsigned int);
 
 extern void wait_for_keypress(void);
 extern void fcntl_init_locks(void);
