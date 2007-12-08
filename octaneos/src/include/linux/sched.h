@@ -26,6 +26,59 @@
 
 #define NEW_SWAP
 
+typedef struct desc_struct {
+	unsigned long a,b;
+} desc_table[256];
+
+extern unsigned long swapper_pg_dir[1024];
+extern desc_table idt, gdt;
+
+#define GDT_NUL 0
+#define GDT_CODE 1
+#define GDT_DATA 2
+#define GDT_TMP 3
+
+#define LDT_NUL 0
+#define LDT_CODE 1
+#define LDT_DATA 2
+
+struct bh_struct {
+	void (*routine)(void *);
+	void *data;
+};
+
+extern unsigned long bh_active;
+extern unsigned long bh_mask;
+extern struct bh_struct bh_base[32];
+
+/* Who gets which entry in bh_base.  Things which will occur most often
+   should come first - in which case NET should be up the top with SERIAL/TQUEUE! */
+   
+enum {
+	TIMER_BH = 0,
+	CONSOLE_BH,
+	TQUEUE_BH,
+	SERIAL_BH,
+	NET_BH,
+	KEYBOARD_BH
+};
+
+extern inline void mark_bh(int nr)
+{
+	__asm__ __volatile__("orl %1,%0":"=m" (bh_active):"ir" (1<<nr));
+}
+
+extern inline void disable_bh(int nr)
+{
+	__asm__ __volatile__("andl %1,%0":"=m" (bh_mask):"ir" (~(1<<nr)));
+}
+
+extern inline void enable_bh(int nr)
+{
+	__asm__ __volatile__("orl %1,%0":"=m" (bh_mask):"ir" (1<<nr));
+}
+
+
 //************************************************
 // signal defines
 //************************************************
@@ -342,18 +395,18 @@ struct tss_struct {
 	union i387_union i387;
 };
 
-#define INIT_TSS  { \
-	0,0, \
+#define INIT_TSS  {          \
+	0,0,                     \
 	sizeof(init_kernel_stack) + (long) &init_kernel_stack, \
-	KERNEL_DS, 0, \
-	0,0,0,0,0,0, \
-	(long) &swapper_pg_dir, \
-	0,0,0,0,0,0,0,0,0,0, \
+	KERNEL_DS, 0,            \
+	0,0,0,0,0,0,             \
+	(long) &swapper_pg_dir,  \
+	0,0,0,0,0,0,0,0,0,0,     \
 	USER_DS,0,USER_DS,0,USER_DS,0,USER_DS,0,USER_DS,0,USER_DS,0, \
-	_LDT(0),0, \
-	0, 0x8000, \
-	{~0, }, /* ioperm */ \
-	_TSS(0), 0, 0,0, \
+	_LDT(0),0,               \
+	0, 0x8000,               \
+	{~0, }, /* ioperm */     \
+	_TSS(0), 0, 0,0,         \
 	{ { 0, }, }  /* 387 state */ \
 }
 
@@ -377,9 +430,9 @@ struct fs_struct {
 };
 
 #define INIT_FS { \
-	0, \
-	0022, \
-	NULL, NULL \
+	0,            \
+	0022,         \
+	NULL, NULL    \
 }
 
 struct mm_struct {
@@ -488,6 +541,39 @@ struct task_struct {
 #define COPYVM		0x00000100	/* set if VM copy desired (like normal fork()) */
 #define COPYFD		0x00000200	/* set if fd's should be copied, not shared (NI) */
 
+/*
+ * INIT_TASK is used to set up the first task table,
+ * Base=0, limit=0x1fffff (=2MB)
+ */
+#define INIT_TASK                      \
+/* state etc */	{ 0,15,15,0,0,0,0,     \
+/* debugregs */ { 0, },                \
+/* exec domain */&default_exec_domain, \
+/* binfmt */	NULL,                  \
+/* schedlink */	&init_task,&init_task, \
+/* signals */	{{ 0, },},             \
+/* stack */	0,(unsigned long) &init_kernel_stack,     \
+/* ec,brk... */	0,0,0,0,0,0,           \
+/* pid etc.. */	0,0,0,0,               \
+/* suppl grps*/ {NOGROUP,},            \
+/* proc links*/ &init_task,&init_task,NULL,NULL,NULL,NULL,     \
+/* uid etc */	0,0,0,0,0,0,           \
+/* timeout */	0,0,0,0,0,0,0,0,0,0,0,0, \
+/* rlimits */   { {LONG_MAX, LONG_MAX}, {LONG_MAX, LONG_MAX},  \
+		  {LONG_MAX, LONG_MAX}, {LONG_MAX, LONG_MAX},  \
+		  {       0, LONG_MAX}, {LONG_MAX, LONG_MAX}}, \
+/* math */	0,                         \
+/* comm */	"swapper",                 \
+/* vm86_info */	NULL, 0, 0, 0, 0,      \
+/* fs info */	0,NULL,NULL,           \
+/* ipc */	NULL, NULL,                \
+/* ldt */	NULL,                      \
+/* tss */	INIT_TSS,                  \
+/* fs */	{ INIT_FS },               \
+/* files */	{ INIT_FILES },            \
+/* mm */	{ INIT_MM }                \
+}
+
 extern struct task_struct init_task;
 extern struct task_struct *task[NR_TASKS];
 extern struct task_struct *last_task_used_math;
@@ -495,7 +581,7 @@ extern struct task_struct *current;
 extern unsigned long volatile jiffies;
 extern unsigned long itimer_ticks;
 extern unsigned long itimer_next;
-extern struct timeval xtime;
+
 extern int need_resched;
 
 #define CURRENT_TIME (xtime.tv_sec)

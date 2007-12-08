@@ -99,4 +99,88 @@ struct	itimerval {
 
 #define HD_TIMER2	24
 
+/*
+ * phase-lock loop variables
+ */
+extern int time_status;		/* clock synchronization status */
+extern long time_offset;	/* time adjustment (us) */
+extern long time_constant;	/* pll time constant */
+extern long time_tolerance;	/* frequency tolerance (ppm) */
+extern long time_precision;	/* clock precision (us) */
+extern long time_maxerror;	/* maximum error */
+extern long time_esterror;	/* estimated error */
+extern long time_phase;		/* phase offset (scaled us) */
+extern long time_freq;		/* frequency offset (scaled ppm) */
+extern long time_adj;		/* tick adjust (scaled 1 / HZ) */
+extern long time_reftime;	/* time at last adjustment (s) */
+
+extern long time_adjust;	/* The amount of adjtime left */
+
+extern long tick;                      /* timer interrupt period */
+extern int tickadj;			/* amount of adjustment per tick */
+extern volatile struct timeval xtime;		/* The current time */
+
+/*
+ * Mode codes (timex.mode) 
+ */
+#define ADJ_OFFSET		0x0001	/* time offset */
+#define ADJ_FREQUENCY		0x0002	/* frequency offset */
+#define ADJ_MAXERROR		0x0004	/* maximum time error */
+#define ADJ_ESTERROR		0x0008	/* estimated time error */
+#define ADJ_STATUS		0x0010	/* clock status */
+#define ADJ_TIMECONST		0x0020	/* pll time constant */
+#define ADJ_TICK		0x4000	/* tick value */
+#define ADJ_OFFSET_SINGLESHOT	0x8001	/* old-fashioned adjtime */
+
+#define SHIFT_HZ 7		/* log2(HZ) */
+
+#define SHIFT_KG 8		/* shift for phase increment */
+#define SHIFT_KF 20		/* shift for frequency increment */
+#define MAXTC 6			/* maximum time constant (shift) */
+
+#define SHIFT_SCALE 24		/* shift for phase scale factor */
+#define SHIFT_UPDATE (SHIFT_KG + MAXTC) /* shift for offset scale factor */
+#define FINEUSEC (1 << SHIFT_SCALE) /* 1 us in scaled units */
+
+#define MAXPHASE 128000         /* max phase error (us) */
+#define MAXFREQ 100             /* max frequency error (ppm) */
+#define MINSEC 16               /* min interval between updates (s) */
+#define MAXSEC 1200             /* max interval between updates (s) */
+
+#define CLOCK_TICK_RATE	1193180 /* Underlying HZ */
+#define CLOCK_TICK_FACTOR	20	/* Factor of both 1000000 and CLOCK_TICK_RATE */
+#define LATCH  ((CLOCK_TICK_RATE + HZ/2) / HZ)	/* For divider */
+
+#define FINETUNE (((((LATCH * HZ - CLOCK_TICK_RATE) << SHIFT_HZ) * \
+	(1000000/CLOCK_TICK_FACTOR) / (CLOCK_TICK_RATE/CLOCK_TICK_FACTOR)) \
+		<< (SHIFT_SCALE-SHIFT_HZ)) / HZ)
+
+#define TIME_OK		0	/* clock synchronized */
+#define TIME_INS	1	/* insert leap second */
+#define TIME_DEL	2	/* delete leap second */
+#define TIME_OOP	3	/* leap second in progress */
+#define TIME_BAD	4	/* clock not synchronized */
+
+
+/*
+ * syscall interface - used (mainly by NTP daemon)
+ * to discipline kernel clock oscillator
+ */
+struct timex {
+	int mode;		/* mode selector */
+	long offset;		/* time offset (usec) */
+	long frequency;		/* frequency offset (scaled ppm) */
+	long maxerror;		/* maximum error (usec) */
+	long esterror;		/* estimated error (usec) */
+	int status;		/* clock command/status */
+	long time_constant;	/* pll time constant */
+	long precision;		/* clock precision (usec) (read only) */
+	long tolerance;		/* clock frequency tolerance (ppm)
+				 * (read only)
+				 */
+	struct timeval time;	/* (read only) */
+	long tick;		/* (modified) usecs between clock ticks */
+};
+
+
 #endif
