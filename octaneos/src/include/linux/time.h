@@ -118,7 +118,7 @@ extern long time_adjust;	/* The amount of adjtime left */
 
 extern long tick;                      /* timer interrupt period */
 extern int tickadj;			/* amount of adjustment per tick */
-extern volatile struct timeval xtime;		/* The current time */
+//extern volatile struct timeval xtime;		/* The current time */
 
 /*
  * Mode codes (timex.mode) 
@@ -161,7 +161,6 @@ extern volatile struct timeval xtime;		/* The current time */
 #define TIME_OOP	3	/* leap second in progress */
 #define TIME_BAD	4	/* clock not synchronized */
 
-
 /*
  * syscall interface - used (mainly by NTP daemon)
  * to discipline kernel clock oscillator
@@ -175,9 +174,7 @@ struct timex {
 	int status;		/* clock command/status */
 	long time_constant;	/* pll time constant */
 	long precision;		/* clock precision (usec) (read only) */
-	long tolerance;		/* clock frequency tolerance (ppm)
-				 * (read only)
-				 */
+	long tolerance;		/* clock frequency tolerance (ppm)  */
 	struct timeval time;	/* (read only) */
 	long tick;		/* (modified) usecs between clock ticks */
 };
