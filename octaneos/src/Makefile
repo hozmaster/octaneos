@@ -173,7 +173,7 @@ kernel/kernelhead.o: kernel/kernelhead.S
 ###
 preZSystem: kernel/kernelhead.o init/main.o init/buildct.o init/getversion.o linuxsubdirs
 	@echo
-	@echo "==## Building Drivers ##=="
+	@echo "== Building Drivers =="
 	@echo "** building drivers and kernel..."
 	@echo "**"
 	@echo
@@ -233,7 +233,7 @@ $(patsubst %, _dir_%, $(SUBDIRS)) : dummy
 ### Dependency setup
 dep-files: scripts/mkdep
 	@echo 
-	@echo "** Running target dep-files... +++"
+	@echo "INFO: Running target dep-files..."
 	@echo
 	$(TOPDIR)/scripts/mkdep -- init/*.c > .depend
 	$(MAKE) $(patsubst %,_sfdep_%,$(SUBDIRS)) _FASTDEP_ALL_SUB_DIRS="$(SUBDIRS)"
@@ -243,9 +243,9 @@ dep-files: scripts/mkdep
 ###
 vmlinux: $(CONFIGURE) boot/bootsect boot/setup scripts/mkdep zBoot/zSystem tools/build tools/kernel_stats 
 	@echo
-	@echo "==** Running **==========================="
-	@echo "** Compiling Kernel......."
-	@echo "** Target: all to : vmlinux"
+	@echo "== Running ==========================="
+	@echo "== Compiling Kernel..."
+	@echo "== Target: all to : vmlinux"
 	@echo
 	$(OBJCOPY) $(OFLAGS) zBoot/zSystem zBoot/zSystem.out
 	tools/build boot/bootsect boot/setup zBoot/zSystem.out $(ROOT_DEV) > vmlinux
