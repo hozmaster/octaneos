@@ -23,17 +23,16 @@
  */
 
 #include <system/system.h>
-#include <linux/block_devices.h>
 #include <linux/errno.h>
+#include <linux/page.h>
+#include <linux/kernel_stat.h>
+
+#include <system/major_devices.h>
+#include <linux/block_devices.h>
 
 #ifndef MAX_BLKDDEV
 #define MAX_BLKDEV 32
 #endif
-
-/*
- * used to wait on when there are no free requests
- */
-struct wait_queue *wait_for_request = NULL;
 
 struct device_struct {
 	const char * name;
@@ -77,24 +76,20 @@ int *blk_size[MAX_BLKDEV] = { NULL, NULL, };
  */
 int * blksize_size[MAX_BLKDEV] = { NULL, NULL, };
 
-int block_write(struct inode *inode, struct file * filp, char * buf, int count)
-{
+int block_write(struct inode *inode, struct file * filp, char * buf, int count) {
 	return -1;
 }
 
-int block_read(struct inode *inode, struct file * filp, char * buf, int count)
-{
+int block_read(struct inode *inode, struct file * filp, char * buf, int count) {
 	return -1;
 }
 
-int block_fsync(struct inode *inode, struct file *filp)
-{
+int block_fsync(struct inode *inode, struct file *filp) {
 	return -1;
 }
 
 int register_blkdev(unsigned int major,
-					const char *name, struct file_operations *fops)
-{
+					const char *name, struct file_operations *fops) {
 	if (major >= MAX_BLKDEV)
 		return -EINVAL;
 	if (blkdevs[major].fops)
@@ -119,42 +114,6 @@ struct wait_queue *wait_for_request = NULL;
 /* This specifies how many sectors to read ahead on the disk.  */
 
 int read_ahead[MAX_BLKDEV] = {0, };
-
-/* blk_dev_struct is:
- *	do_request-address
- *	next-request
- */
-struct blk_dev_struct blk_dev[MAX_BLKDEV] = {
-	{ NULL, NULL },		/* no_dev */
-	{ NULL, NULL },		/* dev mem */
-	{ NULL, NULL },		/* dev fd */
-	{ NULL, NULL },		/* dev hd */
-	{ NULL, NULL },		/* dev ttyx */
-	{ NULL, NULL },		/* dev tty */
-	{ NULL, NULL },		/* dev lp */
-	{ NULL, NULL },		/* dev pipes */
-	{ NULL, NULL },		/* dev sd */
-	{ NULL, NULL }		/* dev st */
-};
-
-/*
- * blk_size contains the size of all block-devices in units of 1024 byte
- * sectors:
- *
- * blk_size[MAJOR][MINOR]
- *
- * if (!blk_size[MAJOR]) then no minor size checking is done.
- */
-int * blk_size[MAX_BLKDEV] = { NULL, NULL, };
-
-/*
- * blksize_size contains the size of all block-devices:
- *
- * blksize_size[MAJOR][MINOR]
- *
- * if (!blksize_size[MAJOR]) then 1024 bytes is assumed.
- */
-int * blksize_size[MAX_BLKDEV] = { NULL, NULL, };
 
 /*
  * look for a free request in the first N entries.
@@ -192,8 +151,7 @@ static inline struct request *get_request(int n, int dev) {
  * NOTE: interrupts must be disabled on the way in, and will still
  *       be disabled on the way out.
  */
-static inline struct request * get_request_wait(int n, int dev)
-{
+static inline struct request * get_request_wait(int n, int dev) {
 	register struct request *req;
 
 	while ((req = get_request(n, dev)) == NULL)
@@ -205,8 +163,7 @@ static inline struct request * get_request_wait(int n, int dev)
 
 static long ro_bits[MAX_BLKDEV][8];
 
-int is_read_only(int dev)
-{
+int is_read_only(int dev) {
 	int minor,major;
 
 	major = MAJOR(dev);
@@ -215,8 +172,7 @@ int is_read_only(int dev)
 	return ro_bits[major][minor >> 5] & (1 << (minor & 31));
 }
 
-void set_device_ro(int dev,int flag)
-{
+void set_device_ro(int dev,int flag) {
 	int minor,major;
 
 	major = MAJOR(dev);
@@ -261,8 +217,7 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 	sti();
 }
 
-static void make_request(int major,int rw, struct buffer_head * bh)
-{
+static void make_request(int major,int rw, struct buffer_head * bh) {
 	unsigned int sector, count;
 	struct request * req;
 	int rw_ahead, max_req;
@@ -515,8 +470,7 @@ void ll_rw_block(int rw, int nr, struct buffer_head * bh[]) {
 	return;
 }
 
-void ll_rw_swap_file(int rw, int dev, unsigned int *b, int nb, char *buf)
-{
+void ll_rw_swap_file(int rw, int dev, unsigned int *b, int nb, char *buf) {
 	int i;
 	int buffersize;
 	struct request * req;

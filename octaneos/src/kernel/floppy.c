@@ -23,6 +23,8 @@
  */
 
 // Note: the MAJOR_NR must be defined for the block device usage.
+
+#include <system/major_devices.h>
 #define MAJOR_NR FLOPPY_MAJOR
 
 #include <linux/errno.h>
@@ -267,8 +269,6 @@ static unsigned char seek_track = 0;
 static unsigned char current_track = NO_TRACK;
 static unsigned char command = 0;
 static unsigned char fdc_version = 0x90;	/* FDC version code */
-
-void (*do_floppy)(void) = NULL;
 
 static void do_rd_request(void) {
 }

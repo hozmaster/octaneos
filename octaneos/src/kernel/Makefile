@@ -30,6 +30,9 @@ LDFLAGS = -m elf_i386
 	$(CC) $(CFLAGS) -S $< -o asm/$@.s
 	$(CC) $(CFLAGS) -c $<
 
+##################################################
+## Kernel File Object Listings
+##################################################
 OBJS = \
 	empty.o misc_print.o traps.o			\
 	exceptions.o interrupts.o    			\
@@ -38,7 +41,7 @@ OBJS = \
 	floppy.o time_helpers.o dma_functions.o \
 	system_calls.o block_devices.o			\
 	fs_super.o fs_buffer.o hexdump.o		\
-	memory.o fork.o time.o exec.o
+	exec_domain.o memory.o fork.o time.o exec.o
 
 all: kernel.o
 
