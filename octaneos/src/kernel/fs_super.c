@@ -21,17 +21,19 @@
  */
 #include <stdarg.h>
 
-#include <linux/config.h>
+#include <system/system.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/major.h>
 #include <linux/stat.h>
 #include <linux/errno.h>
 #include <linux/string.h>
-#include <linux/locks.h>
 
-#include <asm/system.h>
-#include <asm/segment.h>
+#include <system/major_devices.h>
+#include <linux/page.h>
+#include <linux/block_devices.h>
+#include <system/filesystem.h>
+#include <linux/mm.h>
  
 extern struct file_operations *get_blkfops(unsigned int);
 extern struct file_operations *get_chrfops(unsigned int);
@@ -50,10 +52,8 @@ dev_t ROOT_DEV = 0;
 
 static struct file_system_type * file_systems = NULL;
 
-int register_filesystem(struct file_system_type * fs)
-{
+int register_filesystem(struct file_system_type *fs) {
 	struct file_system_type ** tmp;
-
 	if (!fs)
 		return -EINVAL;
 	if (fs->next)

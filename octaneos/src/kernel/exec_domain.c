@@ -1,10 +1,9 @@
 #include <linux/personality.h>
 #include <linux/ptrace.h>
 #include <linux/sched.h>
-
+#include <linux/errno.h>
 
 static asmlinkage void no_lcall7(struct pt_regs * regs);
-
 
 static unsigned long ident_map[32] = {
 	0,	1,	2,	3,	4,	5,	6,	7,
@@ -14,7 +13,7 @@ static unsigned long ident_map[32] = {
 };
 
 struct exec_domain default_exec_domain = {
-	"Linux",	/* name */
+	"Octane",	/* name */
 	no_lcall7,	/* lcall7 causes a seg fault. */
 	0, 0xff,	/* All personalities. */
 	ident_map,	/* Identiy map signals. */
@@ -25,14 +24,11 @@ struct exec_domain default_exec_domain = {
 
 static struct exec_domain *exec_domains = &default_exec_domain;
 
-
-static asmlinkage void no_lcall7(struct pt_regs * regs)
-{
+static asmlinkage void no_lcall7(struct pt_regs *regs) {
 	send_sig(SIGSEGV, current, 1);
 }
 
-struct exec_domain *lookup_exec_domain(unsigned long personality)
-{
+struct exec_domain *lookup_exec_domain(unsigned long personality) {
 	unsigned long pers = personality & PER_MASK;
 	struct exec_domain *it;
 
@@ -46,8 +42,7 @@ struct exec_domain *lookup_exec_domain(unsigned long personality)
 	return NULL;
 }
 
-int register_exec_domain(struct exec_domain *it)
-{
+int register_exec_domain(struct exec_domain *it) {
 	struct exec_domain *tmp;
 
 	if (!it)
@@ -62,8 +57,7 @@ int register_exec_domain(struct exec_domain *it)
 	return 0;
 }
 
-int unregister_exec_domain(struct exec_domain *it)
-{
+int unregister_exec_domain(struct exec_domain *it) {
 	struct exec_domain ** tmp;
 
 	tmp = &exec_domains;
@@ -78,8 +72,7 @@ int unregister_exec_domain(struct exec_domain *it)
 	return -EINVAL;
 }
 
-asmlinkage int sys_personality(unsigned long personality)
-{
+asmlinkage int sys_personality(unsigned long personality) {
 	struct exec_domain *it;
 	unsigned long old_personality;
 
