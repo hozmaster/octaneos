@@ -33,9 +33,6 @@
 #include <linux/kernel_stat.h>
 #include <linux/ptrace.h>
 
-extern descriptor_table _idt;
-extern descriptor_table gdt;
-
 #define TIMER_IRQ               0
 #define TIMER_LIST_REQUESTS     64
 
@@ -273,7 +270,7 @@ asmlinkage int system_call(void);
 static unsigned long init_kernel_stack[1024] = { STACK_MAGIC, };
 struct task_struct init_task = INIT_TASK;
 
-unsigned long volatile jiffies=0;
+unsigned long volatile jiffies = 0;
 
 struct task_struct *current = &init_task;
 struct task_struct *last_task_used_math = NULL;
@@ -413,7 +410,9 @@ confuse_gcc2:
 	if (current == next)
 		return;
 	kstat.context_swtch++;
-	switch_to(next);
+	
+	// TODO: fix switch_to
+	//switch_to(next);
 	/* Now maybe reload the debug registers */
 	if(current->debugreg[7]){
 		loaddebug(0);

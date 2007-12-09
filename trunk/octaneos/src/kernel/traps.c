@@ -23,12 +23,9 @@
  */
 
 #include <system/system.h>
+#include <linux/sched.h>
 
 extern char *__vidmem;
-
-//
-// see kernelhead.S for initial loading of the idt
-extern descriptor_table _idt;
 
 #define __set_gate(gate_addr,type,dpl,addr) \
 do { \
@@ -207,18 +204,16 @@ void handler_reserved(void) {
 //=========== Exception Handlers ==================
 
 void set_intr_gate(unsigned int n, void *addr) {
-  __set_gate(_idt + n,14,0,addr);
-
+	__set_gate(idt + n,14,0,addr);
 }
 
 static void set_trap_gate(unsigned int n, void *addr) {
-  __set_gate(_idt + n,15,0,addr);
-
+	__set_gate(idt + n,15,0,addr);
 }
 
 // why this has one downslash, Ill never know
 void _set_system_gate(unsigned int n, void *addr) {
-  __set_gate(_idt + n,15,3,addr);
+  __set_gate(idt + n,15,3,addr);
 
 }
 

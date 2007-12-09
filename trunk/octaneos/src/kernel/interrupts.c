@@ -369,15 +369,14 @@ void load_remap_controller(void) {
   outb_p(0x02, 0xA1);
   outb_p(0x01, 0xA1);
 
-  __xloop_delay(100);
-  
+  __xloop_delay(100);  
   outb(cached_21, 0x21);
   outb(cached_A1, 0xA1);
   
 } // End of the funtion 
 
 static void math_error_irq(int cpl) {
-	outb(0,0xF0);
+	outb(0, 0xF0);
 	panic("MATH ERROR");
 }
 
