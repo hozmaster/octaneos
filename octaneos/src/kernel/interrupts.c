@@ -31,8 +31,7 @@
 
 asmlinkage void get_all_registers(void);
 
-// jiffies used a lot in scheduler.c
-volatile unsigned long jiffies = 0;
+extern volatile unsigned long jiffies;
 
 // defined in bad_interrupts.S in assembly
 asmlinkage void bad_interrupt_00(void);

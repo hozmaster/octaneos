@@ -1,3 +1,13 @@
+
+#include <system/system.h>
+#include <linux/errno.h>
+#include <linux/real_time_clock.h>
+
+#define RTC_ALWAYS_BCD 1
+
+#include <linux/time.h>
+#include <linux/sched.h>
+
 extern struct timeval xtime;
 
 /* converts date to days since 1/1/1970
@@ -71,8 +81,7 @@ void time_init(void)
  */
 struct timezone sys_tz = { 0, 0};
 
-asmlinkage int sys_time(long * tloc)
-{
+asmlinkage int sys_time(long *tloc) {
 	int i, error;
 
 	i = CURRENT_TIME;
@@ -278,9 +287,8 @@ asmlinkage int sys_settimeofday(struct timeval *tv, struct timezone *tz)
 /* adjtimex mainly allows reading (and writing, if superuser) of
  * kernel time-keeping variables. used by xntpd.
  */
-asmlinkage int sys_adjtimex(struct timex *txc_p)
-{
-        long ltemp, mtemp, save_adjust;
+asmlinkage int sys_adjtimex(struct timex *txc_p) {
+	long ltemp, mtemp, save_adjust;
 	int error;
 
 	/* Local copy of parameter */

@@ -1,3 +1,11 @@
+#include <system/system.h>
+#include <linux/errno.h>
+#include <linux/page.h>
+#include <linux/ldt.h>
+#include <linux/sched.h>
+#include <linux/fcntl.h>
+#include <linux/mm.h>
+#include <linux/a.out.h>
 
 asmlinkage int sys_exit(int exit_code);
 asmlinkage int sys_close(unsigned fd);
@@ -19,10 +27,9 @@ static struct linux_binfmt aout_format = {
 };
 static struct linux_binfmt *formats = &aout_format;
 
-int register_binfmt(struct linux_binfmt * fmt)
-{
-	struct linux_binfmt ** tmp = &formats;
+int register_binfmt(struct linux_binfmt * fmt) {
 
+	struct linux_binfmt **tmp = &formats;
 	if (!fmt)
 		return -EINVAL;
 	if (fmt->next)
