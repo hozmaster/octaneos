@@ -64,13 +64,6 @@
 #define USER_CS   __USER_CS
 #define USER_DS   __USER_DS
 
-typedef struct descr_struct {
-  
-  unsigned long a;
-  unsigned long b;  
-  
-} descriptor_table[256];
-
 //
 // see the kernelhead.S for loading of the idt
 //
@@ -164,13 +157,10 @@ struct TSS_object {
 
 
 struct __TSS_object {
-
   unsigned long __esp0;
-  unsigned long __ss0;
-  
+  unsigned long __ss0;  
   unsigned long __esp1;
   unsigned long __ss1;
-  
   unsigned long __esp2;
   unsigned long __ss2;
   
