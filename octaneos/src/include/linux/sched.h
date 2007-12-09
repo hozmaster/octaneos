@@ -23,8 +23,13 @@
 #include <linux/fpu_emu.h>
 #include <system/octane_types.h>
 #include <linux/wait.h>
+#include <linux/personality.h>
 
 #define NEW_SWAP
+
+#ifndef NR_OPEN
+#define NR_OPEN           256
+#endif
 
 typedef struct desc_struct {
 	unsigned long a,b;
@@ -63,18 +68,15 @@ enum {
 	KEYBOARD_BH
 };
 
-extern inline void mark_bh(int nr)
-{
+extern inline void mark_bh(int nr) {
 	__asm__ __volatile__("orl %1,%0":"=m" (bh_active):"ir" (1<<nr));
 }
 
-extern inline void disable_bh(int nr)
-{
+extern inline void disable_bh(int nr) {
 	__asm__ __volatile__("andl %1,%0":"=m" (bh_mask):"ir" (~(1<<nr)));
 }
 
-extern inline void enable_bh(int nr)
-{
+extern inline void enable_bh(int nr) {
 	__asm__ __volatile__("orl %1,%0":"=m" (bh_mask):"ir" (1<<nr));
 }
 
@@ -413,8 +415,7 @@ struct tss_struct {
 struct files_struct {
 	int         count;
 	fd_set      close_on_exec;
-	// TODO: add file struct
-	//struct file *fd[NR_OPEN];
+	struct file *fd[NR_OPEN];
 };
 
 #define INIT_FILES { \
@@ -453,14 +454,14 @@ struct mm_struct {
 	struct vm_area_struct * mmap;
 };
 
-#define INIT_MM { \
-		0, \
-		0, 0, 0, \
+#define INIT_MM {   \
+		0,          \
+		0, 0, 0,    \
 		0, 0, 0, 0, \
 		0, 0, 0, 0, \
-		0, \
+		0,          \
 /* ?_flt */	0, 0, 0, 0, \
-		0, \
+		0,          \
 /* swap */	0, 0, 0, 0, 0, \
 		NULL }
 
