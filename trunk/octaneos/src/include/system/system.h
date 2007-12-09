@@ -18,6 +18,40 @@
 #ifndef __SYSTEM_H_
 #define __SYSTEM_H_
 
+#define	KERN_EMERG	 "<0>"	/* system is unusable			*/
+#define	KERN_ALERT	 "<1>"	/* action must be taken immediately	*/
+#define	KERN_CRIT	 "<2>"	/* critical conditions			*/
+#define	KERN_ERR	 "<3>"	/* error conditions			*/
+#define	KERN_WARNING "<4>"	/* warning conditions			*/
+#define	KERN_NOTICE	 "<5>"	/* normal but significant condition	*/
+#define	KERN_INFO	 "<6>"	/* informational			*/
+#define	KERN_DEBUG	 "<7>"	/* debug-level messages			*/
+
+#ifndef UTS_SYSNAME
+#define UTS_SYSNAME "Octane"
+#endif
+#ifndef UTS_NODENAME
+#define UTS_NODENAME "(none)"	/* set by sethostname() */
+#endif
+
+#ifndef UTS_MACHINE
+#define UTS_MACHINE "i386"	/* hardware type */
+#endif
+
+#ifndef UTS_DOMAINNAME
+#define UTS_DOMAINNAME "(none)"	/* set by setdomainname() */
+#endif
+
+#define DEF_INITSEG	    0x9000
+#define DEF_SYSSEG	    0x1000
+#define DEF_SETUPSEG	0x9020
+#define DEF_SYSSIZE	    0x7F00
+
+/* internal svga startup constants */
+#define NORMAL_VGA	0xffff		    /* 80x25 mode */
+#define EXTENDED_VGA	0xfffe		/* 80x50 mode */
+#define ASK_VGA		0xfffd		    /* ask for it at bootup */
+
 #define SYMBOL_NAME_STR(X) #X
 
 #ifdef __cplusplus

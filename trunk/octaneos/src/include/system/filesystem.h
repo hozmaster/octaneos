@@ -22,6 +22,25 @@
 #include <system/major_devices.h>
 #include <linux/sched.h>
 
+/*
+ * These are the fs-independent mount-flags: up to 16 flags are supported
+ */
+#define MS_RDONLY    1 /* mount read-only */
+#define MS_NOSUID    2 /* ignore suid and sgid bits */
+#define MS_NODEV     4 /* disallow access to device special files */
+#define MS_NOEXEC    8 /* disallow program execution */
+#define MS_SYNC     16 /* writes are synced at once */
+#define	MS_REMOUNT  32 /* alter flags of a mounted FS */
+
+/*
+ * Flags that can be altered by MS_REMOUNT
+ */
+#define MS_RMT_MASK (MS_RDONLY)
+
+
+#define MS_MGC_VAL 0xC0ED0000 /* magic flag number to indicate "new" flags */
+#define MS_MGC_MSK 0xffff0000 /* magic flag number mask */
+
 //************************************************
 //
 // Filesystem Datastructures
@@ -106,6 +125,27 @@ struct file {
 	void *private_data;	/* needed for tty driver, and maybe others */
 };
 
+#include <linux/ext2_fs_sb.h>
+struct super_block {
+	dev_t s_dev;
+	unsigned long s_blocksize;
+	unsigned char s_blocksize_bits;
+	unsigned char s_lock;
+	unsigned char s_rd_only;
+	unsigned char s_dirt;
+	struct super_operations *s_op;
+	unsigned long s_flags;
+	unsigned long s_magic;
+	unsigned long s_time;
+	struct inode * s_covered;
+	struct inode * s_mounted;
+	struct wait_queue * s_wait;
+	union {
+		struct ext2_sb_info ext2_sb;
+		void *generic_sbp;
+	} u;
+};
+
 struct file_operations {
 	int (*lseek) (struct inode *, struct file *, off_t, int);
 	int (*read) (struct inode *, struct file *, char *, int);
@@ -122,6 +162,41 @@ struct file_operations {
 	int (*revalidate) (dev_t dev);
 };
 
+struct inode_operations {
+	struct file_operations * default_file_ops;
+	int (*create) (struct inode *,const char *,int,int,struct inode **);
+	int (*lookup) (struct inode *,const char *,int,struct inode **);
+	int (*link) (struct inode *,struct inode *,const char *,int);
+	int (*unlink) (struct inode *,const char *,int);
+	int (*symlink) (struct inode *,const char *,int,const char *);
+	int (*mkdir) (struct inode *,const char *,int,int);
+	int (*rmdir) (struct inode *,const char *,int);
+	int (*mknod) (struct inode *,const char *,int,int,int);
+	int (*rename) (struct inode *,const char *,int,struct inode *,const char *,int);
+	int (*readlink) (struct inode *,char *,int);
+	int (*follow_link) (struct inode *,struct inode *,int,int,struct inode **);
+	int (*bmap) (struct inode *,int);
+	void (*truncate) (struct inode *);
+	int (*permission) (struct inode *, int);
+};
+
+struct super_operations {
+	void (*read_inode) (struct inode *);
+	int (*notify_change) (int flags, struct inode *);
+	void (*write_inode) (struct inode *);
+	void (*put_inode) (struct inode *);
+	void (*put_super) (struct super_block *);
+	void (*write_super) (struct super_block *);
+	void (*statfs) (struct super_block *, struct statfs *);
+	int (*remount_fs) (struct super_block *, int *, char *);
+};
+
+struct file_system_type {
+	struct super_block *(*read_super) (struct super_block *, void *, int);
+	char *name;
+	int requires_dev;
+	struct file_system_type * next;
+};
 
 
 extern int char_read(struct inode *, struct file *, char *, int);
@@ -134,6 +209,7 @@ extern int block_fsync(struct inode *, struct file *);
 extern int file_fsync(struct inode *, struct file *);
 
 extern void (*do_floppy)(void);
+
 
 // End of Filesystem.h
 #endif
