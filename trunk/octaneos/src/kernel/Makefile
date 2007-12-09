@@ -41,7 +41,7 @@ OBJS = \
 	floppy.o time_helpers.o dma_functions.o \
 	system_calls.o block_devices.o			\
 	fs_super.o fs_buffer.o hexdump.o		\
-	exec_domain.o fork.o time.o exec.o memory.o 
+	exec_domain.o fork.o time.o memory.o
 
 all: kernel.o
 

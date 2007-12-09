@@ -1,4 +1,13 @@
 
+#include <system/system.h>
+#include <linux/errno.h>
+#include <linux/tasks.h>
+#include <linux/page.h>
+#include <linux/sched.h>
+#include <linux/ldt.h>
+#include <system/filesystem.h>
+#include <linux/unistd.h>
+#include <linux/mm.h>
 
 asmlinkage void ret_from_sys_call(void) __asm__("ret_from_sys_call");
 
@@ -10,8 +19,8 @@ asmlinkage void ret_from_sys_call(void) __asm__("ret_from_sys_call");
 extern int shm_fork(struct task_struct *, struct task_struct *);
 long last_pid=0;
 
-static int find_empty_process(void)
-{
+static int find_empty_process(void) {
+
 	int free_task;
 	int i, tasks_free;
 	int this_user_tasks;
@@ -42,9 +51,9 @@ repeat:
 	return free_task;
 }
 
-static struct file * copy_fd(struct file * old_file)
-{
-	struct file * new_file = get_empty_filp();
+static struct file *copy_fd(struct file * old_file) {
+
+	struct file *new_file = get_empty_filp();
 	int error;
 
 	if (new_file) {
@@ -52,6 +61,7 @@ static struct file * copy_fd(struct file * old_file)
 		new_file->f_count = 1;
 		if (new_file->f_inode)
 			new_file->f_inode->i_count++;
+
 		if (new_file->f_op && new_file->f_op->open) {
 			error = new_file->f_op->open(new_file->f_inode,new_file);
 			if (error) {
@@ -159,8 +169,10 @@ asmlinkage int sys_fork(struct pt_regs regs)
 
 	if (p->exec_domain && p->exec_domain->use_count)
 		(*p->exec_domain->use_count)++;
-	if (p->binfmt && p->binfmt->use_count)
-		(*p->binfmt->use_count)++;
+
+	// TODO: 
+	//if (p->binfmt && p->binfmt->use_count)
+	//	(*p->binfmt->use_count)++;
 
 	p->did_exec = 0;
 	p->swapping = 0;
@@ -211,10 +223,14 @@ asmlinkage int sys_fork(struct pt_regs regs)
 	p->tss.ldt = _LDT(nr);
 	if (p->ldt) {
 		p->ldt = (struct desc_struct*) vmalloc(LDT_ENTRIES*LDT_ENTRY_SIZE);
-		if (p->ldt != NULL)
-			memcpy(p->ldt, current->ldt, LDT_ENTRIES*LDT_ENTRY_SIZE);
+
+		// TODO:
+		//if (p->ldt != NULL)
+		//	memcpy(p->ldt, current->ldt, LDT_ENTRIES*LDT_ENTRY_SIZE);
 	}
-	p->tss.bitmap = offsetof(struct tss_struct,io_bitmap);
+
+	// TODO:
+	//p->tss.bitmap = offsetof(struct tss_struct, io_bitmap);
 	for (i = 0; i < IO_BITMAP_SIZE+1 ; i++) /* IO bitmap is actually SIZE+1 */
 		p->tss.io_bitmap[i] = ~0;
 	if (last_task_used_math == current)

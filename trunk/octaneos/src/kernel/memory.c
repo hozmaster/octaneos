@@ -1,17 +1,10 @@
-#include <asm/system.h>
-#include <linux/config.h>
-
-#include <linux/signal.h>
-#include <linux/sched.h>
-#include <linux/head.h>
-#include <linux/kernel.h>
+#include <system/system.h>
+#include <linux/page.h>
 #include <linux/errno.h>
-#include <linux/string.h>
-#include <linux/types.h>
-#include <linux/ptrace.h>
-#include <linux/mman.h>
-#include <linux/segment.h>
-#include <asm/segment.h>
+#include <linux/gfp.h>
+#include <linux/mm.h>
+#include <system/filesystem.h>
+#include <linux/vm86.h>
 
 /*
  * Define this if things work differently on a i386 and a i486:
@@ -554,7 +547,10 @@ static void __do_wp_page(unsigned long error_code, unsigned long address,
 		if (new_page) {
 			if (mem_map[MAP_NR(old_page)] & MAP_PAGE_RESERVED)
 				++tsk->mm->rss;
-			copy_page(old_page,new_page);
+			
+			// TODO:
+			//copy_page(old_page,new_page);
+
 			*(unsigned long *) pte = new_page | prot;
 			free_page(old_page);
 			invalidate();
@@ -742,7 +738,9 @@ static int try_to_share(unsigned long address, struct task_struct * tsk,
 	if (error_code & PAGE_RW) {
 		if(!newpage)	/* did the page exist?  SRB. */
 			return 0;
-		copy_page((from & PAGE_MASK),newpage);
+
+		// TODO:
+		//copy_page((from & PAGE_MASK),newpage);
 		to = newpage | PAGE_PRIVATE;
 	} else {
 		mem_map[MAP_NR(from)]++;
@@ -766,13 +764,14 @@ static int try_to_share(unsigned long address, struct task_struct * tsk,
  * It should be >1 if there are other tasks sharing this inode.
  */
 int share_page(struct vm_area_struct * area, struct task_struct * tsk,
-	struct inode * inode,
+	struct inode *inode,
 	unsigned long address, unsigned long error_code, unsigned long newpage)
 {
-	struct task_struct ** p;
+	struct task_struct **p;
 
 	if (!inode || inode->i_count < 2 || !area->vm_ops)
 		return 0;
+
 	for (p = &LAST_TASK ; p > &FIRST_TASK ; --p) {
 		if (!*p)
 			continue;
@@ -976,11 +975,11 @@ unsigned long __bad_pagetable(void)
 {
 	extern char empty_bad_page_table[PAGE_SIZE];
 
-	__asm__ __volatile__("cld ; rep ; stosl":
-		:"a" (BAD_PAGE + PAGE_TABLE),
-		 "D" ((long) empty_bad_page_table),
-		 "c" (PTRS_PER_PAGE)
-		:"di","cx");
+	//__asm__ __volatile__("cld ; rep ; stosl":
+	//	:"a" (BAD_PAGE + PAGE_TABLE),
+	//	 "D" ((long) empty_bad_page_table),
+	//	 "c" (PTRS_PER_PAGE)
+	//	:"di","cx");
 	return (unsigned long) empty_bad_page_table;
 }
 
@@ -988,11 +987,11 @@ unsigned long __bad_page(void)
 {
 	extern char empty_bad_page[PAGE_SIZE];
 
-	__asm__ __volatile__("cld ; rep ; stosl":
-		:"a" (0),
-		 "D" ((long) empty_bad_page),
-		 "c" (PTRS_PER_PAGE)
-		:"di","cx");
+	//__asm__ __volatile__("cld ; rep ; stosl":
+	//	:"a" (0),
+	//	 "D" ((long) empty_bad_page),
+	//	 "c" (PTRS_PER_PAGE)
+	//	:"di","cx");
 	return (unsigned long) empty_bad_page;
 }
 
@@ -1000,11 +999,11 @@ unsigned long __zero_page(void)
 {
 	extern char empty_zero_page[PAGE_SIZE];
 
-	__asm__ __volatile__("cld ; rep ; stosl":
-		:"a" (0),
-		 "D" ((long) empty_zero_page),
-		 "c" (PTRS_PER_PAGE)
-		:"di","cx");
+	//__asm__ __volatile__("cld ; rep ; stosl":
+	//	:"a" (0),
+	//	 "D" ((long) empty_zero_page),
+	//	 "c" (PTRS_PER_PAGE)
+	//	:"di","cx");
 	return (unsigned long) empty_zero_page;
 }
 
@@ -1163,7 +1162,10 @@ void si_meminfo(struct sysinfo *val)
 	val->totalram = 0;
 	val->sharedram = 0;
 	val->freeram = nr_free_pages << PAGE_SHIFT;
-	val->bufferram = buffermem;
+	
+	// TODO:
+	//val->bufferram = buffermem;
+
 	while (i-- > 0)  {
 		if (mem_map[i] & MAP_PAGE_RESERVED)
 			continue;
