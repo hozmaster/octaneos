@@ -48,7 +48,6 @@ extern void load_keyboard_driver(void);
 asmlinkage void get_all_registers(void);
 
 extern void print_register_list(struct debug_registers *);
-extern descriptor_table _idt;
 
 extern unsigned char __debug_scan_code;
 
