@@ -6,6 +6,18 @@
 #include <linux/errno.h>
 #include <linux/kernel.h>
 
+#define PROT_READ        0x1       /* page can be read */
+#define PROT_WRITE       0x2       /* page can be written */
+#define PROT_EXEC        0x4       /* page can be executed */
+#define PROT_NONE        0x0       /* page can not be accessed */
+
+#define MAP_SHARED       1         /* Share changes */
+#define MAP_PRIVATE      2         /* Changes are private */
+#define MAP_TYPE         0xf       /* Mask for type of mapping */
+#define MAP_FIXED        0x10      /* Interpret addr exactly */
+#define MAP_ANONYMOUS    0x20      /* don't use a file */
+
+
 #define VERIFY_READ 0
 #define VERIFY_WRITE 1
 
@@ -107,25 +119,8 @@ struct mem_list {
 extern struct mem_list free_area_list[NR_MEM_LISTS];
 extern unsigned char * free_area_map[NR_MEM_LISTS];
 
-/*
- * This is timing-critical - most of the time in getting a new page
- * goes to clearing the page. If you want a page without the clearing
- * overhead, just use __get_free_page() directly..
- */
-#define __get_free_page(priority) __get_free_pages((priority),0)
-extern unsigned long __get_free_pages(int priority, unsigned long gfporder);
-extern inline unsigned long get_free_page(int priority)
-{
-	unsigned long page;
+// TODO: removed get_free page.
 
-	page = __get_free_page(priority);
-	if (page)
-		__asm__ __volatile__("rep ; stosl"
-			: /* no outputs */ \
-			:"a" (0),"c" (1024),"D" (page)
-			:"di","cx");
-	return page;
-}
 
 /* memory.c & swap.c*/
 
