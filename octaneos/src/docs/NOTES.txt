@@ -66,6 +66,17 @@
     
     -------------------------------------------------
     
+    Here is a cleaner view, files and functionality that must be implemented:        
+    
+	  ./fs/super.c:dev_t ROOT_DEV = 0;
+	  ./kernel/sched.c:void sched_init(void)
+	  ./drivers/block/ll_rw_blk.c:
+	  ./mm/memory.c:void mem_init(unsigned long start_low_mem,
+	  ./fs/buffer.c:void buffer_init(void)
+	  ./kernel/time.c:void time_init(void)
+	  ./kernel/floppy.c
+	  ./kernel/fork.c: 
+    
 -------------------------------------------------
  * 11/24/2007
 -------------------------------------------------
