@@ -33,6 +33,8 @@
 extern unsigned long main_get_build_count;
 extern char *main_get_version;
 
+int root_mountflags = 0;
+
 // debugging printk
 extern void __puts(const char *);
 extern int __sprintf(char * buf, const char *fmt, ...);
@@ -128,7 +130,6 @@ asmlinkage void start_kernel(void) {
   init_interrupts();
   load_keyboard_driver();
       
-  scheduler_init();  
   floppy_init(); 
 
   for(;;) {  
