@@ -199,6 +199,68 @@ struct file_system_type {
 };
 
 
+extern int register_filesystem(struct file_system_type *);
+extern int unregister_filesystem(struct file_system_type *);
+
+asmlinkage int sys_open(const char *, int, int);
+asmlinkage int sys_close(unsigned int);		/* yes, it's really unsigned */
+
+extern void kill_fasync(struct fasync_struct *fa, int sig);
+
+extern int getname(const char * filename, char **result);
+extern void putname(char * name);
+
+extern int register_blkdev(unsigned int, const char *, struct file_operations *);
+extern int unregister_blkdev(unsigned int major, const char * name);
+extern int blkdev_open(struct inode * inode, struct file * filp);
+extern struct file_operations def_blk_fops;
+extern struct inode_operations blkdev_inode_operations;
+
+extern int register_chrdev(unsigned int, const char *, struct file_operations *);
+extern int unregister_chrdev(unsigned int major, const char * name);
+extern int chrdev_open(struct inode * inode, struct file * filp);
+extern struct file_operations def_chr_fops;
+extern struct inode_operations chrdev_inode_operations;
+
+extern void init_fifo(struct inode * inode);
+
+extern struct file_operations connecting_fifo_fops;
+extern struct file_operations read_fifo_fops;
+extern struct file_operations write_fifo_fops;
+extern struct file_operations rdwr_fifo_fops;
+extern struct file_operations read_pipe_fops;
+extern struct file_operations write_pipe_fops;
+extern struct file_operations rdwr_pipe_fops;
+
+extern struct file_system_type *get_fs_type(char *name);
+
+extern int fs_may_mount(dev_t dev);
+extern int fs_may_umount(dev_t dev, struct inode * mount_root);
+extern int fs_may_remount_ro(dev_t dev);
+
+extern struct file *first_file;
+extern int nr_files;
+extern struct super_block super_blocks[NR_SUPER];
+
+extern int shrink_buffers(unsigned int priority);
+extern void refile_buffer(struct buffer_head * buf);
+extern void set_writetime(struct buffer_head * buf, int flag);
+extern void refill_freelist(int size);
+
+extern struct buffer_head **buffer_pages;
+extern int nr_buffers;
+extern int buffermem;
+extern int nr_buffer_heads;
+
+#define BUF_CLEAN 0
+#define BUF_UNSHARED 1 /* Buffers that were shared but are not any more */
+#define BUF_LOCKED 2   /* Buffers scheduled for write */
+#define BUF_LOCKED1 3  /* Supers, inodes */
+#define BUF_DIRTY 4    /* Dirty buffers, not yet scheduled for write */
+#define BUF_SHARED 5   /* Buffers shared */
+#define NR_LIST 6
+
+
 extern int char_read(struct inode *, struct file *, char *, int);
 extern int block_read(struct inode *, struct file *, char *, int);
 
