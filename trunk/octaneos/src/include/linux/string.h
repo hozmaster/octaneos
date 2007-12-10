@@ -1,6 +1,9 @@
 #ifndef _OCTANE_I386_STRING_H_
 #define _OCTANE_I386_STRING_H_
 
+#include <system/system.h>
+#include <system/octane_types.h>
+
 static inline char *strcpy(char * dest,const char *src) {
 
 int d0, d1, d2;
@@ -14,7 +17,7 @@ __asm__ __volatile__(
 return dest;
 }
 
-static inline char * strncpy(char * dest,const char *src,size_t count) {
+static inline char *strncpy(char *dest, const char *src, size_t count) {
 
 int d0, d1, d2, d3;
 __asm__ __volatile__(
