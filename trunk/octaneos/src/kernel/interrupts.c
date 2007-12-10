@@ -33,6 +33,8 @@ asmlinkage void get_all_registers(void);
 
 extern volatile unsigned long jiffies;
 
+unsigned long bh_active = 0;
+
 // defined in bad_interrupts.S in assembly
 asmlinkage void bad_interrupt_00(void);
 asmlinkage void bad_interrupt_01(void);
@@ -124,7 +126,6 @@ unsigned char cache_21 = 0xff;
 unsigned char cache_A1 = 0xff;
 
 extern void set_intr_gate(unsigned int, void *);
-extern void scheduler_timer_helper(void);
 
 extern struct TSS_object _tss;
 
@@ -163,13 +164,6 @@ void __debug_timer_irq(void) {
   _enable_interrupts();
 }
 
-void _public_timer_irq(void) {
-  _disable_interrupts();
-  jiffies++;
-  scheduler_timer_helper();
-  _enable_interrupts();
-
-}
 
 int request_irq(unsigned int irq, void (*handler)(int)) {
 	struct sigaction signal_action;

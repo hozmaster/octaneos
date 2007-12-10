@@ -6,6 +6,9 @@
 #include <system/filesystem.h>
 #include <linux/vm86.h>
 
+#include <asm/segment_fs.h>
+#include <linux/string.h>
+
 /*
  * Define this if things work differently on a i386 and a i486:
  * it will (on a i486) warn about kernel memory accesses that are
@@ -46,7 +49,8 @@ void oom(struct task_struct * task)
 	printk("\nOut of memory.\n");
 	task->sigaction[SIGKILL-1].sa_handler = NULL;
 	task->blocked &= ~(1<<(SIGKILL-1));
-	send_sig(SIGKILL,task,1);
+
+	//send_sig(SIGKILL,task,1);
 }
 
 static void free_one_table(unsigned long * page_dir)
@@ -71,12 +75,14 @@ static void free_one_table(unsigned long * page_dir)
 		if (!pg)
 			continue;
 		*page_table = 0;
-		if (pg & PAGE_PRESENT)
-			free_page(PAGE_MASK & pg);
-		else
-			swap_free(pg);
+
+		//if (pg & PAGE_PRESENT)
+		//	free_page(PAGE_MASK & pg);
+		//else
+		//	swap_free(pg);
 	}
-	free_page(PAGE_MASK & pg_table);
+
+	//free_page(PAGE_MASK & pg_table);
 }
 
 /*
@@ -105,13 +111,15 @@ void clear_page_tables(struct task_struct * tsk)
 	if (mem_map[MAP_NR(pg_dir)] > 1) {
 		unsigned long * new_pg;
 
-		if (!(new_pg = (unsigned long*) get_free_page(GFP_KERNEL))) {
-			oom(tsk);
-			return;
-		}
+		//if (!(new_pg = (unsigned long*) get_free_page(GFP_KERNEL))) {
+		//	oom(tsk);
+		//	return;
+		//}
+
 		for (i = 768 ; i < 1024 ; i++)
 			new_pg[i] = page_dir[i];
-		free_page(pg_dir);
+
+		//free_page(pg_dir);
 		tsk->tss.cr3 = (unsigned long) new_pg;
 		return;
 	}
@@ -144,14 +152,16 @@ void free_page_tables(struct task_struct * tsk)
 	tsk->tss.cr3 = (unsigned long) swapper_pg_dir;
 	if (tsk == current)
 		__asm__ __volatile__("movl %0,%%cr3": :"a" (tsk->tss.cr3));
-	if (mem_map[MAP_NR(pg_dir)] > 1) {
-		free_page(pg_dir);
-		return;
-	}
+
+	//if (mem_map[MAP_NR(pg_dir)] > 1) {
+	//	free_page(pg_dir);
+	//	return;
+	//}
 	page_dir = (unsigned long *) pg_dir;
 	for (i = 0 ; i < PTRS_PER_PAGE ; i++,page_dir++)
 		free_one_table(page_dir);
-	free_page(pg_dir);
+
+	//free_page(pg_dir);
 	invalidate();
 }
 
@@ -182,8 +192,9 @@ int copy_page_tables(struct task_struct * tsk)
 	unsigned long old_pg_dir, *old_page_dir;
 	unsigned long new_pg_dir, *new_page_dir;
 
-	if (!(new_pg_dir = get_free_page(GFP_KERNEL)))
-		return -ENOMEM;
+	//if (!(new_pg_dir = get_free_page(GFP_KERNEL)))
+	//	return -ENOMEM;
+
 	old_pg_dir = current->tss.cr3;
 	tsk->tss.cr3 = new_pg_dir;
 	old_page_dir = (unsigned long *) old_pg_dir;
@@ -206,10 +217,11 @@ int copy_page_tables(struct task_struct * tsk)
 			*new_page_dir = old_pg_table;
 			continue;
 		}
-		if (!(new_pg_table = get_free_page(GFP_KERNEL))) {
-			free_page_tables(tsk);
-			return -ENOMEM;
-		}
+
+		//if (!(new_pg_table = get_free_page(GFP_KERNEL))) {
+		//	free_page_tables(tsk);
+		//	return -ENOMEM;
+		//}
 		old_page_table = (unsigned long *) (PAGE_MASK & old_pg_table);
 		new_page_table = (unsigned long *) (PAGE_MASK & new_pg_table);
 		for (j = 0 ; j < PTRS_PER_PAGE ; j++,old_page_table++,new_page_table++) {
@@ -218,7 +230,8 @@ int copy_page_tables(struct task_struct * tsk)
 			if (!pg)
 				continue;
 			if (!(pg & PAGE_PRESENT)) {
-				*new_page_table = swap_duplicate(pg);
+
+				//*new_page_table = swap_duplicate(pg);
 				continue;
 			}
 			if ((pg & (PAGE_RW | PAGE_COW)) == (PAGE_RW | PAGE_COW))
@@ -277,14 +290,18 @@ int unmap_page_range(unsigned long from, unsigned long size)
 					if (!(mem_map[MAP_NR(page)] & MAP_PAGE_RESERVED))
 						if (current->mm->rss > 0)
 							--current->mm->rss;
-					free_page(PAGE_MASK & page);
-				} else
-					swap_free(page);
+
+					//free_page(PAGE_MASK & page);
+				} else {
+					// TODO:					
+					//swap_free(page);
+				}
 			}
 		}
 		if (pcnt == PTRS_PER_PAGE) {
 			*dir = 0;
-			free_page(PAGE_MASK & page_dir);
+
+			//free_page(PAGE_MASK & page_dir);
 		}
 	}
 	invalidate();
@@ -317,12 +334,14 @@ int zeromap_page_range(unsigned long from, unsigned long size, int mask)
 	while (size > 0) {
 		if (!(PAGE_PRESENT & *dir)) {
 				/* clear page needed here?  SRB. */
-			if (!(page_table = (unsigned long*) get_free_page(GFP_KERNEL))) {
-				invalidate();
-				return -ENOMEM;
-			}
+
+			//if (!(page_table = (unsigned long*) get_free_page(GFP_KERNEL))) {
+			//	invalidate();
+			//	return -ENOMEM;
+			//}
+
 			if (PAGE_PRESENT & *dir) {
-				free_page((unsigned long) page_table);
+				//free_page((unsigned long) page_table);
 				page_table = (unsigned long *)(PAGE_MASK & *dir++);
 			} else
 				*dir++ = ((unsigned long) page_table) | PAGE_TABLE;
@@ -337,9 +356,12 @@ int zeromap_page_range(unsigned long from, unsigned long size, int mask)
 					if (!(mem_map[MAP_NR(page)] & MAP_PAGE_RESERVED))
 						if (current->mm->rss > 0)
 							--current->mm->rss;
-					free_page(PAGE_MASK & page);
-				} else
-					swap_free(page);
+
+					//free_page(PAGE_MASK & page);
+				} else {
+					// TODO:
+					//swap_free(page);
+				}
 			}
 			*page_table++ = mask;
 		}
@@ -379,10 +401,11 @@ int remap_page_range(unsigned long from, unsigned long to, unsigned long size, i
 	while (size > 0) {
 		if (!(PAGE_PRESENT & *dir)) {
 			/* clearing page here, needed?  SRB. */
-			if (!(page_table = (unsigned long*) get_free_page(GFP_KERNEL))) {
-				invalidate();
-				return -1;
-			}
+
+			//if (!(page_table = (unsigned long*) get_free_page(GFP_KERNEL))) {
+			//	invalidate();
+			//	return -1;
+			//}
 			*dir++ = ((unsigned long) page_table) | PAGE_TABLE;
 		}
 		else
@@ -399,9 +422,12 @@ int remap_page_range(unsigned long from, unsigned long to, unsigned long size, i
 					if (!(mem_map[MAP_NR(page)] & MAP_PAGE_RESERVED))
 						if (current->mm->rss > 0)
 							--current->mm->rss;
-					free_page(PAGE_MASK & page);
-				} else
-					swap_free(page);
+
+					//free_page(PAGE_MASK & page);
+				} else {
+					// TODO:
+					//swap_free(page);
+				}
 			}
 
 			/*
@@ -486,10 +512,12 @@ unsigned long put_dirty_page(struct task_struct * tsk, unsigned long page, unsig
 	if (PAGE_PRESENT & *page_table)
 		page_table = (unsigned long *) (PAGE_MASK & *page_table);
 	else {
-		if (!(tmp = get_free_page(GFP_KERNEL)))
-			return 0;
+
+		//if (!(tmp = get_free_page(GFP_KERNEL)))
+		//	return 0;
+
 		if (PAGE_PRESENT & *page_table) {
-			free_page(tmp);
+			//free_page(tmp);
 			page_table = (unsigned long *) (PAGE_MASK & *page_table);
 		} else {
 			*page_table = tmp | PAGE_TABLE;
@@ -524,13 +552,14 @@ static void __do_wp_page(unsigned long error_code, unsigned long address,
 	unsigned long *pde, pte, old_page, prot;
 	unsigned long new_page;
 
-	new_page = __get_free_page(GFP_KERNEL);
+	//new_page = __get_free_page(GFP_KERNEL);
 	pde = PAGE_DIR_OFFSET(tsk->tss.cr3,address);
 	pte = *pde;
 	if (!(pte & PAGE_PRESENT))
 		goto end_wp_page;
 	if ((pte & PAGE_TABLE) != PAGE_TABLE || pte >= high_memory)
 		goto bad_wp_pagetable;
+
 	pte &= PAGE_MASK;
 	pte += PAGE_PTR(address);
 	old_page = *(unsigned long *) pte;
@@ -552,11 +581,13 @@ static void __do_wp_page(unsigned long error_code, unsigned long address,
 			//copy_page(old_page,new_page);
 
 			*(unsigned long *) pte = new_page | prot;
-			free_page(old_page);
+
+			//free_page(old_page);
 			invalidate();
 			return;
 		}
-		free_page(old_page);
+
+		//free_page(old_page);
 		oom(tsk);
 		*(unsigned long *) pte = BAD_PAGE | prot;
 		invalidate();
@@ -564,21 +595,24 @@ static void __do_wp_page(unsigned long error_code, unsigned long address,
 	}
 	*(unsigned long *) pte |= PAGE_RW;
 	invalidate();
-	if (new_page)
-		free_page(new_page);
+
+	//if (new_page)
+	//	free_page(new_page);
 	return;
 bad_wp_page:
 	printk("do_wp_page: bogus page at address %08lx (%08lx)\n",address,old_page);
 	*(unsigned long *) pte = BAD_PAGE | PAGE_SHARED;
-	send_sig(SIGKILL, tsk, 1);
+
+	//send_sig(SIGKILL, tsk, 1);
 	goto end_wp_page;
 bad_wp_pagetable:
 	printk("do_wp_page: bogus page-table at address %08lx (%08lx)\n",address,pte);
 	*pde = BAD_PAGETABLE | PAGE_TABLE;
-	send_sig(SIGKILL, tsk, 1);
+	//send_sig(SIGKILL, tsk, 1);
 end_wp_page:
-	if (new_page)
-		free_page(new_page);
+
+	//if (new_page)
+	//	free_page(new_page);
 	return;
 }
 
@@ -608,7 +642,7 @@ void do_wp_page(unsigned long error_code, unsigned long address,
 				current->tss.cr2 = address;
 				current->tss.error_code = error_code;
 				current->tss.trap_no = 14;
-				send_sig(SIGSEGV, tsk, 1);
+				//send_sig(SIGSEGV, tsk, 1);
 				return;
 			}
 		}
@@ -680,12 +714,13 @@ static inline void get_empty_page(struct task_struct * tsk, unsigned long addres
 {
 	unsigned long tmp;
 
-	if (!(tmp = get_free_page(GFP_KERNEL))) {
-		oom(tsk);
-		tmp = BAD_PAGE;
-	}
-	if (!put_page(tsk,tmp,address,PAGE_PRIVATE))
-		free_page(tmp);
+	//if (!(tmp = get_free_page(GFP_KERNEL))) {
+	//	oom(tsk);
+	//	tmp = BAD_PAGE;
+	//}
+
+	//if (!put_page(tsk,tmp,address,PAGE_PRIVATE))
+	//	free_page(tmp);
 }
 
 /*
@@ -746,8 +781,9 @@ static int try_to_share(unsigned long address, struct task_struct * tsk,
 		mem_map[MAP_NR(from)]++;
 		from &= ~PAGE_RW;
 		to = from;
-		if(newpage)	/* only if it existed. SRB. */
-			free_page(newpage);
+
+		//if(newpage)	/* only if it existed. SRB. */
+		//	free_page(newpage);
 	}
 	*(unsigned long *) from_page = from;
 	*(unsigned long *) to_page = to;
@@ -815,10 +851,11 @@ static inline unsigned long get_empty_pgtable(struct task_struct * tsk,unsigned 
 		printk("get_empty_pgtable: bad page-directory entry \n");
 		*p = 0;
 	}
-	page = get_free_page(GFP_KERNEL);
+
+	//page = get_free_page(GFP_KERNEL);
 	p = PAGE_DIR_OFFSET(tsk->tss.cr3,address);
 	if (PAGE_PRESENT & *p) {
-		free_page(page);
+		//free_page(page);
 		return *p;
 	}
 	if (*p) {
@@ -852,7 +889,8 @@ void do_no_page(unsigned long error_code, unsigned long address,
 	if (tmp) {
 		++tsk->mm->rss;
 		++tsk->mm->maj_flt;
-		swap_in((unsigned long *) page);
+
+		//swap_in((unsigned long *) page);
 		return;
 	}
 	address &= 0xfffff000;
@@ -887,7 +925,7 @@ void do_no_page(unsigned long error_code, unsigned long address,
 	tsk->tss.cr2 = address;
 	current->tss.error_code = error_code;
 	current->tss.trap_no = 14;
-	send_sig(SIGSEGV,tsk,1);
+	//send_sig(SIGSEGV,tsk,1);
 	if (error_code & 4)	/* user level access? */
 		return;
 ok_no_page:
@@ -954,8 +992,8 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
 		user_esp = ((unsigned long *) user_esp)[address >> PAGE_SHIFT];
 		printk(KERN_ALERT "*pte = %08lx\n", user_esp);
 	}
-	die_if_kernel("Oops", regs, error_code);
-	do_exit(SIGKILL);
+	//die_if_kernel("Oops", regs, error_code);
+	//do_exit(SIGKILL);
 }
 
 /*
@@ -971,40 +1009,40 @@ asmlinkage void do_page_fault(struct pt_regs *regs, unsigned long error_code)
  * ZERO_PAGE is a special page that is used for zero-initialized
  * data and COW.
  */
-unsigned long __bad_pagetable(void)
-{
-	extern char empty_bad_page_table[PAGE_SIZE];
+unsigned long __bad_pagetable(void) {
 
+	//extern char empty_bad_page_table[PAGE_SIZE];
 	//__asm__ __volatile__("cld ; rep ; stosl":
 	//	:"a" (BAD_PAGE + PAGE_TABLE),
 	//	 "D" ((long) empty_bad_page_table),
 	//	 "c" (PTRS_PER_PAGE)
 	//	:"di","cx");
-	return (unsigned long) empty_bad_page_table;
+	//return (unsigned long) empty_bad_page_table;
+	return 0;
 }
 
 unsigned long __bad_page(void)
 {
-	extern char empty_bad_page[PAGE_SIZE];
-
+	//extern char empty_bad_page[PAGE_SIZE];
 	//__asm__ __volatile__("cld ; rep ; stosl":
 	//	:"a" (0),
 	//	 "D" ((long) empty_bad_page),
 	//	 "c" (PTRS_PER_PAGE)
 	//	:"di","cx");
-	return (unsigned long) empty_bad_page;
+	//return (unsigned long) empty_bad_page;
+	return 0;
 }
 
 unsigned long __zero_page(void)
 {
-	extern char empty_zero_page[PAGE_SIZE];
-
+	//extern char empty_zero_page[PAGE_SIZE];
 	//__asm__ __volatile__("cld ; rep ; stosl":
 	//	:"a" (0),
 	//	 "D" ((long) empty_zero_page),
 	//	 "c" (PTRS_PER_PAGE)
 	//	:"di","cx");
-	return (unsigned long) empty_zero_page;
+	//return (unsigned long) empty_zero_page;
+	return 0;
 }
 
 void show_mem(void)
@@ -1013,7 +1051,8 @@ void show_mem(void)
 	int shared = 0;
 
 	printk("Mem-info:\n");
-	show_free_areas();
+
+	//show_free_areas();
 	printk("Free swap:       %6dkB\n",nr_swap_pages<<(PAGE_SHIFT-10));
 	i = high_memory >> PAGE_SHIFT;
 	while (i-- > 0) {
@@ -1029,7 +1068,8 @@ void show_mem(void)
 	printk("%d free pages\n",free);
 	printk("%d reserved pages\n",reserved);
 	printk("%d pages shared\n",shared);
-	show_buffers();
+
+	//show_buffers();
 #ifdef CONFIG_NET
 	show_net_buffers();
 #endif
@@ -1082,7 +1122,8 @@ unsigned long paging_init(unsigned long start_mem, unsigned long end_mem)
 		}
 	}
 	invalidate();
-	return free_area_init(start_mem, end_mem);
+	//return free_area_init(start_mem, end_mem);
+	return 0;
 }
 
 void mem_init(unsigned long start_low_mem,
@@ -1130,7 +1171,7 @@ void mem_init(unsigned long start_low_mem,
 			continue;
 		}
 		mem_map[MAP_NR(tmp)] = 1;
-		free_page(tmp);
+		//free_page(tmp);
 	}
 	tmp = nr_free_pages << PAGE_SHIFT;
 	printk("Memory: %luk/%luk available (%dk kernel code, %dk reserved, %dk data)\n",
@@ -1194,7 +1235,7 @@ void file_mmap_nopage(int error_code, struct vm_area_struct * area, unsigned lon
 	block = address - area->vm_start + area->vm_offset;
 	block >>= inode->i_sb->s_blocksize_bits;
 
-	page = get_free_page(GFP_KERNEL);
+	//page = get_free_page(GFP_KERNEL);
 	if (share_page(area, area->vm_task, inode, address, error_code, page)) {
 		++area->vm_task->mm->min_flt;
 		return;
@@ -1210,7 +1251,8 @@ void file_mmap_nopage(int error_code, struct vm_area_struct * area, unsigned lon
 		nr[j] = bmap(inode,block);
 	if (error_code & PAGE_RW)
 		prot |= PAGE_RW | PAGE_DIRTY;
-	page = bread_page(page, inode->i_dev, nr, inode->i_sb->s_blocksize, prot);
+
+	//page = bread_page(page, inode->i_dev, nr, inode->i_sb->s_blocksize, prot);
 
 	if (!(prot & PAGE_RW)) {
 		if (share_page(area, area->vm_task, inode, address, error_code, page))
@@ -1218,7 +1260,7 @@ void file_mmap_nopage(int error_code, struct vm_area_struct * area, unsigned lon
 	}
 	if (put_page(area->vm_task,page,address,prot))
 		return;
-	free_page(page);
+	//free_page(page);
 	oom(current);
 }
 

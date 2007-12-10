@@ -8,6 +8,8 @@
 #include <linux/time.h>
 #include <linux/sched.h>
 
+#include <asm/segment_fs.h>
+
 extern struct timeval xtime;
 
 /* converts date to days since 1/1/1970
@@ -94,10 +96,11 @@ asmlinkage int sys_time(long *tloc) {
 	return i;
 }
 
-asmlinkage int sys_stime(long * tptr)
-{
-	if (!suser())
-		return -EPERM;
+asmlinkage int sys_stime(long *tptr) {
+
+	//if (!suser())
+	//	return -EPERM;
+
 	cli();
 	xtime.tv_sec = get_fs_long((unsigned long *) tptr);
 	xtime.tv_usec = 0;
@@ -243,8 +246,9 @@ asmlinkage int sys_settimeofday(struct timeval *tv, struct timezone *tz)
 {
 	static int	firsttime = 1;
 
-	if (!suser())
-		return -EPERM;
+	//if (!suser())
+	//	return -EPERM;
+
 	if (tz) {
 		sys_tz.tz_minuteswest = get_fs_long((unsigned long *) tz);
 		sys_tz.tz_dsttime = get_fs_long(((unsigned long *) tz)+1);
@@ -305,8 +309,8 @@ asmlinkage int sys_adjtimex(struct timex *txc_p) {
 	memcpy_fromfs(&txc, txc_p, sizeof(struct timex));
 
 	/* In order to modify anything, you gotta be super-user! */
-	if (txc.mode && !suser())
-		return -EPERM;
+	//if (txc.mode && !suser())
+	//	return -EPERM;
 
 	/* Now we validate the data before disabling interrupts
 	 */

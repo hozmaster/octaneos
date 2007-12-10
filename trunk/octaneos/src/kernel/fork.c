@@ -9,6 +9,8 @@
 #include <linux/unistd.h>
 #include <linux/mm.h>
 
+#include <linux/string.h>
+
 asmlinkage void ret_from_sys_call(void) __asm__("ret_from_sys_call");
 
 /* These should maybe be in <linux/tasks.h> */
@@ -57,7 +59,7 @@ static struct file *copy_fd(struct file * old_file) {
 	int error;
 
 	if (new_file) {
-		memcpy(new_file,old_file,sizeof(struct file));
+		//memcpy(new_file,old_file,sizeof(struct file));
 		new_file->f_count = 1;
 		if (new_file->f_inode)
 			new_file->f_inode->i_count++;
@@ -81,7 +83,8 @@ static int dup_mmap(struct task_struct * tsk)
 	tsk->mm->mmap = NULL;
 	p = &tsk->mm->mmap;
 	for (mpnt = current->mm->mmap ; mpnt ; mpnt = mpnt->vm_next) {
-		tmp = (struct vm_area_struct *) kmalloc(sizeof(struct vm_area_struct), GFP_KERNEL);
+
+		//tmp = (struct vm_area_struct *) kmalloc(sizeof(struct vm_area_struct), GFP_KERNEL);
 		if (!tmp)
 			return -ENOMEM;
 		*tmp = *mpnt;
@@ -132,7 +135,8 @@ static int copy_mm(unsigned long clone_flags, struct task_struct * p)
 			return 1;
 		dup_mmap(p);		/* wrong.. */
 	}
-	return shm_fork(current, p);
+	//return shm_fork(current, p);
+	return 0;
 }
 
 static void copy_fs(unsigned long clone_flags, struct task_struct * p)
@@ -152,15 +156,17 @@ static void copy_fs(unsigned long clone_flags, struct task_struct * p)
  * information (task[nr]) and sets up the necessary registers. It
  * also copies the data segment in its entirety.
  */
-asmlinkage int sys_fork(struct pt_regs regs)
-{
-	struct pt_regs * childregs;
+asmlinkage int sys_fork(struct pt_regs regs) {
+	// TODO: fix
+#if 0
+	struct pt_regs *childregs;
 	struct task_struct *p;
 	int i,nr;
 	unsigned long clone_flags = COPYVM | SIGCHLD;
 
-	if(!(p = (struct task_struct*)__get_free_page(GFP_KERNEL)))
-		goto bad_fork;
+	//if(!(p = (struct task_struct*)__get_free_page(GFP_KERNEL)))
+	//	goto bad_fork;
+
 	nr = find_empty_process();
 	if (nr < 0)
 		goto bad_fork_free;
@@ -182,7 +188,9 @@ asmlinkage int sys_fork(struct pt_regs regs)
 	p->pid = last_pid;
 	p->p_pptr = p->p_opptr = current;
 	p->p_cptr = NULL;
-	SET_LINKS(p);
+
+	//SET_LINKS(p);
+
 	p->signal = 0;
 	p->it_real_value = p->it_virt_value = p->it_prof_value = 0;
 	p->it_real_incr = p->it_virt_incr = p->it_prof_incr = 0;
@@ -193,8 +201,9 @@ asmlinkage int sys_fork(struct pt_regs regs)
 /*
  * set up new TSS and kernel stack
  */
-	if (!(p->kernel_stack_page = get_free_page(GFP_KERNEL)))
-		goto bad_fork_cleanup;
+	//if (!(p->kernel_stack_page = get_free_page(GFP_KERNEL)))
+	//	goto bad_fork_cleanup;
+
 	*(unsigned long *)p->kernel_stack_page = STACK_MAGIC;
 	p->tss.es = KERNEL_DS;
 	p->tss.cs = KERNEL_CS;
@@ -205,12 +214,14 @@ asmlinkage int sys_fork(struct pt_regs regs)
 	p->tss.ss0 = KERNEL_DS;
 	p->tss.esp0 = p->kernel_stack_page + PAGE_SIZE;
 	p->tss.tr = _TSS(nr);
+
 	childregs = ((struct pt_regs *) (p->kernel_stack_page + PAGE_SIZE)) - 1;
 	p->tss.esp = (unsigned long) childregs;
-	p->tss.eip = (unsigned long) ret_from_sys_call;
+	//p->tss.eip = (unsigned long) ret_from_sys_call;
 	*childregs = regs;
 	childregs->eax = 0;
 	p->tss.back_link = 0;
+
 	p->tss.eflags = regs.eflags & 0xffffcfff;	/* iopl is always 0 for a new process */
 	if (IS_CLONE) {
 		if (regs.ebx)
@@ -221,39 +232,48 @@ asmlinkage int sys_fork(struct pt_regs regs)
 	}
 	p->exit_signal = clone_flags & CSIGNAL;
 	p->tss.ldt = _LDT(nr);
-	if (p->ldt) {
-		p->ldt = (struct desc_struct*) vmalloc(LDT_ENTRIES*LDT_ENTRY_SIZE);
+
+	//if (p->ldt) {
+		//p->ldt = (struct desc_struct*) vmalloc(LDT_ENTRIES*LDT_ENTRY_SIZE);
 
 		// TODO:
 		//if (p->ldt != NULL)
 		//	memcpy(p->ldt, current->ldt, LDT_ENTRIES*LDT_ENTRY_SIZE);
-	}
+	//}
 
 	// TODO:
 	//p->tss.bitmap = offsetof(struct tss_struct, io_bitmap);
 	for (i = 0; i < IO_BITMAP_SIZE+1 ; i++) /* IO bitmap is actually SIZE+1 */
 		p->tss.io_bitmap[i] = ~0;
+
 	if (last_task_used_math == current)
 		__asm__("clts ; fnsave %0 ; frstor %0":"=m" (p->tss.i387));
-	if (copy_mm(clone_flags, p))
-		goto bad_fork_cleanup;
-	copy_files(clone_flags, p);
-	copy_fs(clone_flags, p);
-	set_tss_desc(gdt+(nr<<1)+FIRST_TSS_ENTRY,&(p->tss));
-	if (p->ldt)
-		set_ldt_desc(gdt+(nr<<1)+FIRST_LDT_ENTRY,p->ldt, 512);
-	else
-		set_ldt_desc(gdt+(nr<<1)+FIRST_LDT_ENTRY,&default_ldt, 1);
+
+	//if (copy_mm(clone_flags, p))
+	//	goto bad_fork_cleanup;
+
+	//copy_files(clone_flags, p);
+	//copy_fs(clone_flags, p);
+
+	//set_tss_desc(gdt+(nr<<1)+FIRST_TSS_ENTRY,&(p->tss));
+	//if (p->ldt)
+	//	set_ldt_desc(gdt+(nr<<1)+FIRST_LDT_ENTRY,p->ldt, 512);
+	//else
+	//	set_ldt_desc(gdt+(nr<<1)+FIRST_LDT_ENTRY,&default_ldt, 1);
 
 	p->counter = current->counter >> 1;
 	p->state = TASK_RUNNING;	/* do this last, just in case */
 	return p->pid;
+
 bad_fork_cleanup:
 	task[nr] = NULL;
-	REMOVE_LINKS(p);
-	free_page(p->kernel_stack_page);
+	//REMOVE_LINKS(p);
+
+	//free_page(p->kernel_stack_page);
 bad_fork_free:
-	free_page((long) p);
+	//free_page((long) p);
 bad_fork:
 	return -EAGAIN;
+#endif
+	return 0;
 }
