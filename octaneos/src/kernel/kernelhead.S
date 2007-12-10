@@ -1,7 +1,6 @@
 /*
  *
  * Berlin Brown
- * bigbinc@hotmail.com
  * $Id: kernelhead.S,v 1.4 2005/05/26 00:06:53 bigbinc Exp $
  *
  * This is exactly before, we enter into the kernel
@@ -145,7 +144,7 @@ setup_idt:
     movl $(__KERNEL_CS << 16),%eax
     movw %dx,%ax
     movw $0x8E00,%dx
-    lea SYMBOL_NAME(_idt),%edi
+    lea SYMBOL_NAME(idt),%edi
     mov $256,%ecx
 rp_sidt:
     movl %eax,(%edi)
@@ -251,11 +250,10 @@ ALIGN
 
 ENTRY(idt_descr)
     .word 256*8-1
-    .long 0xc0000000+SYMBOL_NAME(_idt)
+    .long 0xc0000000+SYMBOL_NAME(idt)
     .align 4
-ENTRY(_idt)
+ENTRY(idt)
     .fill 256,8,0
-
 
 ALIGN
 .word 0

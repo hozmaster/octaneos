@@ -30,6 +30,8 @@
 #include <system/major_devices.h>
 #include <linux/block_devices.h>
 
+#include <linux/string.h>
+
 #ifndef MAX_BLKDDEV
 #define MAX_BLKDEV 32
 #endif
@@ -193,8 +195,10 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 
 	req->next = NULL;
 	cli();
-	if (req->bh)
-		mark_buffer_clean(req->bh);
+
+	//if (req->bh)
+	//	mark_buffer_clean(req->bh);
+
 	if (!(tmp = dev->current_request)) {
 		dev->current_request = req;
 		(dev->request_fn)();
@@ -202,17 +206,14 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 		return;
 	}
 	for ( ; tmp->next ; tmp = tmp->next) {
-		if ((IN_ORDER(tmp,req) ||
-		    !IN_ORDER(tmp,tmp->next)) &&
-		    IN_ORDER(req,tmp->next))
-			break;
+
+		//if ((IN_ORDER(tmp,req) ||
+		//    !IN_ORDER(tmp,tmp->next)) &&
+		///   IN_ORDER(req,tmp->next))
+		//	break;
 	}
 	req->next = tmp->next;
 	tmp->next = req;
-
-/* for SCSI devices, call request_fn unconditionally */
-	if (scsi_major(MAJOR(req->dev)))
-		(dev->request_fn)();
 
 	sti();
 }
@@ -244,9 +245,10 @@ static void make_request(int major,int rw, struct buffer_head * bh) {
 			bh->b_dirt = bh->b_uptodate = 0;
 			return;
 		}
-	lock_buffer(bh);
+
+	//lock_buffer(bh);
 	if ((rw == WRITE && !bh->b_dirt) || (rw == READ && bh->b_uptodate)) {
-		unlock_buffer(bh);
+		//unlock_buffer(bh);
 		return;
 	}
 
@@ -282,7 +284,8 @@ repeat:
 				req->bhtail->b_reqnext = bh;
 				req->bhtail = bh;
 				req->nr_sectors += count;
-				mark_buffer_clean(bh);
+
+				//mark_buffer_clean(bh);
 				sti();
 				return;
 			}
@@ -298,7 +301,8 @@ repeat:
 			    	req->buffer = bh->b_data;
 			    	req->current_nr_sectors = count;
 			    	req->sector = sector;
-				mark_buffer_clean(bh);
+
+					//mark_buffer_clean(bh);
 			    	req->bh = bh;
 			    	sti();
 			    	return;
@@ -315,7 +319,7 @@ repeat:
 	if (! req) {
 		if (rw_ahead) {
 			sti();
-			unlock_buffer(bh);
+			//unlock_buffer(bh);
 			return;
 		}
 		sleep_on(&wait_for_request);

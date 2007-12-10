@@ -93,7 +93,6 @@ __OUT1(s,x) __OUT2(s,s1,"w") : : "a" (value), "Nd" (port)); } \
 		__asm__ __volatile__ ("in" #s " %" s2 "1,%" s1 "0"
 
 
-
 #define __IN(s,s1,i...) \
 __IN1(s) __IN2(s,s1,"w") : "=a" (_v) : "Nd" (port) ,##i ); return _v; } \
 __IN1(s##_p) __IN2(s,s1,"w") __FULL_SLOW_DOWN_IO : "=a" (_v) : "Nd" (port) ,##i ); return _v; }
@@ -109,7 +108,6 @@ static inline void __outs##s(unsigned short port, const void * addr, unsigned lo
 : "=S" (addr), "=c" (count) : "d" (port),"0" (addr),"1" (count)); }
 
 
-
 #define RETURN_TYPE unsigned char
 __IN(b,"")
 #undef RETURN_TYPE
@@ -119,7 +117,6 @@ __IN(w,"")
 #define RETURN_TYPE unsigned int
 __IN(l,"")
 #undef RETURN_TYPE
-
 
 __OUT(b,"b",char)
 __OUT(w,"w",short)
@@ -134,8 +131,7 @@ __OUTS(w)
 __OUTS(l)
 
 
-// ==========++ IO Code ++=====================
-
+// ========== IO Code =====================
 
 unsigned char _ctype[] = {
   _C,_C,_C,_C,_C,_C,_C,_C,

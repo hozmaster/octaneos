@@ -33,6 +33,8 @@
 #include <linux/kernel_stat.h>
 #include <linux/ptrace.h>
 
+#include <asm/io.h>
+
 #define TIMER_IRQ               0
 #define TIMER_LIST_REQUESTS     64
 
@@ -320,7 +322,8 @@ asmlinkage void math_emulate(long arg)
 {
   printk("math-emulation not enabled and no coprocessor found.\n");
   printk("killing %s.\n",current->comm);
-  send_sig(SIGFPE,current,1);
+
+  //send_sig(SIGFPE,current,1);
   schedule();
 }
 
@@ -351,10 +354,10 @@ asmlinkage void schedule(void) {
 
 /* check alarm, wake up any interruptible tasks that have got a signal */
 
-	if (intr_count) {
-		printk("Aiee: scheduling in interrupt\n");
-		intr_count = 0;
-	}
+	//if (intr_count) {
+	//	printk("Aiee: scheduling in interrupt\n");
+	//	intr_count = 0;
+	//}
 	cli();
 	ticks = itimer_ticks;
 	itimer_ticks = 0;
@@ -367,7 +370,8 @@ asmlinkage void schedule(void) {
 			goto confuse_gcc1;
 		if (ticks && p->it_real_value) {
 			if (p->it_real_value <= ticks) {
-				send_sig(SIGALRM, p, 1);
+
+				//send_sig(SIGALRM, p, 1);
 				if (!p->it_real_incr) {
 					p->it_real_value = 0;
 					goto end_itimer;
@@ -683,7 +687,7 @@ static void do_timer(struct pt_regs *regs) {
 		/* Update ITIMER_VIRT for current task if not in a system call */
 		if (current->it_virt_value && !(--current->it_virt_value)) {
 			current->it_virt_value = current->it_virt_incr;
-			send_sig(SIGVTALRM,current,1);
+			//send_sig(SIGVTALRM,current,1);
 		}
 	} else {
 		current->stime++;
@@ -697,7 +701,7 @@ static void do_timer(struct pt_regs *regs) {
 	/* Update ITIMER_PROF for the current task */
 	if (current->it_prof_value && !(--current->it_prof_value)) {
 		current->it_prof_value = current->it_prof_incr;
-		send_sig(SIGPROF,current,1);
+		//send_sig(SIGPROF,current,1);
 	}
 	for (mask = 1, tp = timer_table+0 ; mask ; tp++,mask += mask) {
 		if (mask > timer_active)
@@ -733,7 +737,8 @@ asmlinkage int sys_alarm(long seconds) {
 	it_new.it_interval.tv_sec = it_new.it_interval.tv_usec = 0;
 	it_new.it_value.tv_sec = seconds;
 	it_new.it_value.tv_usec = 0;
-	_setitimer(ITIMER_REAL, &it_new, &it_old);
+
+	//_setitimer(ITIMER_REAL, &it_new, &it_old);
 	return(it_old.it_value.tv_sec + (it_old.it_value.tv_usec / 1000000));
 }
 
@@ -764,8 +769,9 @@ asmlinkage int sys_getegid(void) {
 asmlinkage int sys_nice(long increment) {
 	int newprio;
 
-	if (increment < 0 && !suser())
-		return -EPERM;
+	//if (increment < 0 && !suser())
+	//	return -EPERM;
+
 	newprio = current->priority - increment;
 	if (newprio < 1)
 		newprio = 1;
@@ -823,13 +829,16 @@ void sched_init(void) {
 	int i;
 	struct desc_struct *p;
 
-	bh_base[TIMER_BH].routine = timer_bh;
-	bh_base[TQUEUE_BH].routine = tqueue_bh;
+	// TODO:
+	//bh_base[TIMER_BH].routine = timer_bh;
+	//bh_base[TQUEUE_BH].routine = tqueue_bh;
+
 	if (sizeof(struct sigaction) != 16)
 		panic("Struct sigaction MUST be 16 bytes");
-	set_tss_desc(gdt+FIRST_TSS_ENTRY,&init_task.tss);
-	set_ldt_desc(gdt+FIRST_LDT_ENTRY,&default_ldt,1);
-	set_system_gate(0x80,&system_call);
+
+	//set_tss_desc(gdt+FIRST_TSS_ENTRY,&init_task.tss);
+	//set_ldt_desc(gdt+FIRST_LDT_ENTRY,&default_ldt,1);
+	_set_system_gate(0x80,&system_call);
 	p = gdt+2+FIRST_TSS_ENTRY;
 	for(i=1 ; i<NR_TASKS ; i++) {
 		task[i] = NULL;

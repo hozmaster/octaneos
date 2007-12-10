@@ -213,7 +213,7 @@ static void set_trap_gate(unsigned int n, void *addr) {
 
 // why this has one downslash, Ill never know
 void _set_system_gate(unsigned int n, void *addr) {
-  __set_gate(idt + n,15,3,addr);
+	__set_gate(idt + n,15,3,addr);
 
 }
 

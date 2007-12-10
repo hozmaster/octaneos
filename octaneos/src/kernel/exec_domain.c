@@ -25,7 +25,7 @@ struct exec_domain default_exec_domain = {
 static struct exec_domain *exec_domains = &default_exec_domain;
 
 static asmlinkage void no_lcall7(struct pt_regs *regs) {
-	send_sig(SIGSEGV, current, 1);
+	//send_sig(SIGSEGV, current, 1);
 }
 
 struct exec_domain *lookup_exec_domain(unsigned long personality) {

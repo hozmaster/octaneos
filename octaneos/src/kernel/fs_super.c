@@ -34,6 +34,8 @@
 #include <linux/block_devices.h>
 #include <system/filesystem.h>
 #include <linux/mm.h>
+
+#include <asm/segment_fs.h>
  
 extern struct file_operations *get_blkfops(unsigned int);
 extern struct file_operations *get_chrfops(unsigned int);
@@ -87,21 +89,23 @@ int unregister_filesystem(struct file_system_type * fs)
 static int fs_index(const char * __name)
 {
 	struct file_system_type * tmp;
-	char * name;
+	char *name;
 	int err, index;
 
-	err = getname(__name, &name);
+	//err = getname(__name, &name);
 	if (err)
 		return err;
 	index = 0;
 	for (tmp = file_systems ; tmp ; tmp = tmp->next) {
 		if (strcmp(tmp->name, name) == 0) {
-			putname(name);
+
+			//putname(name);
 			return index;
 		}
 		index++;
 	}
-	putname(name);
+
+	//putname(name);
 	return -EINVAL;
 }
 
@@ -164,16 +168,15 @@ asmlinkage int sys_sysfs(int option, ...)
 	return retval;
 }
 
-int get_filesystem_list(char * buf)
-{
+int get_filesystem_list(char *buf) {
 	int len = 0;
 	struct file_system_type * tmp;
-
 	tmp = file_systems;
 	while (tmp && len < PAGE_SIZE - 80) {
-		len += sprintf(buf+len, "%s\t%s\n",
-			tmp->requires_dev ? "" : "nodev",
-			tmp->name);
+
+		//len += sprintf(buf+len, "%s\t%s\n",
+		//			   tmp->requires_dev ? "" : "nodev",
+		//			   tmp->name);
 		tmp = tmp->next;
 	}
 	return len;
@@ -217,7 +220,8 @@ void sync_supers(dev_t dev)
 			continue;
 		if (dev && sb->s_dev != dev)
 			continue;
-		wait_on_super(sb);
+
+		//wait_on_super(sb);
 		if (!sb->s_dev || !sb->s_dirt)
 			continue;
 		if (dev && (dev != sb->s_dev))
@@ -236,7 +240,7 @@ static struct super_block * get_super(dev_t dev)
 	s = 0+super_blocks;
 	while (s < NR_SUPER+super_blocks)
 		if (s->s_dev == dev) {
-			wait_on_super(s);
+			//wait_on_super(s);
 			if (s->s_dev == dev)
 				return s;
 			s = 0+super_blocks;
@@ -273,7 +277,8 @@ static struct super_block * read_super(dev_t dev,char *name,int flags,
 
 	if (!dev)
 		return NULL;
-	check_disk_change(dev);
+
+	//check_disk_change(dev);
 	s = get_super(dev);
 	if (s)
 		return s;
@@ -350,7 +355,7 @@ static int do_umount(dev_t dev)
 		if (!(sb=get_super(dev)))
 			return -ENOENT;
 		if (!(sb->s_flags & MS_RDONLY)) {
-			fsync_dev(dev);
+			//fsync_dev(dev);
 			retval = do_remount_sb(sb, MS_RDONLY, 0);
 			if (retval)
 				return retval;
@@ -394,20 +399,23 @@ asmlinkage int sys_umount(char * name)
 	struct inode dummy_inode;
 	struct file_operations * fops;
 
-	if (!suser())
-		return -EPERM;
-	retval = namei(name,&inode);
+	//if (!suser())
+	//	return -EPERM;
+
+	//retval = namei(name,&inode);
 	if (retval) {
-		retval = lnamei(name,&inode);
+
+		//retval = lnamei(name,&inode);
 		if (retval)
 			return retval;
 	}
 	if (S_ISBLK(inode->i_mode)) {
 		dev = inode->i_rdev;
-		if (IS_NODEV(inode)) {
-			iput(inode);
-			return -EACCES;
-		}
+
+		//if (IS_NODEV(inode)) {
+		//	iput(inode);
+		//	return -EACCES;
+		//}
 	} else {
 		if (!inode || !inode->i_sb || inode != inode->i_sb->s_mounted) {
 			iput(inode);
@@ -424,7 +432,7 @@ asmlinkage int sys_umount(char * name)
 		return -ENXIO;
 	}
 	if (!(retval = do_umount(dev)) && dev != ROOT_DEV) {
-		fops = get_blkfops(MAJOR(dev));
+		//fops = get_blkfops(MAJOR(dev));
 		if (fops && fops->release)
 			fops->release(inode,NULL);
 		if (MAJOR(dev) == UNNAMED_MAJOR)
@@ -434,7 +442,8 @@ asmlinkage int sys_umount(char * name)
 		iput(inode);
 	if (retval)
 		return retval;
-	fsync_dev(dev);
+
+	//fsync_dev(dev);
 	return 0;
 }
 
@@ -453,7 +462,7 @@ static int do_mount(dev_t dev, const char * dir, char * type, int flags, void * 
 	struct super_block * sb;
 	int error;
 
-	error = namei(dir,&dir_i);
+	//error = namei(dir,&dir_i);
 	if (error)
 		return error;
 	if (dir_i->i_count != 1 || dir_i->i_mount) {
@@ -508,7 +517,7 @@ static int do_remount(const char *dir,int flags,char *data)
 	struct inode *dir_i;
 	int retval;
 
-	retval = namei(dir,&dir_i);
+	//retval = namei(dir,&dir_i);
 	if (retval)
 		return retval;
 	if (dir_i != dir_i->i_sb->s_mounted) {
@@ -542,9 +551,10 @@ static int copy_mount_options (const void * data, unsigned long *where)
 	i = vma->vm_end - (unsigned long) data;
 	if (PAGE_SIZE <= (unsigned long) i)
 		i = PAGE_SIZE-1;
-	if (!(page = __get_free_page(GFP_KERNEL))) {
-		return -ENOMEM;
-	}
+
+	//if (!(page = __get_free_page(GFP_KERNEL))) {
+	//	return -ENOMEM;
+	//}
 	memcpy_fromfs((void *) page,data,i);
 	*where = page;
 	return 0;
@@ -576,8 +586,9 @@ asmlinkage int sys_mount(char * dev_name, char * dir_name, char * type,
 	unsigned long flags = 0;
 	unsigned long page = 0;
 
-	if (!suser())
-		return -EPERM;
+	//if (!suser())
+	//	return -EPERM;
+
 	if ((new_flags &
 	     (MS_MGC_MSK | MS_REMOUNT)) == (MS_MGC_VAL | MS_REMOUNT)) {
 		retval = copy_mount_options (data, &page);
@@ -586,29 +597,33 @@ asmlinkage int sys_mount(char * dev_name, char * dir_name, char * type,
 		retval = do_remount(dir_name,
 				    new_flags & ~MS_MGC_MSK & ~MS_REMOUNT,
 				    (char *) page);
-		free_page(page);
+
+		//free_page(page);
 		return retval;
 	}
 	retval = copy_mount_options (type, &page);
 	if (retval < 0)
 		return retval;
 	fstype = get_fs_type((char *) page);
-	free_page(page);
+
+	//free_page(page);
 	if (!fstype)		
 		return -ENODEV;
 	t = fstype->name;
 	if (fstype->requires_dev) {
-		retval = namei(dev_name,&inode);
+
+		//retval = namei(dev_name,&inode);
 		if (retval)
 			return retval;
 		if (!S_ISBLK(inode->i_mode)) {
 			iput(inode);
 			return -ENOTBLK;
 		}
-		if (IS_NODEV(inode)) {
-			iput(inode);
-			return -EACCES;
-		}
+
+		//if (IS_NODEV(inode)) {
+		//	iput(inode);
+		//	return -EACCES;
+		//}
 		dev = inode->i_rdev;
 		if (MAJOR(dev) >= MAX_BLKDEV) {
 			iput(inode);
@@ -619,7 +634,7 @@ asmlinkage int sys_mount(char * dev_name, char * dir_name, char * type,
 			return -EMFILE;
 		inode = NULL;
 	}
-	fops = get_blkfops(MAJOR(dev));
+	//fops = get_blkfops(MAJOR(dev));
 	if (fops && fops->open) {
 		retval = fops->open(inode,NULL);
 		if (retval) {
@@ -637,7 +652,8 @@ asmlinkage int sys_mount(char * dev_name, char * dir_name, char * type,
 		}
 	}
 	retval = do_mount(dev,dir_name,t,flags,(void *) page);
-	free_page(page);
+
+	//free_page(page);
 	if (retval && fops && fops->release)
 		fops->release(inode,NULL);
 	iput(inode);
@@ -651,10 +667,10 @@ void mount_root(void)
 	struct inode * inode;
 
 	memset(super_blocks, 0, sizeof(super_blocks));
-	fcntl_init_locks();
+	//fcntl_init_locks();
 	if (MAJOR(ROOT_DEV) == FLOPPY_MAJOR) {
 		printk(KERN_NOTICE "VFS: Insert root floppy and press ENTER\n");
-		wait_for_keypress();
+		//wait_for_keypress();
 	}
 	for (fs_type = file_systems ; fs_type ; fs_type = fs_type->next) {
 		if (!fs_type->requires_dev)

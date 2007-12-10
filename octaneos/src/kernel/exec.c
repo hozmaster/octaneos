@@ -502,7 +502,7 @@ void flush_old_exec(struct linux_binprm * bprm)
 
 	/* Flush the old ldt stuff... */
 	if (current->ldt) {
-		free_page((unsigned long) current->ldt);
+		//free_page((unsigned long) current->ldt);
 		current->ldt = NULL;
 		for (i=1 ; i<NR_TASKS ; i++) {
 			if (task[i] == current)  {
@@ -702,8 +702,9 @@ restart_interp:
 exec_error2:
 	iput(bprm.inode);
 exec_error1:
-	for (i=0 ; i<MAX_ARG_PAGES ; i++)
-		free_page(bprm.page[i]);
+	
+	//for (i=0 ; i<MAX_ARG_PAGES ; i++)
+	//	free_page(bprm.page[i]);
 	return(retval);
 }
 
