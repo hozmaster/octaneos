@@ -1,0 +1,165 @@
+#################################################
+### Misc Operating System Development Notes
+###
+### THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+### "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+### LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+### A PARTICULAR PURPOSE ARE DISCLAIMED.
+###
+### See LICENSE.OCTANE for more details
+#################################################
+
+This document helps to outline some of the sequence of 
+kernel operation calls.
+
+The format of the calls uses the "octane meta language"
+
+//-------------------------------------
+// Open file operations
+// The open operations eventually invoke
+// block device drivers like the floppy.
+//-------------------------------------
+(syscall-open:
+.main-init-> {	
+	file: init/main.c;
+	
+	.lib/open-> {
+		file: lib/open.c;
+						
+		.action-> {
+			// This invokes the system call
+			// see lib/open.c open
+			action: movl %2, %%ebx;
+			action: int $0x80;
+			flag: O_RDWR;
+			syscall_nr: 02; 
+		}
+		
+		.array-sys_call_table-> {
+			file: kernel/sys_call.S;
+			index: 5;	
+			action: sys_open;			
+		}
+		
+		.fs_open-sys_open-> {
+			file: kernel/fs_open.c;
+			
+			.fs_open->do_open-> {
+				file: kernel/fs_open.c;				
+				
+				.action {
+					action: FD_CLR(fd,&current->files->close_on_exec);
+					action: open_namei(filename,flag,mode,&inode,NULL);
+				}
+				
+				.fs_namei-open_namei-> {
+					file: kernel/fs_namei.c;
+					
+					.inode-iput-> {
+						file: kernel/inode.c;
+						
+						.action {
+							action: wait_on_inode;
+							action: write_inode;
+						}
+					}
+				}
+			}
+		}
+	}
+})
+
+//-------------------------------------
+// Floppy Operations
+// Initializing the floppy driver
+//-------------------------------------
+(floppy-operations:
+.main-init-> {
+	file: init/main.c;
+	
+	.floppy-floppy_init-> {
+		file: kernel/floppy.c;
+		
+		.block-register_blkdev-> {
+			file: kernel/block_devices.c;
+			arg-major-nr: MAJOR_NR;
+			arg-name: "fd";
+			arg-file_operations: floppy_fops;
+			
+			.action-> {
+				action: blkdevs[major].name;
+				action: blkdevs[major].fops;
+			}
+			
+			.class-file_operations {
+				file: include/system/filesystem.h;
+										
+				lseek; read;
+				write; readdir;
+				select; ioctl;
+				mmap; open;
+				release; fsync;
+				fasync; check_media_change;
+				revalidate;
+			}
+						
+			.devices-blkdev_open-> {
+				file: devices.c;
+				
+				.action-> {
+					action: filp->f_op = blkdevs[i].fops;
+					action: filp->f_op->open(inode, filp);
+				}
+			}
+			
+			.fs_open-do_open {
+				// This eventually opens the block device.
+				action: f->f_op = inode->i_op->default_file_ops;
+				action: error = f->f_op->open(inode,f);
+			}
+			
+		} // End of Register Blk Dev
+	}
+}
+
+//-------------------------------------
+// File and Inode Operations and Structures from block devices
+//-------------------------------------
+.class-file_operations {
+	file: devices.c;
+	singleton: def_blk_fops;
+	
+	.operation {
+		lseek;
+		read;
+		write;
+		readdir;
+		select;
+		ioctl;
+		mmap;
+		open: blkdev_open;
+		release;
+	}
+}
+
+//-------------------------------------
+// Inode Operations and Structures from block devices
+//
+// Eventually will end up with this:
+//  <fs/exec.c: f->f_op = inode->i_op->default_file_ops;>
+// or
+//  <linux/fs/open.c: f->f_op = inode->i_op->default_file_ops;>
+// Also see ext2 definitions.
+//-------------------------------------
+.class-inode-operations {
+	file: devices.c;
+	singleton: blkdev_inode_operations;	
+	
+	file_operations: &def_blk_fops;
+	create; lookup;
+	link; unlink; symlink;
+	mkdir; rmdir; mknod; rename;
+	readlink; follow_link; bmap; 
+	truncate; permission;
+
+}) // End of Floppy Operations
