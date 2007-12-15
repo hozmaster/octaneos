@@ -43,7 +43,6 @@ _start:
 	movsw
 	ljmp	$INITSEG, $go
 
-
 go:	movw	$0x4000-12, %di
 	movw	%ax, %ds
 	movw	%ax, %ss
@@ -64,34 +63,31 @@ go:	movw	$0x4000-12, %di
 	movb	$36, 0x4(%di)
 	movw	%di, %fs:(%bx)
 	movw	%es, %fs:2(%bx)
-
-
-
 	movw	$disksizes, %si
 probe_loop:
 	lodsb
 	cbtw
 	movw	%ax, sectors
 	cmpw	$disksizes+4, %si
-	jae	got_sectors
+	jae	    got_sectors
 
 	xchgw	%cx, %ax
 	xorw	%dx, %dx
 	movw	$0x0200, %bx
 	movw	$0x0201, %ax
-	int	$0x13
-	jc	probe_loop
+	int	    $0x13
+	jc	    probe_loop
 
 got_sectors:
 	movb	$0x03, %ah
 	xorb	%bh, %bh
-	int	$0x10
+	int	    $0x10
 	movw	$9, %cx
 	movb	$0x07, %bl
 				
 	movw	$msg1, %bp
 	movw	$0x1301, %ax
-	int	$0x10
+	int	    $0x10
 
 
 	movw	$0x0001, %ax
@@ -123,8 +119,6 @@ no_cyl_crossing:
 	call	read_it
 	call	kill_motor
 	call	print_nl
-
-
 
 	movw	root_dev, %ax
 	orw	%ax, %ax
@@ -282,8 +276,6 @@ print_nl:
 	movb	$0xa, %al		# LF
 	int 	$0x10
 	ret
-
-
 
 print_hex:
 	movw	$4, %cx
