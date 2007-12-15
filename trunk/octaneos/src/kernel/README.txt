@@ -7,8 +7,8 @@
 	4/5/2004:
 -------------------------------------------------
 	This directory contains pretty much the entire OS kernel.
-	Most of the drivers, filesystem, memory modules will be located
-	here.
+	Most of the source for the drivers, filesystem, 
+	memory modules will be located here.
 	
 -------------------------------------------------
 	4/5/2004 Status:
