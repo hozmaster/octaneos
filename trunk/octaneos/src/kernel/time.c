@@ -11,6 +11,7 @@
 #include <asm/segment_fs.h>
 
 extern struct timeval xtime;
+extern simple_time cur_simpletime;
 
 /* converts date to days since 1/1/1970
  * assumes year,mon,day in normal date format
@@ -75,6 +76,15 @@ void time_init(void)
 	  }
 	if ((year += 1900) < 1970)
 		year += 100;
+	
+	// Also, set the simple time struct
+	cur_simpletime.year = year;
+	cur_simpletime.mon = mon;
+	cur_simpletime.day = day;
+	cur_simpletime.hour = hour;
+	cur_simpletime.min = min;
+	cur_simpletime.sec = sec;
+	
 	xtime.tv_sec = mktime(year, mon, day, hour, min, sec);
 }
 /* 

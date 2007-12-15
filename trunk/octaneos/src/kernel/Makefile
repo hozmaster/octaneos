@@ -26,9 +26,10 @@ LDFLAGS = -m elf_i386
 .s.o:
 	$(AS) -c -o $*.o $<
 .c.o:
-	@echo " /// compiling Standard C file and gcc asm code ///"
+	@echo "INFO: compiling Standard C file and gcc asm code ///"
+	mkdir -p `dirname asm/$@.s`
 	$(CC) $(CFLAGS) -S $< -o asm/$@.s
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -o $@
 
 ##################################################
 ## Kernel File Object Listings
@@ -43,6 +44,7 @@ OBJS = \
 	fs_super.o fs_buffer.o hexdump.o		\
     inode.o fs_file_table.o                 \
 	exec_domain.o fork.o time.o memory.o    \
+	tests/traps/test_traps_1.o
 
 all: kernel.o
 

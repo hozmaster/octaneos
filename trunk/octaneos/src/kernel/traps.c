@@ -87,9 +87,10 @@ void panic(const char *str)
 {
   static char buf[1024];
   __blue_screen();
-  __sprintf(buf, "======================================\n", str); __puts(buf);
-  __sprintf(buf, ">> KERNEL PANIC << : %s\n", str); __puts(buf);
-  __sprintf(buf, "======================================\n", str); __puts(buf);
+  printk("======================================\n", str);
+  printk(">> OCTANE <<\n");
+  printk(">> KERNEL PANIC << : %s\n", str);
+  printk("======================================\n", str);
   get_all_registers();
   for(;;);
 
