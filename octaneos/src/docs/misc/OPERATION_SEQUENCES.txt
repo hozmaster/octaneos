@@ -113,7 +113,10 @@ The format of the calls uses the "octane meta language"
 			}
 			
 			.fs_open-do_open {
+				//*******************************
 				// This eventually opens the block device.
+				// Also, we need to check for ioctl, transfer, read, etc?
+				//*******************************
 				action: f->f_op = inode->i_op->default_file_ops;
 				action: error = f->f_op->open(inode,f);
 			}
