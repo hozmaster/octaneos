@@ -24,10 +24,10 @@
 #include <linux/errno.h>
 #include <linux/signal.h>
 
-#define HZ 100
-#define CLOCK_TICK_RATE 1193180
-#define CLOCK_TICK_FACTOR       20
-#define TIMER_LATCH  ((CLOCK_TICK_RATE + HZ/2) / HZ)
+#define HZ                100
+#define CLOCK_TICK_RATE   1193180
+#define CLOCK_TICK_FACTOR 20
+#define TIMER_LATCH       ((CLOCK_TICK_RATE + HZ/2) / HZ)
 
 asmlinkage void get_all_registers(void);
 
@@ -129,13 +129,11 @@ extern void set_intr_gate(unsigned int, void *);
 
 extern struct TSS_object _tss;
 
-unsigned long _get_jiffy_value(void)
-{
+unsigned long _get_jiffy_value(void) {
   return jiffies;
 }
 
-void __xloop_delay(unsigned long loops)
-{
+void __xloop_delay(unsigned long loops) {
   int d0;
   __asm__ __volatile__(
 		       "\tjmp 1f\n"
@@ -147,12 +145,11 @@ void __xloop_delay(unsigned long loops)
 		       :"0" (loops));
 }
 
-int check_timer_irq(void)
-{
+int check_timer_irq(void) {
   unsigned int __tmp01 =  jiffies;
   sti();    
   __xloop_delay(0xf0000); 
-  return jiffies  - __tmp01;    
+  return jiffies - __tmp01;    
 }
 
 void __debug_timer_irq(void) {
@@ -163,7 +160,6 @@ void __debug_timer_irq(void) {
   // turn em back on
   _enable_interrupts();
 }
-
 
 int request_irq(unsigned int irq, void (*handler)(int)) {
 	struct sigaction signal_action;
@@ -193,9 +189,13 @@ int irqaction(unsigned int irq, struct sigaction *new_signal_action) {
 	*signal_action = *new_signal_action;
 	signal_action->sa_mask = 1;
 
-	//if (sa->sa_flags & SA_INTERRUPT) {
-	//	set_intr_gate(0x20+irq, fast_interrupt[irq]);
-	//} else {
+#if 0
+	// TODO:
+	// Removed fast interrupt code
+	if (sa->sa_flags & SA_INTERRUPT) {
+		set_intr_gate(0x20+irq, fast_interrupt[irq]);
+	} else {
+#endif
 		set_intr_gate(0x20+irq, interrupt[irq]);
 
 	if (irq < 8) {
@@ -362,7 +362,7 @@ void load_remap_controller(void) {
   outb_p(0x02, 0xA1);
   outb_p(0x01, 0xA1);
 
-  __xloop_delay(100);  
+  __xloop_delay(100); 
   outb(cached_21, 0x21);
   outb(cached_A1, 0xA1);
   
@@ -385,16 +385,13 @@ static struct sigaction ignore_IRQ = {
 void print_register_list(struct debug_registers *check_registers) {
 
   char buf[255];
-  __sprintf(buf, " >> Checking registers <<\n"); __puts(buf);
-  __sprintf(buf, "    EAX: %x    ECX: %x    EBX: %x\n", check_registers->__eax,
+  printk(" >> Checking registers <<\n"); __puts(buf);
+  printk("    EAX: %x    ECX: %x    EBX: %x\n", check_registers->__eax,
 	    check_registers->__ecx, check_registers->__ebx);
-  __puts(buf);
-  __sprintf(buf, "    DS: %x    ES: %x    FS: %x\n", check_registers->__ds,
+  printk("    DS: %x    ES: %x    FS: %x\n", check_registers->__ds,
 	    check_registers->__es, check_registers->__fs);
-  __puts(buf);
-  __sprintf(buf, "    EIP: %x    CS: %x    OLDAX: %x\n", check_registers->__eip,
+  printk("    EIP: %x    CS: %x    OLDAX: %x\n", check_registers->__eip,
 	    check_registers->__cs, check_registers->__old_eax);
-  __puts(buf);
 
 }
 
@@ -405,27 +402,12 @@ void init_interrupts(void) {
 	
 	// Set the 16 interrupts initially to (default) bad_interrupts
 	for (i = 0; i < 16 ; i++) {
-		set_intr_gate(0x20+i, bad_interrupt[i]);
+		set_intr_gate(0x20 + i, bad_interrupt[i]);
 	}
 
-	if (irqaction(2,&ignore_IRQ))
+	if (irqaction(2, &ignore_IRQ))
 		printk("Unable to get IRQ2 for cascade\n");
 	if (request_irq(13, math_error_irq))
 		printk("Unable to get IRQ13 for math-error handler\n");
 
-	disable_irq(0);
-	
-	//**********************************************
-	// program the 8253 - Interval Timer
-	// Set frequency of our timer
-	// LATCH = 11931.8 gives to 8253 (in output) 
-	// a frequency of 1193180 / 11931.8 = 100 Hz, so period = 10ms
-	//**********************************************
-	outb_p(0x34,0x43);
-	outb_p(TIMER_LATCH & 0xff, 0x40);
-	outb(TIMER_LATCH >> 8 , 0x40);
-	
-	// prepare the timer_interrupt
-	handle_interrupt(0x00);	
-	handle_interrupt(0x01);
 }

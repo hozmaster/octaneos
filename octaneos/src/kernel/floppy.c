@@ -273,13 +273,11 @@ static unsigned char fdc_version = 0x90;	/* FDC version code */
 static void do_rd_request(void) {
 }
 
-static void select_callback(unsigned long unused)
-{
+static void select_callback(unsigned long unused) {
 	floppy_ready();
 }
 
-static void floppy_select(unsigned int nr)
-{
+static void floppy_select(unsigned int nr) {
 	static struct timer_list select = { NULL, NULL, 0, 0, select_callback };
 
 	if (current_drive == (current_DOR & 3)) {
@@ -1246,8 +1244,7 @@ outb_p(addr,0x70); \
 inb_p(0x71); \
 })
 
-static struct floppy_struct *find_base(int drive,int code)
-{
+static struct floppy_struct *find_base(int drive,int code) {
 	struct floppy_struct *base;
 
 	if (code > 0 && code < 7) {                            /* -bb*/
@@ -1262,9 +1259,8 @@ static struct floppy_struct *find_base(int drive,int code)
 	return NULL;
 }
 
-static void config_types(void)
-{
-	printk("Floppy drive(s): ");
+static void config_types(void) {
+	printk("INFO: Floppy drive(s): ");
 	base_type[0] = find_base(0,(CMOS_READ(0x10) >> 4) & 15);
 	if ((CMOS_READ(0x10) & 15) == 0)
 		base_type[1] = NULL;
@@ -1281,18 +1277,19 @@ static void config_types(void)
  * /dev/PS0 etc), and disallows simultaneous access to the same
  * drive with different device numbers.
  */
-static int floppy_open(struct inode *inode, struct file *filp)
-{
+static int floppy_open(struct inode *inode, struct file *filp) {
+
 	int drive;
 	int old_dev;
-
 	drive = inode->i_rdev & 3;
 	old_dev = fd_device[drive];
 	if (fd_ref[drive])
 		if (old_dev != inode->i_rdev)
 			return -EBUSY;
+
 	if (floppy_grab_irq_and_dma())
 		return -EBUSY;
+
 	fd_ref[drive]++;
 	fd_device[drive] = inode->i_rdev;
 	buffer_drive = buffer_track = -1;
@@ -1305,14 +1302,27 @@ static int floppy_open(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static void floppy_release(struct inode * inode, struct file * filp)
-{
+void __debug_floppy_open() {
+	
+	printk("INFO: floppy open\n");
+	if (floppy_grab_irq_and_dma()) {
+		printk("FLOPPY BUSY!!!");
+	}
+}
+
+void __debug_floppy_release() {
+	printk("INFO: floppy release\n");
+	floppy_release_irq_and_dma();
+
+}
+
+static void floppy_release(struct inode *inode, struct file *filp) {
 	//fsync_dev(inode->i_rdev);
 	if (!fd_ref[inode->i_rdev & 3]--) {
 		printk("floppy_release with fd_ref == 0");
 		fd_ref[inode->i_rdev & 3] = 0;
 	}
-        floppy_release_irq_and_dma();
+	floppy_release_irq_and_dma();
 }
 
 static int check_floppy_change(dev_t dev)
@@ -1343,8 +1353,8 @@ static struct file_operations floppy_fops = {
 	NULL			        // revalidate
 };
 
-static void floppy_interrupt(int unused)
-{
+static void floppy_interrupt(int unused) {
+
 	//void (*handler)(void) = DEVICE_INTR;
 	//DEVICE_INTR = NULL;
 	//if (!handler)
@@ -1363,16 +1373,17 @@ static struct sigaction floppy_sigaction = {
 	NULL
 };
 
-void floppy_init(void)
-{
+void floppy_init(void) {
+
 	outb(current_DOR, FDC_DOR);
-	if (register_blkdev(MAJOR_NR,"fd",&floppy_fops)) {
+	if (register_blkdev(MAJOR_NR,"fd", &floppy_fops)) {
 		printk("Unable to get major %d for floppy\n",MAJOR_NR);
 		return;
 	}
 	blk_size[MAJOR_NR] = floppy_sizes;
 	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;
 	timer_table[FLOPPY_TIMER].fn = floppy_shutdown;
+
 	timer_active &= ~(1 << FLOPPY_TIMER);
 	config_types();
 
@@ -1401,7 +1412,7 @@ int floppy_grab_irq_and_dma(void) {
 
 	if (usage_count++)
 		return 0;
-	if (irqaction(FLOPPY_IRQ,&floppy_sigaction)) {
+	if (irqaction(FLOPPY_IRQ, &floppy_sigaction)) {
 		printk("Unable to grab IRQ%d for the floppy driver\n", FLOPPY_IRQ);
 		return -1;
 	}

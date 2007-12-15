@@ -147,7 +147,7 @@ ENTRY(hw_interrupt_entry_01)
     movl %esp,%ebx
     pushl %ebx
     pushl $0	# PUSH the IRQ request INDEX number on the stack
-	#call SYMBOL_NAME(do_IRQ)
+	###call SYMBOL_NAME(do_IRQ)
 	call SYMBOL_NAME(__debug_keyboard_interrupt)
     addl $8,%esp
     cli
@@ -166,7 +166,8 @@ ENTRY(hw_interrupt_entry_06)
     movl %esp,%ebx
     pushl %ebx
     pushl $0
-    #call SYMBOL_NAME(lowlevel_floppy_interrupt)
+    ###call SYMBOL_NAME(lowlevel_floppy_interrupt)
+	call SYMBOL_NAME(do_IRQ)
     addl $8,%esp
     cli
     PIC_CLOSE_FIRST(0x40)

@@ -217,6 +217,7 @@ static void write_inode(struct inode * inode)
 	wait_on_inode(inode);
 	if (!inode->i_dirt)
 		return;
+
 	if (!inode->i_sb || !inode->i_sb->s_op || !inode->i_sb->s_op->write_inode) {
 		inode->i_dirt = 0;
 		return;
