@@ -180,4 +180,13 @@ struct timex {
 };
 
 
+typedef struct simple_time_class {
+	int year;
+	int mon;
+	int day;
+	int hour;
+	int min;
+	int sec;
+} simple_time;
+
 #endif
