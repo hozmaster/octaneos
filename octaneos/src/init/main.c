@@ -24,14 +24,17 @@
 
 #include <system/system.h>
 #include <asm/io.h>
-
 #include <system/jiffies_value.h>
+#include <linux/time.h>
+
+#include <tests/_test_traps.h>
 
 // Note: this is a part of buildct.c getting the build count
 
 // generated from python scripts
 extern unsigned long main_get_build_count;
 extern char *main_get_version;
+extern char _end;
 
 int root_mountflags = 0;
 
@@ -64,7 +67,6 @@ extern void __debug_floppy(void);
 
 //
 // End of floppy functions
-
 extern void block_devices_init(void);
 extern void scheduler_init(void);
 extern int __public_debug(int);
@@ -74,8 +76,24 @@ extern void public_timer_test(void);
 void __test_floppy(void);
 char  *__vidmem = (char *)0xb8000;
 
-//
-// Draw Characters
+static unsigned long memory_start = 0;
+static unsigned long memory_end = 0;
+static unsigned long low_memory_start = 0;
+
+extern void __debug_floppy_open();
+extern void __debug_floppy_release();
+
+extern struct timeval xtime;
+
+simple_time cur_simpletime = {
+	0, 0, 0, 0, 0, 0
+};
+
+//------------------------------------------------
+// Init/Main Function Definitions
+//------------------------------------------------
+
+
 static void _video_draw_char(const char _c, int _x, int _y) {
 	
   unsigned char __attr = 0;
@@ -98,6 +116,14 @@ static void _draw_char(char _c,int _x, int _y) {
   __vidmem [ ( _x + 80 * _y ) * 2 ] = _c;		
 }
 
+static void _nop() {}
+
+static void tests() {
+	
+	//test_traps_1();
+
+}
+
 //
 // Start Kernel
 asmlinkage void start_kernel(void) {
@@ -105,7 +131,6 @@ asmlinkage void start_kernel(void) {
   char buf[255];
   int _i = 0;
   int _diff = 0;
-
   _video_draw_char('O', 79, 10);
   _video_draw_char('c', 79, 11);
   _video_draw_char('t', 79, 12);
@@ -123,24 +148,45 @@ asmlinkage void start_kernel(void) {
   __sprintf(buf, "=========== Octane ===========\n"); __puts(buf);
   __sprintf(buf, "@INFO: Build: %ld; since (10/15/2007) %s\n", 
 		  	main_get_build_count, main_get_version); __puts(buf);
-    
+
+  //memory_end = (1<<20) + (EXT_MEM_K<<10);
+  //  memory_end &= PAGE_MASK;
+  memory_end = 16*1024*1024;
+  memory_start = 1024*1024;
+  low_memory_start = (unsigned long) &_end;
+
   // now lets load the IDT
   load_exception_table();
-  
+
   init_interrupts();
+  //sched_init();
   load_keyboard_driver();
-      
-  floppy_init(); 
+  
+  //memory_start = blk_dev_init(memory_start, memory_end);
+  sti();
+  //calibrate_delay();
+  
+  //memory_start = inode_init(memory_start, memory_end);
+  //memory_start = file_table_init(memory_start, memory_end);  
+  //mem_init(low_memory_start, memory_start, memory_end);
+  //buffer_init();
+  time_init();
+ 
+  // Print the current time.
+  printk("INFO: current time: %d\n", xtime.tv_sec);
+  printk("INFO: %d/%d/%d %d:%d\n", cur_simpletime.mon,
+		 cur_simpletime.day, cur_simpletime.year,
+		 cur_simpletime.hour, cur_simpletime.min);
 
+  floppy_init();
+  sti();
+
+  __debug_floppy_open();
+  __debug_floppy_release();
+
+  tests();
   for(;;) {  
-    _jiffy_delay_setup(40);
-    _jiffy_start();
-    _jiffy_delay();
-
-    if ((jiffies % 60000) == 0) {  
-      __sprintf(buf, "[%d]",__debug_scan_code);
-      __puts(buf);
-    }
+	  _nop();
   }
 }
 
