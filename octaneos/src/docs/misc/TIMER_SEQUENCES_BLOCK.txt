@@ -1,0 +1,39 @@
+#################################################
+### Misc Operating System Development Notes
+###
+### THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+### "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+### LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+### A PARTICULAR PURPOSE ARE DISCLAIMED.
+###
+### See LICENSE.OCTANE for more details
+#################################################
+
+This document helps to outline some of the sequence of 
+kernel operation calls.
+
+The format of the documentation syntax uses the "octane meta language".
+
+Also see: http://www.stack.nl/~dimitri/doxygen/docblocks.html
+
+//-------------------------------------
+// Time and Scheduler Operations
+//-------------------------------------
+(sched-time-operations:
+	
+	.main-init-> {
+		.scheduler-sched_init-> {
+			.interrupts-request_irq-> {
+				handler: do_timer;
+			}			
+			.interrupt-do_IRQ-> {
+				file: kernel/interrupts.c
+				<Invoked based on the interrupt timing; note that the do_IRQ handler
+				for the timing is do_timer>
+			}
+			.scheduler-do_timer-> {
+				
+			}
+		}
+	}	
+)
