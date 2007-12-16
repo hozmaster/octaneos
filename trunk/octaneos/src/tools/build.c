@@ -28,8 +28,7 @@
 int fd;
 
 
-void die(const char * str, ...)
-{
+void die(const char * str, ...) {
 	va_list args;
 	va_start(args, str);
 	vfprintf(stderr, str, args);
@@ -37,21 +36,19 @@ void die(const char * str, ...)
 	exit(1);
 } // end of the function
 
-void usage(void)
-{
-        die("Usage: build bootsect setup system [rootdev] [> image]");
+void usage(void) {
+	die("Usage: build bootsect setup system [rootdev] [> image]");
 } // end of the functino
 
-void file_open(const char *name)
-{
-        if ((fd = open(name, O_RDONLY, 0)) < 0)
-                die("Unable to open `%s': %m", name);
+void file_open(const char *name) {
+	if ((fd = open(name, O_RDONLY, 0)) < 0)
+		die("Unable to open `%s': %m", name);
 } // end of the function
 
 
-//
-// main
-//
+/**
+ * Main program entry point.
+ */
 int main(int argc, char **argv) {
 
   unsigned int i;
@@ -108,8 +105,8 @@ int main(int argc, char **argv) {
   } // end of the if - else
   
   
-  fprintf(stderr, "..Running build...\n\n");
-  fprintf(stderr, "++ Root device is (%d, %d)\n", major_root, minor_root);
+  fprintf(stderr, "BUILD-INFO: Running build...\n\n");
+  fprintf(stderr, "BUILD-INFO: Root device is (%d, %d)\n", major_root, minor_root);
   
   
   file_open(argv[1]);
@@ -154,8 +151,8 @@ int main(int argc, char **argv) {
   if (setup_sectors < SETUP_SECTS)
     setup_sectors = SETUP_SECTS;
   
-  fprintf(stderr, "++ Setup is %d bytes.\n", i); 
-  fprintf(stderr, "++ Sectors: %d\n", setup_sectors);
+  fprintf(stderr, "BUILD-INFO: Setup is %d bytes.\n", i); 
+  fprintf(stderr, "BUILD-INFO: Sectors: %d\n", setup_sectors);
 	
   memset(buf, 0, sizeof(buf));
 
@@ -170,7 +167,7 @@ int main(int argc, char **argv) {
     i += c;
   } // end of the while
 
-  fprintf(stderr, "++ padded setup size: %d needed: %d\n",i, 0x800); 
+  fprintf(stderr, "BUILD-INFO: padded setup size: %d needed: %d\n",i, 0x800); 
   
   
   file_open(argv[3]);
@@ -184,7 +181,7 @@ int main(int argc, char **argv) {
   
   sys_size = (sz + 15) / 16;
  
-  fprintf(stderr, "++ Writing system stdout...ctr: %d\n\n", sys_size);
+  fprintf(stderr, "BUILD-INFO: Writing system stdout...ctr: %d\n\n", sys_size);
   
   while (sz > 0) {
     int l, n;
@@ -204,8 +201,7 @@ int main(int argc, char **argv) {
  
   //
   // Normally, we would write the sizes at the end of the
-  // bootsector, for simplicity, we wont
-  //  
+  // bootsector, for simplicity, we wont 
   if (lseek(1, 497, SEEK_SET) != 497)
     die("Output: seek failed");
 
@@ -223,7 +219,6 @@ int main(int argc, char **argv) {
   if (write(1, buf, 2) != 2)
     die("Write of image length failed");
     
-  
   return 0;
 
-} // end of main --
+}
