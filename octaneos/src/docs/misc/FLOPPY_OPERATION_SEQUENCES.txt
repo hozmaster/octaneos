@@ -12,7 +12,9 @@
 This document helps to outline some of the sequence of 
 kernel operation calls.
 
-The format of the calls uses the "octane meta language"
+The format of the documentation syntax uses the "octane meta language".
+
+Also see: http://www.stack.nl/~dimitri/doxygen/docblocks.html
 
 //-------------------------------------
 // Open file operations
@@ -166,3 +168,19 @@ The format of the calls uses the "octane meta language"
 	truncate; permission;
 
 }) // End of Floppy Operations
+
+(key-floppy-structures
+.floppy-block_devices_h {
+	file: include/linux/block_devices.h;
+	
+	DEVICE_NAME: "floppy";
+	DEVICE_INTR: do_floppy;
+	DEVICE_REQUEST: do_fd_request;
+	DEVICE_NR: ((device) & 3);
+	DEVICE_ON: floppy_on(DEVICE_NR(device));
+	DEVICE_OFF: floppy_off(DEVICE_NR(device));
+	
+	CURRENT:  (blk_dev[MAJOR_NR].current_request);
+	DEVICE_INTR:  void (*DEVICE_INTR)(void) = NULL;
+	FLOPPY_DEVICE_INTR: void (*do_floppy)(void) = NULL;
+})
