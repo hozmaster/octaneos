@@ -16,17 +16,16 @@ The format of the documentation syntax uses the "octane meta language".
 
 Also see: http://www.stack.nl/~dimitri/doxygen/docblocks.html
 
-
 //-------------------------------------
 // Floppy Operations
 // Calling from the block functions
 //-------------------------------------
 (floppy-block:
+
 	.class-floppy_fops {
 		file: kernel/floppy.c;
 		class: file_operations;
-		class-file: 
-	
+		class-file: system/filesystem.h	
 		.callbacks {
 			read: block_read;
 			write: block_write;
@@ -34,8 +33,68 @@ Also see: http://www.stack.nl/~dimitri/doxygen/docblocks.html
 			open: floppy_open;
 			release: floppy_release;
 			media_change: check_floppy_change;
-		}		
+		}
+		<Device callbacks data structure, these callbacks are eventually used
+		by the block device operations ll_rw_block>
+	}
+	
+	.block-ll_rw_block-> {
+		file: kernel/block_devices.c;
+		linux-file: block/ll_rw_blk.c;
+		
+		.block-make_request-> {
+			file: kernel/block_devices.c;
+			linux-file: block/ll_rw_blk.c;
+			
+			.get_request-> { }
+			
+			.add_request-> {
+				.request_fn-> {
+					<In the case of the floppy driver, the 
+					floppy block device request function (request_fn) is set
+					during the floppy_init call.  The floppy_fops callback struct
+					is subsequently passed to register_blkdev function.  The fops 
+					(file operations, blkdevs[major].fops) is used by the filesystem
+					operations.>
+				}	
+			}		
+		}
+	}	
+)
+
+(floppy-block-interrupt:
+	
+	.devices-blkdev_open-> {
+		.filp->f_op->open {
+			<In the case of the floppy device driver, the floppy_open
+			 function will get called.>
+		}
+	}
+	
+	.floppy_open-> {
+		.floppy_grab_irq_and_dma-> {
+			.irqaction-> {
+			}
+		}
+	}	
+	.interrupts-irqaction-> {	
+		set: signal_action = new_signal_action;
+		set: signal_action->sa_mask = 1;
+		set: set_intr_gate(0x20+irq, interrupt[irq]);
+		<During floppy device use, the irqaction operation is invoked by
+		floppy_grab_irq_and_dma.  signal_action = floppy_interrupt>
+	}
+	
+	.floppy-ready-> {
+		.transfer-> {		
+			.setup_rw_floppy-> {				
+				// The floppy interrupt 'do_floppy' callback is set to another function;
+				// 'rw_interrupt'.
+				// @see floppy_interrupt and DEVICE_INTR
+				// @see floppy_sigaction
+				set: do_floppy = rw_interrupt;			
+			}
+		}
+		<The do_floppy, sigaction callback is set dynamically depending on the operation>
 	}
 )
-			
-	
