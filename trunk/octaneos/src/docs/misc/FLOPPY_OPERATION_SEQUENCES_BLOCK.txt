@@ -1,0 +1,41 @@
+#################################################
+### Misc Operating System Development Notes
+###
+### THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+### "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+### LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+### A PARTICULAR PURPOSE ARE DISCLAIMED.
+###
+### See LICENSE.OCTANE for more details
+#################################################
+
+This document helps to outline some of the sequence of 
+kernel operation calls.
+
+The format of the documentation syntax uses the "octane meta language".
+
+Also see: http://www.stack.nl/~dimitri/doxygen/docblocks.html
+
+
+//-------------------------------------
+// Floppy Operations
+// Calling from the block functions
+//-------------------------------------
+(floppy-block:
+	.class-floppy_fops {
+		file: kernel/floppy.c;
+		class: file_operations;
+		class-file: 
+	
+		.callbacks {
+			read: block_read;
+			write: block_write;
+			ioctl: fd_ioctl;
+			open: floppy_open;
+			release: floppy_release;
+			media_change: check_floppy_change;
+		}		
+	}
+)
+			
+	
