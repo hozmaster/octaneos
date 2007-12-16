@@ -621,6 +621,9 @@ void tqueue_bh(void * unused) {
  * interrupt wants to know from where it was called. The timer
  * irq uses this to decide if it should update the user or system
  * times.
+ *
+ * @see hardware_interrupts
+ * @see interrupts.c do_IRQ
  */
 static void do_timer(struct pt_regs *regs) {
 
@@ -636,16 +639,15 @@ static void do_timer(struct pt_regs *regs) {
 		ltemp = -time_phase >> SHIFT_SCALE;
 		time_phase += ltemp << SHIFT_SCALE;
 		xtime.tv_usec += tick + time_adjust_step - ltemp;
-	}
-	else if (time_phase > FINEUSEC) {
+	} else if (time_phase > FINEUSEC) {
 		ltemp = time_phase >> SHIFT_SCALE;
 		time_phase -= ltemp << SHIFT_SCALE;
 		xtime.tv_usec += tick + time_adjust_step + ltemp;
-	} else
+	} else {
 		xtime.tv_usec += tick + time_adjust_step;
+	}
 
-	if (time_adjust)
-	{
+	if (time_adjust) {  
 	    /* We are doing an adjtime thing. 
 	     *
 	     * Modify the value of the tick for next time.
@@ -664,9 +666,9 @@ static void do_timer(struct pt_regs *regs) {
 	     
 	    /* Reduce by this step the amount of time left  */
 	    time_adjust -= time_adjust_step;
-	}
-	else
+	} else {
 	    time_adjust_step = 0;
+	}
 
 	if (xtime.tv_usec >= 1000000) {
 	    xtime.tv_usec -= 1000000;
@@ -703,6 +705,7 @@ static void do_timer(struct pt_regs *regs) {
 		current->it_prof_value = current->it_prof_incr;
 		//send_sig(SIGPROF,current,1);
 	}
+
 	for (mask = 1, tp = timer_table+0 ; mask ; tp++,mask += mask) {
 		if (mask > timer_active)
 			break;
@@ -712,15 +715,20 @@ static void do_timer(struct pt_regs *regs) {
 			continue;
 		mark_bh(TIMER_BH);
 	}
+
 	cli();
 	itimer_ticks++;
-	if (itimer_ticks > itimer_next)
+	if (itimer_ticks > itimer_next) {
 		need_resched = 1;
+	}
 	if (next_timer) {
 		if (next_timer->expires) {
+
 			next_timer->expires--;
-			if (!next_timer->expires)
+
+			if (!next_timer->expires) {
 				mark_bh(TIMER_BH);
+			}
 		} else {
 			lost_ticks++;
 			mark_bh(TIMER_BH);
@@ -833,30 +841,33 @@ void sched_init(void) {
 	//bh_base[TIMER_BH].routine = timer_bh;
 	//bh_base[TQUEUE_BH].routine = tqueue_bh;
 
-	if (sizeof(struct sigaction) != 16)
+	if (sizeof(struct sigaction) != 16) {
 		panic("Struct sigaction MUST be 16 bytes");
+	}
 
 	//set_tss_desc(gdt+FIRST_TSS_ENTRY,&init_task.tss);
 	//set_ldt_desc(gdt+FIRST_LDT_ENTRY,&default_ldt,1);
-	_set_system_gate(0x80,&system_call);
-	p = gdt+2+FIRST_TSS_ENTRY;
-	for(i=1 ; i<NR_TASKS ; i++) {
-		task[i] = NULL;
-		p->a = p->b = 0;
-		p++;
-		p->a=p->b=0;
-		p++;
-	}
-/* Clear NT, so that we won't have troubles with that later on */
+	//_set_system_gate(0x80, &system_call);
+
+	//p = gdt + 2 + FIRST_TSS_ENTRY;
+	//for(i=1; i < NR_TASKS; i++) {
+	//	task[i] = NULL;
+	//	p->a = p->b = 0;
+	//	p++;
+	//	p->a=p->b=0;
+	//	p++;
+	//}
+
+	/* Clear NT, so that we won't have troubles with that later on */
 	__asm__("pushfl ; andl $0xffffbfff,(%esp) ; popfl");
-	load_TR(0);
-	load_ldt(0);
-	outb_p(0x34,0x43);		/* binary, mode 2, LSB/MSB, ch 0 */
-	outb_p(LATCH & 0xff , 0x40);	/* LSB */
-	outb(LATCH >> 8 , 0x40);	/* MSB */
-	if (request_irq(TIMER_IRQ,(void (*)(int)) do_timer)!=0)
+	//load_TR(0);
+	//load_ldt(0);
+
+	outb_p(0x34,0x43);              // binary, mode 2, LSB/MSB, ch 0 
+	outb_p(LATCH & 0xff , 0x40);	// LSB
+	outb(LATCH >> 8 , 0x40);	    // MSB
+
+	if (request_irq(TIMER_IRQ,(void (*)(int)) do_timer) != 0) {
 		panic("Could not allocate timer IRQ!");
+	}
 }
-
-
-
