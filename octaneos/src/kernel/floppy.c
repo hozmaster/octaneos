@@ -20,6 +20,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * See LICENSE.OCTANE for more details
+ *
+ *
+ * Public Function Definitions
+ * ----------------------------
+ * floppy_init
+ *
+ * Static Function Definitions (critical operations)
+ * ----------------------------
+ * floppy_select
+ * floppy_change
+ * setup_DMA
+ * rw_interrupt
+ * setup_rw_floppy
+ * seek_interrupt
+ * transfer
+ * do_fd_request (block DEVICE_REQUEST)
  */
 
 // Note: the MAJOR_NR must be defined for the block device usage.
@@ -248,7 +264,7 @@ static void recalibrate_floppy(void);
 int floppy_grab_irq_and_dma(void);
 void floppy_release_irq_and_dma(void);
 
-/*
+/**
  * These are global variables, as that's the easiest way to give
  * information to interrupts. They are the data used for the current
  * request.
@@ -278,8 +294,8 @@ static void select_callback(unsigned long unused) {
 }
 
 static void floppy_select(unsigned int nr) {
-	static struct timer_list select = { NULL, NULL, 0, 0, select_callback };
 
+	static struct timer_list select = { NULL, NULL, 0, 0, select_callback };
 	if (current_drive == (current_DOR & 3)) {
 		floppy_ready();
 		return;
@@ -294,8 +310,8 @@ static void floppy_select(unsigned int nr) {
 	add_timer(&select);
 }
 
-static void motor_on_callback(unsigned long nr)
-{
+static void motor_on_callback(unsigned long nr) {
+
 	running |= 0x10 << nr;
 	floppy_select(nr);
 }
@@ -324,13 +340,14 @@ static struct timer_list motor_off_timer[4] = {
 	{ NULL, NULL, 0, 3, motor_off_callback }
 };
 
-static void floppy_on(unsigned int nr)
-{
-	unsigned char mask = 0x10 << nr;
+static void floppy_on(unsigned int nr) {
 
+	unsigned char mask = 0x10 << nr;
 	del_timer(motor_off_timer + nr);
-	if (mask & running)
+	if (mask & running) {
 		floppy_select(nr);
+	}
+
 	if (!(mask & current_DOR)) {
 		del_timer(motor_on_timer + nr);
 		motor_on_timer[nr].expires = HZ;
@@ -339,18 +356,17 @@ static void floppy_on(unsigned int nr)
 	current_DOR &= 0xFC;
 	current_DOR |= mask;
 	current_DOR |= nr;
-	outb(current_DOR,FDC_DOR);
+	outb(current_DOR, FDC_DOR);
 }
 
-static void floppy_off(unsigned int nr)
-{
+static void floppy_off(unsigned int nr) {
 	del_timer(motor_off_timer+nr);
 	motor_off_timer[nr].expires = 3*HZ;
 	add_timer(motor_off_timer+nr);
 }
 
-void request_done(int uptodate)
-{
+void request_done(int uptodate) {
+
 	timer_active &= ~(1 << FLOPPY_TIMER);
 	/*
 	if (format_status != FORMAT_BUSY)
@@ -362,16 +378,15 @@ void request_done(int uptodate)
 	*/
 }
 
-/*
+/**
  * floppy-change is never called from an interrupt, so we can relax a bit
  * here, sleep etc. Note that floppy-on tries to set current_DOR to point
  * to the desired drive, but it will probably not survive the sleep if
  * several floppies are used at the same time: thus the loop.
  */
-static int floppy_change(struct buffer_head * bh)
-{
-	unsigned int mask = 1 << (bh->b_dev & 0x03);
+static int floppy_change(struct buffer_head *bh) {
 
+	unsigned int mask = 1 << (bh->b_dev & 0x03);
 	if (MAJOR(bh->b_dev) != MAJOR_NR) {
 		printk("floppy_changed: not a floppy\n");
 		return 0;
@@ -408,19 +423,17 @@ static int floppy_change(struct buffer_head * bh)
 	return 0;
 }
 
-static __inline__ void copy_buffer(void *from, void *to)
-{
-	ulong	*p1 = (ulong *)from, *p2 = (ulong *)to;
-	int		cnt;
-	for( cnt = 512/4; cnt; cnt-- )
+static __inline__ void copy_buffer(void *from, void *to) {
+	ulong *p1 = (ulong *)from, *p2 = (ulong *)to;
+	int cnt;
+	for(cnt = 512/4; cnt; cnt-- )
 		*p2++ = *p1++;
 }
 
-static void setup_DMA(void)
-{
+static void setup_DMA(void) {
+
 	unsigned long addr,count;
 	unsigned char dma_code;
-
 	dma_code = DMA_WRITE;
 	if (command == FD_READ)
 		dma_code = DMA_READ;
@@ -497,10 +510,9 @@ static void output_byte_force(char byte)
 	printk("Unable to send byte to FDC\n");
 }
 
-static int result(void)
-{
-	int i = 0, counter, status;
+static int result(void) {
 
+	int i = 0, counter, status;
 	if (reset)
 		return -1;
 	for (counter = 0 ; counter < 10000 ; counter++) {
@@ -522,8 +534,8 @@ static int result(void)
 	return -1;
 }
 
-static void bad_flp_intr(void)
-{
+static void bad_flp_intr(void) {
+
 	int errors;
 
 	current_track = NO_TRACK;
@@ -580,8 +592,8 @@ static inline void perpendicular_mode(unsigned char rate)
  * with `FDC_FIFO_UNTESTED' defined. You may also want to add support for
  * recognizing drives with vertical recording support.
  */
-static void configure_fdc_mode(void)
-{
+static void configure_fdc_mode(void) {
+
 	if (need_configure && (fdc_version == FDC_TYPE_82077)) {
 		/* Enhanced version with FIFO & vertical recording. */
 		output_byte(FD_CONFIGURE);
@@ -617,13 +629,13 @@ static void tell_sector(int nr)
 } /* tell_sector */
 
 
-/*
- * Ok, this interrupt is called after a DMA read/write has succeeded
+/**
+ * This interrupt is called after a DMA read/write has succeeded
  * or failed, so we check the results, and copy any buffers.
  * hhb: Added better error reporting.
  */
-static void rw_interrupt(void)
-{
+static void rw_interrupt(void) {
+
 	char *buffer_area;
 	int nr;
 	char bad;
@@ -708,15 +720,17 @@ static void rw_interrupt(void)
 	redo_fd_request();
 }
 
-/*
+/**
  * We try to read tracks, but if we get too many errors, we
  * go back to reading just one sector at a time.
  *
  * This means we should be able to read a sector even if there
  * are other bad sectors on this track.
+ *
+ * @see rw_interrupt 
  */
-inline void setup_rw_floppy(void)
-{
+inline void setup_rw_floppy(void) {
+
 	setup_DMA();
 	do_floppy = rw_interrupt;
 	output_byte(command);
@@ -752,9 +766,9 @@ inline void setup_rw_floppy(void)
  * from the floppy controller. Note that the "unexpected interrupt" routine
  * also does a recalibrate, but doesn't come here.
  */
-static void seek_interrupt(void)
-{
-/* sense drive status */
+static void seek_interrupt(void) {
+
+	/* sense drive status */
 	output_byte(FD_SENSEI);
 	if (result() != 2 || (ST0 & 0xF8) != 0x20 || ST1 != seek_track) {
 		printk(DEVICE_NAME ": seek failed\n");
@@ -773,17 +787,17 @@ static void seek_interrupt(void)
  * for the transfer (ie floppy motor is on and the correct floppy is
  * selected).
  */
-static void transfer(void)
-{
+static void transfer(void) {
+
 	read_track = (command == FD_READ) && (CURRENT_ERRORS < 4) &&
 	    (floppy->sect <= MAX_BUFFER_SECTORS);
 
 	configure_fdc_mode();
-
 	if (reset) {
 		redo_fd_request();
 		return;
 	}
+
 	if (!seek) {
 		setup_rw_floppy();
 		return;
@@ -795,6 +809,7 @@ static void transfer(void)
 		output_byte(current_drive);
 	else
 		output_byte((head<<2) | current_drive);
+
 	output_byte(seek_track);
 	if (reset)
 		redo_fd_request();
@@ -804,8 +819,8 @@ static void transfer(void)
  * Special case - used after a unexpected interrupt (or reset)
  */
 
-static void recal_interrupt(void)
-{
+static void recal_interrupt(void) {
+
 	output_byte(FD_SENSEI);
 	current_track = NO_TRACK;
 	if (result()!=2 || (ST0 & 0xE0) == 0x60)
@@ -817,8 +832,8 @@ static void recal_interrupt(void)
 		redo_fd_request();
 }
 
-static void unexpected_floppy_interrupt(void)
-{
+static void unexpected_floppy_interrupt(void) {
+
 	current_track = NO_TRACK;
 	output_byte(FD_SENSEI);
 	printk(DEVICE_NAME ": unexpected interrupt\n");
@@ -828,8 +843,8 @@ static void unexpected_floppy_interrupt(void)
 		recalibrate = 1;
 }
 
-static void recalibrate_floppy(void)
-{
+static void recalibrate_floppy(void) {
+
 	recalibrate = 0;
 	current_track = 0;
 	do_floppy = recal_interrupt;
@@ -842,10 +857,9 @@ static void recalibrate_floppy(void)
 /*
  * Must do 4 FD_SENSEIs after reset because of ``drive polling''.
  */
-static void reset_interrupt(void)
-{
-	short i;
+static void reset_interrupt(void) {
 
+	short i;
 	for (i=0; i<4; i++) {
 		output_byte(FD_SENSEI);
 		(void) result();
@@ -871,10 +885,9 @@ static void reset_interrupt(void)
 /*
  * reset is done by pulling bit 2 of DOR low for a while.
  */
-static void reset_floppy(void)
-{
-	int i;
+static void reset_floppy(void) {
 
+	int i;
 	do_floppy = reset_interrupt;
 	reset = 0;
 	current_track = NO_TRACK;
@@ -892,8 +905,8 @@ static void reset_floppy(void)
 	sti();
 }
 
-static void floppy_shutdown(void)
-{
+static void floppy_shutdown(void) {
+
 	cli();
 	do_floppy = NULL;
 	request_done(0);
@@ -903,16 +916,15 @@ static void floppy_shutdown(void)
 	redo_fd_request();
 }
 
-static void shake_done(void)
-{
+static void shake_done(void) {
 	current_track = NO_TRACK;
 	if (inb(FDC_DIR) & 0x80)
 		request_done(0);
 	redo_fd_request();
 }
 
-static int retry_recal(void (*proc)(void))
-{
+static int retry_recal(void (*proc)(void)) {
+
 	output_byte(FD_SENSEI);
 	if (result() == 2 && (ST0 & 0x10) != 0x10) return 0;
 	do_floppy = proc;
@@ -921,13 +933,12 @@ static int retry_recal(void (*proc)(void))
 	return 1;
 }
 
-static void shake_zero(void)
-{
+static void shake_zero(void) {
+
 	if (!retry_recal(shake_zero)) shake_done();
 }
 
-static void shake_one(void)
-{
+static void shake_one(void) {
 	if (retry_recal(shake_one)) return;
 	do_floppy = shake_done;
 	output_byte(FD_SEEK);
@@ -935,8 +946,7 @@ static void shake_one(void)
 	output_byte(1);
 }
 
-static void floppy_ready(void)
-{
+static void floppy_ready(void) {
 	if (inb(FDC_DIR) & 0x80) {
 		changed_floppies |= 1<<current_drive;
 		buffer_track = -1;
@@ -950,14 +960,17 @@ static void floppy_ready(void)
 			current_type[current_drive] = NULL;
 			floppy_sizes[current_drive] = MAX_DISK_SIZE;
 		}
-/* Forcing the drive to seek makes the "media changed" condition go away.
- * There should be a cleaner solution for that ...
- */
+
+		/* Forcing the drive to seek makes the "media changed" condition go away.
+		 * There should be a cleaner solution for that ...
+		 */
 		if (!reset && !recalibrate) {
-			if (current_track && current_track != NO_TRACK)
+			if (current_track && current_track != NO_TRACK) {
 				do_floppy = shake_zero;
-			else
+			} else {
 				do_floppy = shake_one;
+			}
+
 			output_byte(FD_RECALIBRATE);
 			output_byte(head<<2 | current_drive);
 			return;
@@ -974,8 +987,8 @@ static void floppy_ready(void)
 	transfer();
 }
 
-static void setup_format_params(void)
-{
+static void setup_format_params(void) {
+
     unsigned char *here = (unsigned char *) tmp_floppy_area;
     int count,head_shift,track_shift,total_shift;
 
@@ -996,12 +1009,11 @@ static void setup_format_params(void)
     }
 }
 
-static void redo_fd_request(void)
-{
-	unsigned int block;
-	char * buffer_area;
-	int device;
+static void redo_fd_request(void) {
 
+	unsigned int block;
+	char *buffer_area;
+	int device;
 	if (CURRENT && CURRENT->dev < 0) return;
 
 repeat:
@@ -1101,23 +1113,24 @@ repeat:
 	floppy_on(current_drive);
 }
 
-void do_fd_request(void)
-{
+void do_fd_request(void) {
 	cli();
-	while (fdc_busy) sleep_on(&fdc_wait);
+	while (fdc_busy) {
+		sleep_on(&fdc_wait);
+	}
 	fdc_busy = 1;
 	sti();
 	redo_fd_request();
 }
 
 static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
-    unsigned long param)
-{
+					unsigned long param) {
+
 	int i,drive,cnt,okay;
 	struct floppy_struct *this_floppy;
 
 	switch (cmd) {
-		RO_IOCTLS(inode->i_rdev,param);
+		RO_IOCTLS(inode->i_rdev, param);
 	}
 	drive = MINOR(inode->i_rdev);
 	switch (cmd) {
@@ -1214,11 +1227,17 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 				sti();
 				outb_p((current_DOR & 0xfc) | drive |
 				    (0x10 << drive),FDC_DOR);
-				for (cnt = 0; cnt < 1000; cnt++) __asm__("nop");
-				if (inb(FDC_DIR) & 0x80)
+
+				for (cnt = 0; cnt < 1000; cnt++) {
+					__asm__("nop");
+				}
+
+				if (inb(FDC_DIR) & 0x80) {
 					keep_data[drive] = 1;
-				else
+				} else {
 					keep_data[drive] = 0;
+				}
+
 				outb_p(current_DOR,FDC_DOR);
 				fdc_busy = 0;
 				wake_up(&fdc_wait);
@@ -1240,14 +1259,14 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 }
 
 #define CMOS_READ(addr) ({ \
-outb_p(addr,0x70); \
-inb_p(0x71); \
+outb_p(addr,0x70);         \
+inb_p(0x71);               \
 })
 
 static struct floppy_struct *find_base(int drive,int code) {
 	struct floppy_struct *base;
 
-	if (code > 0 && code < 7) {                            /* -bb*/
+	if (code > 0 && code < 7) {
 		base = &floppy_types[(code-1)*2];
 		printk("fd%d is %s",drive,base->name);
 		return base;
@@ -1287,8 +1306,9 @@ static int floppy_open(struct inode *inode, struct file *filp) {
 		if (old_dev != inode->i_rdev)
 			return -EBUSY;
 
-	if (floppy_grab_irq_and_dma())
+	if (floppy_grab_irq_and_dma()) {
 		return -EBUSY;
+	}
 
 	fd_ref[drive]++;
 	fd_device[drive] = inode->i_rdev;
@@ -1337,6 +1357,20 @@ static int check_floppy_change(dev_t dev)
 	return i;
 };
 
+/**
+ * File operation block device call backs.
+ * 
+ * This is used as part of the register_blkdev call, register_blkdev
+ * only prepares the block device data structure with floppy_fops.
+ *
+ * <code>
+ * 	blkdevs[major].name = name;
+ *	blkdevs[major].fops = fops;
+ * </code>
+ *
+ * @see block_devices.h
+ * @see register_blkdev
+ */
 static struct file_operations floppy_fops = {
 	NULL,			        // lseek - default
 	block_read,		        // read - general block-dev read
@@ -1354,12 +1388,16 @@ static struct file_operations floppy_fops = {
 };
 
 static void floppy_interrupt(int unused) {
+	
+	printk("INFO: floppy interrupt invoked\n");
+	void (*handler)(void) = DEVICE_INTR;
 
-	//void (*handler)(void) = DEVICE_INTR;
-	//DEVICE_INTR = NULL;
-	//if (!handler)
-	//	handler = unexpected_floppy_interrupt;
-	//handler();
+	// Set the do_floppy callback to NULL
+	DEVICE_INTR = NULL;
+	if (!handler) {
+		handler = unexpected_floppy_interrupt;
+	}
+	handler();	
 }
 
 /*
@@ -1373,6 +1411,48 @@ static struct sigaction floppy_sigaction = {
 	NULL
 };
 
+
+int floppy_grab_irq_and_dma(void) {
+
+	if (usage_count++)
+		return 0;
+
+	// Note: request_irq is not needed because the 
+	// sigaction is already defined, we only need to invoke irqaction.
+	if (irqaction(FLOPPY_IRQ, &floppy_sigaction)) {
+		printk("Unable to grab IRQ%d for the floppy driver\n", FLOPPY_IRQ);
+		return -1;
+	} else {
+		printk("INFO: able to grab IRQ=%d\n", FLOPPY_IRQ);
+	}
+
+	if (request_dma(FLOPPY_DMA)) {
+		printk("Unable to grab DMA%d for the floppy driver\n", FLOPPY_DMA);
+		free_irq(FLOPPY_IRQ);
+		return -1;
+	}
+	enable_irq(FLOPPY_IRQ);
+	return 0;
+}
+
+void floppy_release_irq_and_dma(void) {
+
+	if (--usage_count) {
+		return;
+	}
+
+	disable_dma(FLOPPY_DMA);
+	free_dma(FLOPPY_DMA);
+	disable_irq(FLOPPY_IRQ);
+	free_irq(FLOPPY_IRQ);
+}
+
+/**
+ * Public function to initialize the floppy block device driver called
+ * as part of the main.c/init routine.
+ * 
+ * @see main.c/init()
+ */
 void floppy_init(void) {
 
 	outb(current_DOR, FDC_DOR);
@@ -1380,6 +1460,13 @@ void floppy_init(void) {
 		printk("Unable to get major %d for floppy\n",MAJOR_NR);
 		return;
 	}
+
+	//**********************************
+	// Associate this major device number (floppy device)
+	// with the other block devices and set the block request function.
+	// The floppy DEVICE_REQUEST function is do_fd_request.
+	// @see do_fd_request and block_devices.h
+	//**********************************
 	blk_size[MAJOR_NR] = floppy_sizes;
 	blk_dev[MAJOR_NR].request_fn = DEVICE_REQUEST;
 	timer_table[FLOPPY_TIMER].fn = floppy_shutdown;
@@ -1392,8 +1479,9 @@ void floppy_init(void) {
 	if (result() != 1) {
 		printk(DEVICE_NAME ": FDC failed to return version byte\n");
 		fdc_version = FDC_TYPE_STD;
-	} else
+	} else {
 		fdc_version = reply_buffer[0];
+	}
 
 	if (fdc_version != FDC_TYPE_STD)
 		printk(DEVICE_NAME ": FDC version 0x%x\n", fdc_version);
@@ -1406,32 +1494,4 @@ void floppy_init(void) {
 		initial_reset_flag = 1;
 		reset_floppy();
 	}
-}
-
-int floppy_grab_irq_and_dma(void) {
-
-	if (usage_count++)
-		return 0;
-	if (irqaction(FLOPPY_IRQ, &floppy_sigaction)) {
-		printk("Unable to grab IRQ%d for the floppy driver\n", FLOPPY_IRQ);
-		return -1;
-	}
-	if (request_dma(FLOPPY_DMA)) {
-		printk("Unable to grab DMA%d for the floppy driver\n", FLOPPY_DMA);
-		free_irq(FLOPPY_IRQ);
-		return -1;
-	}
-	enable_irq(FLOPPY_IRQ);
-	return 0;
-}
-
-void floppy_release_irq_and_dma(void) {
-
-	if (--usage_count)
-		return;
-
-	disable_dma(FLOPPY_DMA);
-	free_dma(FLOPPY_DMA);
-	disable_irq(FLOPPY_IRQ);
-	free_irq(FLOPPY_IRQ);
 }

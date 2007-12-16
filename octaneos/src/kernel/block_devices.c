@@ -128,11 +128,13 @@ static inline struct request *get_request(int n, int dev) {
  * NOTE: interrupts must be disabled on the way in, and will still
  *       be disabled on the way out.
  */
-static inline struct request * get_request_wait(int n, int dev) {
-	register struct request *req;
+static inline struct request *get_request_wait(int n, int dev) {
 
-	while ((req = get_request(n, dev)) == NULL)
+	register struct request *req;
+	while ((req = get_request(n, dev)) == NULL) {
 		sleep_on(&wait_for_request);
+	}
+
 	return req;
 }
 
@@ -164,10 +166,9 @@ void set_device_ro(int dev,int flag) {
  * It disables interrupts so that it can muck with the
  * request-lists in peace.
  */
-static void add_request(struct blk_dev_struct * dev, struct request * req)
-{
-	struct request * tmp;
+static void add_request(struct blk_dev_struct *dev, struct request *req) {
 
+	struct request * tmp;
 	req->next = NULL;
 	cli();
 
@@ -177,6 +178,7 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 	if (!(tmp = dev->current_request)) {
 		dev->current_request = req;
 		(dev->request_fn)();
+
 		sti();
 		return;
 	}
@@ -189,17 +191,17 @@ static void add_request(struct blk_dev_struct * dev, struct request * req)
 	}
 	req->next = tmp->next;
 	tmp->next = req;
-
 	sti();
 }
 
-static void make_request(int major,int rw, struct buffer_head * bh) {
+static void make_request(int major,int rw, struct buffer_head *bh) {
+
 	unsigned int sector, count;
-	struct request * req;
+	struct request *req;
 	int rw_ahead, max_req;
 
-/* WRITEA/READA is special case - it is not really needed, so if the */
-/* buffer is locked, we just forget about it, else it's a normal read */
+	// WRITEA/READA is special case - it is not really needed, so if the
+	// buffer is locked, we just forget about it, else it's a normal read
 	rw_ahead = (rw == READA || rw == WRITEA);
 	if (rw_ahead) {
 		if (bh->b_lock)
@@ -227,10 +229,10 @@ static void make_request(int major,int rw, struct buffer_head * bh) {
 		return;
 	}
 
-/* we don't allow the write-requests to fill up the queue completely:
- * we want some room for reads: they take precedence. The last third
- * of the requests are only for reads.
- */
+	/* we don't allow the write-requests to fill up the queue completely:
+	 * we want some room for reads: they take precedence. The last third
+	 * of the requests are only for reads.
+	 */
 	max_req = (rw == READ) ? NR_REQUEST : ((NR_REQUEST*2)/3);
 
 /* big loop: look for a free request. */
@@ -238,10 +240,10 @@ static void make_request(int major,int rw, struct buffer_head * bh) {
 repeat:
 	cli();
 
-/* The scsi disk drivers completely remove the request from the queue when
- * they start processing an entry.  For this reason it is safe to continue
- * to add links to the top entry for scsi devices.
- */
+	/* The scsi disk drivers completely remove the request from the queue when
+	 * they start processing an entry.  For this reason it is safe to continue
+	 * to add links to the top entry for scsi devices.
+	 */
 	if ((major == HD_MAJOR
 	     || major == SCSI_DISK_MAJOR
 	     || major == SCSI_CDROM_MAJOR)
@@ -287,10 +289,10 @@ repeat:
 		}
 	}
 
-/* find an unused request. */
+	/* find an unused request. */
 	req = get_request(max_req, bh->b_dev);
 
-/* if no request available: if rw_ahead, forget it; otherwise try again. */
+	/* if no request available: if rw_ahead, forget it; otherwise try again. */
 	if (! req) {
 		if (rw_ahead) {
 			sti();
@@ -302,10 +304,10 @@ repeat:
 		goto repeat;
 	}
 
-/* we found a request. */
+	/* we found a request. */
 	sti();
 
-/* fill up the request-info, and add it to the queue */
+	/* fill up the request-info, and add it to the queue */
 	req->cmd = rw;
 	req->errors = 0;
 	req->sector = sector;
@@ -319,9 +321,9 @@ repeat:
 	add_request(major+blk_dev,req);
 }
 
-void ll_rw_page(int rw, int dev, int page, char * buffer)
-{
-	struct request * req;
+void ll_rw_page(int rw, int dev, int page, char *buffer) {
+
+	struct request *req;
 	unsigned int major = MAJOR(dev);
 
 	if (major >= MAX_BLKDEV || !(blk_dev[major].request_fn)) {
@@ -337,7 +339,8 @@ void ll_rw_page(int rw, int dev, int page, char * buffer)
 	cli();
 	req = get_request_wait(NR_REQUEST, dev);
 	sti();
-/* fill up the request-info, and add it to the queue */
+
+	/* fill up the request-info, and add it to the queue */
 	req->cmd = rw;
 	req->errors = 0;
 	req->sector = page<<3;
@@ -356,11 +359,12 @@ void ll_rw_page(int rw, int dev, int page, char * buffer)
 	schedule();
 }
 
-/* This function can be used to request a number of buffers from a block
-   device. Currently the only restriction is that all buffers must belong to
-   the same device */
-
-void ll_rw_block(int rw, int nr, struct buffer_head * bh[]) {
+/** 
+ * This function can be used to request a number of buffers from a block
+ * device. Currently the only restriction is that all buffers must belong to
+ * the same device 
+ */
+void ll_rw_block(int rw, int nr, struct buffer_head *bh[]) {
 
 	unsigned int major;
 	struct request plug;
@@ -377,11 +381,12 @@ void ll_rw_block(int rw, int nr, struct buffer_head * bh[]) {
 	};
 
 	dev = NULL;
-	if ((major = MAJOR(bh[0]->b_dev)) < MAX_BLKDEV)
+	if ((major = MAJOR(bh[0]->b_dev)) < MAX_BLKDEV) {
 		dev = blk_dev + major;
+	}
+
 	if (!dev || !dev->request_fn) {
-		printk(
-	"ll_rw_block: Trying to read nonexistent block-device %04lX (%ld)\n",
+		printk("ll_rw_block: Trying to read nonexistent block-device %04lX (%ld)\n",
 		       (unsigned long) bh[0]->b_dev, bh[0]->b_blocknr);
 		goto sorry;
 	}
@@ -450,6 +455,7 @@ void ll_rw_block(int rw, int nr, struct buffer_head * bh[]) {
 }
 
 void ll_rw_swap_file(int rw, int dev, unsigned int *b, int nb, char *buf) {
+
 	int i;
 	int buffersize;
 	struct request * req;

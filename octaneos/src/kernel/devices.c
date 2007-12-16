@@ -22,9 +22,19 @@
  * See LICENSE.OCTANE for more details
  */
 
+#include <system/system.h>
+#include <linux/errno.h>
+#include <linux/page.h>
+#include <linux/kernel_stat.h>
+
+#include <system/major_devices.h>
+#include <linux/block_devices.h>
+
+#include <linux/string.h>
+
 
 struct device_struct {
-	const char * name;
+	const char *name;
 	struct file_operations * fops;
 };
 
@@ -36,42 +46,39 @@ static struct device_struct blkdevs[MAX_BLKDEV] = {
 	{ NULL, NULL },
 };
 
-int get_device_list(char * page)
-{
+int get_device_list(char *page) {
+
 	int i;
 	int len;
-
 	len = sprintf(page, "Character devices:\n");
 	for (i = 0; i < MAX_CHRDEV ; i++) {
 		if (chrdevs[i].fops) {
-			len += sprintf(page+len, "%2d %s\n", i, chrdevs[i].name);
+			len += __sprintf(page+len, "%2d %s\n", i, chrdevs[i].name);
 		}
 	}
 	len += sprintf(page+len, "\nBlock devices:\n");
 	for (i = 0; i < MAX_BLKDEV ; i++) {
 		if (blkdevs[i].fops) {
-			len += sprintf(page+len, "%2d %s\n", i, blkdevs[i].name);
+			len += __sprintf(page+len, "%2d %s\n", i, blkdevs[i].name);
 		}
 	}
 	return len;
 }
 
-struct file_operations * get_blkfops(unsigned int major)
-{
+struct file_operations *get_blkfops(unsigned int major) {
 	if (major >= MAX_BLKDEV)
 		return NULL;
 	return blkdevs[major].fops;
 }
 
-struct file_operations * get_chrfops(unsigned int major)
+struct file_operations *get_chrfops(unsigned int major)
 {
 	if (major >= MAX_CHRDEV)
 		return NULL;
 	return chrdevs[major].fops;
 }
 
-int register_chrdev(unsigned int major, const char * name, struct file_operations *fops)
-{
+int register_chrdev(unsigned int major, const char * name, struct file_operations *fops) {
 	if (major >= MAX_CHRDEV)
 		return -EINVAL;
 	if (chrdevs[major].fops)
@@ -81,8 +88,8 @@ int register_chrdev(unsigned int major, const char * name, struct file_operation
 	return 0;
 }
 
-int register_blkdev(unsigned int major, const char * name, struct file_operations *fops)
-{
+int register_blkdev(unsigned int major, const char * name, struct file_operations *fops) {
+
 	if (major >= MAX_BLKDEV)
 		return -EINVAL;
 	if (blkdevs[major].fops)
@@ -105,14 +112,15 @@ int unregister_chrdev(unsigned int major, const char * name)
 	return 0;
 }
 
-int unregister_blkdev(unsigned int major, const char * name)
-{
+int unregister_blkdev(unsigned int major, const char *name) {
+
 	if (major >= MAX_BLKDEV)
 		return -EINVAL;
 	if (!blkdevs[major].fops)
 		return -EINVAL;
 	if (strcmp(blkdevs[major].name, name))
 		return -EINVAL;
+
 	blkdevs[major].name = NULL;
 	blkdevs[major].fops = NULL;
 	return 0;
@@ -127,8 +135,8 @@ int unregister_blkdev(unsigned int major, const char * name)
  * People changing diskettes in the middle of an operation deserve
  * to loose :-)
  */
-int check_disk_change(dev_t dev)
-{
+int check_disk_change(dev_t dev) {
+
 	int i;
 	struct file_operations * fops;
 
@@ -145,27 +153,36 @@ int check_disk_change(dev_t dev)
 	for (i=0 ; i<NR_SUPER ; i++)
 		if (super_blocks[i].s_dev == dev)
 			put_super(super_blocks[i].s_dev);
-	invalidate_inodes(dev);
-	invalidate_buffers(dev);
+
+	//invalidate_inodes(dev);
+	//invalidate_buffers(dev);
 
 	if (fops->revalidate)
 		fops->revalidate(dev);
 	return 1;
 }
 
-/*
- * Called every time a block special file is opened
+/**
+ * Called every time a block special file is opened.
+ *
+ * In the case of the floppy device driver, the floppy_open
+ * function will get called.
+ *
+ * (see filp->f_op->open)
  */
-int blkdev_open(struct inode * inode, struct file * filp)
-{
+int blkdev_open(struct inode *inode, struct file *filp) {
+
 	int i;
 
 	i = MAJOR(inode->i_rdev);
-	if (i >= MAX_BLKDEV || !blkdevs[i].fops)
+	if (i >= MAX_BLKDEV || !blkdevs[i].fops) {
 		return -ENODEV;
+	}
+
 	filp->f_op = blkdevs[i].fops;
-	if (filp->f_op->open)
+	if (filp->f_op->open) {
 		return filp->f_op->open(inode,filp);
+	}
 	return 0;
 }	
 
@@ -175,19 +192,19 @@ int blkdev_open(struct inode * inode, struct file * filp)
  * depending on the special file...
  */
 struct file_operations def_blk_fops = {
-	NULL,		/* lseek */
-	NULL,		/* read */
-	NULL,		/* write */
-	NULL,		/* readdir */
-	NULL,		/* select */
-	NULL,		/* ioctl */
-	NULL,		/* mmap */
+	NULL,		    /* lseek */
+	NULL,		    /* read */
+	NULL,		    /* write */
+	NULL,		    /* readdir */
+	NULL,		    /* select */
+	NULL,		    /* ioctl */
+	NULL,           /* mmap */
 	blkdev_open,	/* open */
-	NULL,		/* release */
+	NULL,		    /* release */
 };
 
 struct inode_operations blkdev_inode_operations = {
-	&def_blk_fops,		/* default file operations */
+	&def_blk_fops,	/* default file operations */
 	NULL,			/* create */
 	NULL,			/* lookup */
 	NULL,			/* link */
@@ -207,16 +224,19 @@ struct inode_operations blkdev_inode_operations = {
 /*
  * Called every time a character special file is opened
  */
-int chrdev_open(struct inode * inode, struct file * filp)
-{
-	int i;
+int chrdev_open(struct inode *inode, struct file *filp) {
 
+	int i;
 	i = MAJOR(inode->i_rdev);
-	if (i >= MAX_CHRDEV || !chrdevs[i].fops)
+	if (i >= MAX_CHRDEV || !chrdevs[i].fops) {
 		return -ENODEV;
+	}
+
 	filp->f_op = chrdevs[i].fops;
-	if (filp->f_op->open)
+	if (filp->f_op->open) {
 		return filp->f_op->open(inode,filp);
+	}
+
 	return 0;
 }
 

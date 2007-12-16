@@ -172,32 +172,31 @@ int request_irq(unsigned int irq, void (*handler)(int)) {
 }
 
 int irqaction(unsigned int irq, struct sigaction *new_signal_action) {
+
 	struct sigaction *signal_action;
 	unsigned long flags;
 
-	if (irq > 15)
+	if (irq > 15) {
 		return -EINVAL;
+	}
 
 	signal_action = irq + irq_sigaction;
-	if (signal_action->sa_mask)
+	if (signal_action->sa_mask) {
 		return -EBUSY;
-	if (!new_signal_action->sa_handler)
+	}
+
+	if (!new_signal_action->sa_handler) {
 		return -EINVAL;
+	}
 
 	save_flags(flags);
 	cli();
+
 	*signal_action = *new_signal_action;
 	signal_action->sa_mask = 1;
 
-#if 0
-	// TODO:
-	// Removed fast interrupt code
-	if (sa->sa_flags & SA_INTERRUPT) {
-		set_intr_gate(0x20+irq, fast_interrupt[irq]);
-	} else {
-#endif
-		set_intr_gate(0x20+irq, interrupt[irq]);
-
+	set_intr_gate(0x20+irq, interrupt[irq]);
+		
 	if (irq < 8) {
 		cache_21 &= ~(1<<irq);
 		outb(cache_21,0x21);
@@ -207,6 +206,7 @@ int irqaction(unsigned int irq, struct sigaction *new_signal_action) {
 		outb(cache_21,0x21);
 		outb(cache_A1,0xA1);
 	}
+
 	restore_flags(flags);
 	return 0;
 }
@@ -284,7 +284,7 @@ void free_irq(unsigned int irq) {
 asmlinkage void do_IRQ(int irq, struct pt_regs *regs) {
 	struct sigaction *signal_action = NULL;
 	//kstat.interrupts[irq]++;
-	printk("IRQ called");
+	printk("IRQ called !!!");
 	signal_action = irq + irq_sigaction;
 	signal_action->sa_handler((int) regs);
 }
