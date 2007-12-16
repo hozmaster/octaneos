@@ -1,12 +1,10 @@
-#
-#
-## Berlin Brown
-# $Id: Makefile,v 1.2 2005/05/21 06:08:10 bigbinc Exp $
-#
-# - makefile for 
-#    C - tools
-#     Note: external to the OS kernel
-#
+###
+### Berlin Brown
+### $Id: Makefile,v 1.2 2005/05/21 06:08:10 bigbinc Exp $
+###
+### Makefile for 
+###   C - tools
+###   Note: external to the OS kernel
 
 CC = gcc
 CFLAGS = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer

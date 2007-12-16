@@ -314,7 +314,7 @@ clean:
 	rm -f docs/*~
 	rm -f vmlinux SrcReport.txt PureReport.txt TotalSrc.txt
 	$(TOPDIR)/scripts/rm_squid
-	@echo "== cleaning complete =="
+	@echo "INFO: CLEAN complete"
 
 ###**********************************************************
 ### End of Makefile
