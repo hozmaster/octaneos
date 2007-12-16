@@ -323,8 +323,8 @@ static struct timer_list motor_on_timer[4] = {
 	{ NULL, NULL, 0, 3, motor_on_callback }
 };
 
-static void motor_off_callback(unsigned long nr)
-{
+static void motor_off_callback(unsigned long nr) {
+
 	unsigned char mask = ~(0x10 << nr);
 	cli();
 	running &= mask;
@@ -353,6 +353,7 @@ static void floppy_on(unsigned int nr) {
 		motor_on_timer[nr].expires = HZ;
 		add_timer(motor_on_timer + nr);
 	}
+
 	current_DOR &= 0xFC;
 	current_DOR |= mask;
 	current_DOR |= nr;
@@ -367,15 +368,13 @@ static void floppy_off(unsigned int nr) {
 
 void request_done(int uptodate) {
 
-	timer_active &= ~(1 << FLOPPY_TIMER);
-	/*
-	if (format_status != FORMAT_BUSY)
+	timer_active &= ~(1 << FLOPPY_TIMER);	
+	if (format_status != FORMAT_BUSY) {
 		end_request(uptodate);
-	else {
+	} else {
 		format_status = uptodate ? FORMAT_OKAY : FORMAT_ERROR;
 		wake_up(&format_done);
-	}
-	*/
+	}   
 }
 
 /**
@@ -818,7 +817,6 @@ static void transfer(void) {
 /*
  * Special case - used after a unexpected interrupt (or reset)
  */
-
 static void recal_interrupt(void) {
 
 	output_byte(FD_SENSEI);
@@ -1166,6 +1164,7 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 
 			if (fd_ref[drive & 3] != 1)
 				return -EBUSY;
+
 			cli();
 			while (format_status != FORMAT_NONE)
 				sleep_on(&format_done);
@@ -1185,8 +1184,9 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 				}
 			}
 			while (format_status != FORMAT_OKAY && format_status !=
-			    FORMAT_ERROR)
+				   FORMAT_ERROR) {
 				sleep_on(&format_done);
+			}
 			sti();
 			okay = format_status == FORMAT_OKAY;
 			format_status = FORMAT_NONE;

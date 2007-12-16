@@ -34,6 +34,7 @@
 #include <linux/ptrace.h>
 
 #include <asm/io.h>
+#include <linux/task_queue.h>
 
 #define TIMER_IRQ               0
 #define TIMER_LIST_REQUESTS     64
@@ -242,7 +243,7 @@ long tick = 1000000 / HZ;               /* timer interrupt period */
 volatile struct timeval xtime;		/* The current time */
 int tickadj = 500/HZ;			/* microsecs */
 
-//DECLARE_TASK_QUEUE(tq_timer);
+DECLARE_TASK_QUEUE(tq_timer);
 
 /*
  * Tell us the machine setup..
@@ -725,7 +726,6 @@ static void do_timer(struct pt_regs *regs) {
 		if (next_timer->expires) {
 
 			next_timer->expires--;
-
 			if (!next_timer->expires) {
 				mark_bh(TIMER_BH);
 			}
@@ -734,8 +734,9 @@ static void do_timer(struct pt_regs *regs) {
 			mark_bh(TIMER_BH);
 		}
 	}
-	//if (tq_timer != &tq_last)
-	//	mark_bh(TQUEUE_BH);
+	if (tq_timer != &tq_last) {
+		mark_bh(TQUEUE_BH);
+	}
 	sti();
 }
 

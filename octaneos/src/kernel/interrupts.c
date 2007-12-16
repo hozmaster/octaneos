@@ -284,7 +284,6 @@ void free_irq(unsigned int irq) {
 asmlinkage void do_IRQ(int irq, struct pt_regs *regs) {
 	struct sigaction *signal_action = NULL;
 	//kstat.interrupts[irq]++;
-	printk("IRQ called !!!");
 	signal_action = irq + irq_sigaction;
 	signal_action->sa_handler((int) regs);
 }
