@@ -159,7 +159,7 @@ asmlinkage void start_kernel(void) {
   load_exception_table();
 
   init_interrupts();
-  //sched_init();
+  sched_init();
   load_keyboard_driver();
   
   //memory_start = blk_dev_init(memory_start, memory_end);
