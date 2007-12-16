@@ -113,11 +113,11 @@
 =================================================
 	- Operating System Design and Implementation
 		
-	- Linux kernel developers - if you really
-	      want to know what is going on with a computer
+	- Linux kernel developers - Especially Linus Torvalds.
+		Unless noted; all linux kernel source is copyrighted to Linus Torvalds (1991-1994) under
+		a GPL license.  OctaneOS is also distributed under a GPLv3 license, all source included.
 	
-	- Tim Robinson - His code is probably somewhere
-	    in my kernel
+	- Tim Robinson - His code has also help this project.
 	
 	- Alexei A. Frounze - same here, his code
 	       is out there, good stuff.
@@ -125,8 +125,6 @@
 	3/26/2004 - help from geist of newos.com
 	geist@newos.com
 	
-	Other GPL developers - good luck
-
 =================================================
  * License
 =================================================
