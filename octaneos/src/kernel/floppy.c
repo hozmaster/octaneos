@@ -311,7 +311,6 @@ static void floppy_select(unsigned int nr) {
 }
 
 static void motor_on_callback(unsigned long nr) {
-
 	running |= 0x10 << nr;
 	floppy_select(nr);
 }
