@@ -181,8 +181,9 @@ asmlinkage void start_kernel(void) {
   floppy_init();
   sti();
 
-  __debug_floppy_open();
-  __debug_floppy_release();
+  //__debug_floppy_open();
+  //__debug_floppy_release();
+  test_time_1();
 
   tests();
   for(;;) {  
