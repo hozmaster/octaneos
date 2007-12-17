@@ -61,7 +61,7 @@ struct class_timer_list {
   void (*timer_function)();
   struct class_timer_list *next;
 
-}; // end of the struct
+};
 
 unsigned long timer_active = 0;
 struct timer_struct timer_table[32];
@@ -71,22 +71,15 @@ extern void _set_system_gate(unsigned int, void *);
 
 asmlinkage int system_call(void);
 
-//.....................................................
-// system_call vector table list function pointer array
-
-// see system_calls.h = int_function_ptr = int (*int_function_ptr)()
+//@see system_calls.h = int_function_ptr = int (*int_function_ptr)()
 int_function_ptr system_call_table [] = {
 	system_debug,				// [ 0 ]
 };
 
-//.....................................................
-// two tasks + the main kernel
-
-//  [ as opposed to _TSS ]
 #define _GET_TSS_VECTOR(index) \
         ((((unsigned long) index) << 4) + (_FIRST_TSS << 3))
 
-//
+
 #define load_task_register(tss_offset) __asm__ ( \
                                "ltr %%ax"        \
                                :                 \
@@ -112,7 +105,6 @@ int_function_ptr system_call_table [] = {
                           "m" (*(gdt_offset + 7))               \
                          )
 
-
 #define _load_tss_descriptor(n,addr)				\
 	__load_tss_helper(((char *) (n)),((int)(addr)),235,"0x89")
 
@@ -125,41 +117,40 @@ struct TSS_object _tss[__MAX_DEBUG_TASKS];
 static inline void __sleep_on(struct wait_queue **p, int state) {
 
 	unsigned long flags;
-	//struct wait_queue wait = { current, NULL };
-	struct wait_queue wait = { NULL, NULL };
+	struct wait_queue wait = { current, NULL };
 
 	if (!p)
 		return;
 
-	//if (current == task[0])
-	//	panic("task[0] trying to sleep");
-	//current->state = state;
+	if (current == task[0]) {
+		panic("task[0] trying to sleep");
+	}
 
+	current->state = state;
 	add_wait_queue(p, &wait);
 	save_flags(flags);
 	sti();
-	//schedule();
+	schedule();
 	remove_wait_queue(p, &wait);
 	restore_flags(flags);
 }
 
-void interruptible_sleep_on(struct wait_queue **p)
-{
+void interruptible_sleep_on(struct wait_queue **p) {
 	__sleep_on(p,TASK_INTERRUPTIBLE);
 }
 
-void sleep_on(struct wait_queue **p)
-{
+void sleep_on(struct wait_queue **p) {
 	__sleep_on(p,TASK_UNINTERRUPTIBLE);
 }
 
 void add_timer(struct timer_list *timer) {
 
 	unsigned long flags;
-	struct timer_list ** p;
+	struct timer_list **p;   
 
-	if (!timer)
+	if (!timer) {
 		return;
+	}
 	timer->next = NULL;
 	p = &next_timer;
 	save_flags(flags);
@@ -177,8 +168,8 @@ void add_timer(struct timer_list *timer) {
 	restore_flags(flags);
 }
 
-int del_timer(struct timer_list * timer)
-{
+int del_timer(struct timer_list *timer) {
+
 	unsigned long flags;
 	unsigned long expires = 0;
 	struct timer_list **p;
@@ -209,8 +200,7 @@ int del_timer(struct timer_list * timer)
  * the wait-queue structures directly, but only call wake_up() to wake
  * a process. The process itself must remove the queue once it has woken.
  */
-void wake_up(struct wait_queue **q)
-{
+void wake_up(struct wait_queue **q) {
 	struct wait_queue *tmp;
 	struct task_struct * p;
 	if (!q || !(tmp = *q))
@@ -221,8 +211,9 @@ void wake_up(struct wait_queue **q)
 			    (p->state == TASK_INTERRUPTIBLE)) {
 				p->state = TASK_RUNNING;
 
-				//if (p->counter > current->counter)
-				//	need_resched = 1;
+				if (p->counter > current->counter) {
+					need_resched = 1;
+				}
 			}
 		}
 		if (!tmp->next) {
@@ -248,8 +239,8 @@ DECLARE_TASK_QUEUE(tq_timer);
 /*
  * Tell us the machine setup..
  */
-int hard_math = 0;		/* set by boot/head.S */
-int x86 = 0;			/* set by boot/head.S to 3 or 4 */
+int hard_math = 0;          /* set by boot/head.S */
+int x86 = 0;                /* set by boot/head.S to 3 or 4 */
 int ignore_irq13 = 0;		/* set if exception 16 works */
 int wp_works_ok = 0;		/* set if paging hardware honours WP */ 
 
@@ -349,11 +340,11 @@ static unsigned long lost_ticks = 0;
 asmlinkage void schedule(void) {
 
 	int c;
-	struct task_struct * p;
-	struct task_struct * next;
+	struct task_struct *p;
+	struct task_struct *next;
 	unsigned long ticks;
 
-/* check alarm, wake up any interruptible tasks that have got a signal */
+	/* check alarm, wake up any interruptible tasks that have got a signal */
 
 	//if (intr_count) {
 	//	printk("Aiee: scheduling in interrupt\n");
@@ -582,8 +573,11 @@ static void second_overflow(void) {
 	    last_rtc_update = xtime.tv_sec - 600; /* do it again in one min */
 }
 
-/*
- * disregard lost ticks for now.. We don't care enough.
+/**
+ * Timer bottom half.
+ *
+ * @see do_timer
+ * @see add_timer
  */
 static void timer_bh(void *unused) {
 	unsigned long mask;
@@ -724,7 +718,7 @@ static void do_timer(struct pt_regs *regs) {
 	}
 	if (next_timer) {
 		if (next_timer->expires) {
-
+			printk("nte=%d  ", next_timer->expires);
 			next_timer->expires--;
 			if (!next_timer->expires) {
 				mark_bh(TIMER_BH);
