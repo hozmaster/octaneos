@@ -17,6 +17,25 @@ The format of the documentation syntax uses the "octane meta language".
 Also see: http://www.stack.nl/~dimitri/doxygen/docblocks.html
 
 //-------------------------------------
+// Tracking bottom half operations
+// The 32 bottom half operations operate at kernel priority.
+//-------------------------------------
+(bottom-half-operations:
+
+	.sys_call-system_call-> {
+		file-type: assembly;
+		
+		.sys_call-handle_bottom_half-> {
+			.irq-do_bottom_half-> {
+				.bh->routine(bh->data);
+				<Bottom half (bh) routines could include timer handler functions, for
+				example the floppy motor_on_callback>
+			}
+		}
+	}
+)
+
+//-------------------------------------
 // Time and Scheduler Operations
 //-------------------------------------
 (sched-time-operations:
