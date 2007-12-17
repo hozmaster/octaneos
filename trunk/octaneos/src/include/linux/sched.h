@@ -47,6 +47,9 @@ extern desc_table idt, gdt;
 #define LDT_CODE 1
 #define LDT_DATA 2
 
+/**
+ * BH stands for bottom half.
+ */
 struct bh_struct {
 	void (*routine)(void *);
 	void *data;
@@ -58,7 +61,6 @@ extern struct bh_struct bh_base[32];
 
 /* Who gets which entry in bh_base.  Things which will occur most often
    should come first - in which case NET should be up the top with SERIAL/TQUEUE! */
-   
 enum {
 	TIMER_BH = 0,
 	CONSOLE_BH,
