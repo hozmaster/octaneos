@@ -68,9 +68,7 @@ ENTRY(get_all_registers)
     pushl %edx          # 9
     pushl %ecx          # 10
     pushl %ebx          # 11
-
     call SYMBOL_NAME(print_register_list)
-
     popl %ebx           # 11
     popl %ecx           # 10
     popl %edx           # 9
