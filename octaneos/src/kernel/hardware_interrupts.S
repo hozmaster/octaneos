@@ -96,27 +96,27 @@
 1:  jmp 1f;                 \
 1:  outb %al,$0x20;
 
-#
-# Set_intr_gate prepares the actual interrupt
-#
 
-# 0  0x01   system_timer
-# 1  0x02   keyboard
-# 2  0x04
-# 3  0x08
-# 4  0x10
-# 5  0x20   harddrive
-# 6  0x40   floppy
-# 7  0x80
-# (Second PIC)
-# 8  0x01
-# 9  0x02
-# 10 0x04
-# 11 0x08
-# 12 0x10
-# 13 0x20
-# 14 0x40
-# 15 0x80
+/**
+ * Interrupt Vector List:
+ * 0  0x01   system_timer
+ * 1  0x02   keyboard
+ * 2  0x04
+ * 3  0x08
+ * 4  0x10
+ * 5  0x20   harddrive
+ * 6  0x40   floppy
+ * 7  0x80
+ * (Second PIC)
+ * 8  0x01
+ * 9  0x02
+ * 10 0x04
+ * 11 0x08
+ * 12 0x10
+ * 13 0x20
+ * 14 0x40
+ * 15 0x80
+ */		 
 
 #***************************************************
 # TIMER_IRQ
