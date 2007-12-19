@@ -1,24 +1,24 @@
-//
-// Copyright (C) 2003, 2007 Berlin Brown
-//
-// $Id: setup.S,v 1.1 2004/03/14 03:21:39 bigbinc Exp $, we are assuming a big kernel
-//
-// Original Source:
-// Setup.S		Copyright (C) 1991, 1992 Linus Torvalds
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//
+/*
+ * Copyright (C) 2003, 2007 Berlin Brown
+ *
+ * $Id: setup.S,v 1.1 2004/03/14 03:21:39 bigbinc Exp $, we are assuming a big kernel
+ *
+ * Original Source:
+ * Setup.S		Copyright (C) 1991, 1992 Linus Torvalds
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #define __ASSEMBLY__
 
@@ -46,23 +46,22 @@ start:
 	jmp	trampoline
 
 # = cs:2 (old 0x9020:2)
-
 		.ascii	"HdrS"
 		.word	0x0201
 
-#
-# ++ Send Messages to 32-bit mode ++
-#
+#*************************************************
+# Send Messages to 32-bit mode
+#*************************************************
 realmode_swtch:	.word	0, 0			# 0, 2
 
 start_sys_seg:	.word	SYSSEG			# 4
-		.word	kernel_version		# 6			
+		.word	kernel_version		    # 6			
 
-type_of_loader:	.byte	0			# 8 
+type_of_loader:	.byte	0			    # 8 
 
 extra_spirit_msg:
-		.word	kernel_message		# 9 
-		.word	kernel_version		# 11 
+		.word	kernel_message		    # 9 
+		.word	kernel_version		    # 11 
 
 
 loadflags:
@@ -92,10 +91,8 @@ start_of_setup:
 	movw	$0x01500, %ax
 	movb	$0x81, %dl
 	int	$0x13
-
 	movw	%cs, %ax
 	movw	%ax, %ds
-
 	cmpw	$SIG1, setup_sig1
 	jne	bad_sig
 
@@ -149,7 +146,6 @@ bad_sig:
 	shrw	$3, %bx
 	addw	$SYSSEG, %bx
 	movw	%bx, %cs:start_sys_seg
-
 	movw	$2048, %di
 	subw	%si, %si
 	movw	%cs, %ax	
@@ -162,10 +158,8 @@ bad_sig:
 	movw	%ax, %ds
 	cmpw	$SIG1, setup_sig1
 	jne	no_sig
-
 	cmpw	$SIG2, setup_sig2
 	jne	no_sig
-
 	jmp	good_sig
 
 no_sig:
@@ -182,23 +176,17 @@ good_sig:
 
 	testb	$LOADED_HIGH, %cs:loadflags
 	jz	loader_ok			
-
-	cmpb	$0, %cs:type_of_loader 		
-						
+	cmpb	$0, %cs:type_of_loader 						
 	jnz	loader_ok			
-
 	pushw	%cs				
 	popw	%ds				
 	lea	loader_panic_mess, %si
 	call	prtstr
-
 	jmp	no_sig_loop
 
 loader_panic_mess: .string "Wrong loader, giving up..."
 
 loader_ok:
-
-
 	xorl	%eax, %eax
 	movl	%eax, (0x1e0)
 
@@ -253,7 +241,6 @@ no_disk1:
 	rep
 	stosb
 is_disk1:
-
 	movw	%cs, %ax			# aka SETUPSEG
 	subw	$DELTA_INITSEG, %ax		# aka INITSEG
 	movw	%ax, %ds
@@ -263,11 +250,10 @@ is_disk1:
 	stc
 	int	$0x15
 	jc	no_mca
-
 	pushw	%ds
 	movw	%es, %ax
 	movw	%ax, %ds
-	movw	%cs, %ax			# aka SETUPSEG
+	movw	%cs, %ax			    # aka SETUPSEG
 	subw	$DELTA_INITSEG, %ax		# aka INITSEG
 	movw	%ax, %es
 	movw	%bx, %si
@@ -312,19 +298,18 @@ rmodeswtch_end:
 	movl	%eax, %cs:code32
 
 	testb	$LOADED_HIGH, %cs:loadflags
-	jz	do_move0			# .. then we have a normal low
-
-	jmp	end_move			# ... and we skip moving
+	jz	do_move0			# Then we have a normal low
+	jmp	end_move			# and we skip moving
 
 do_move0:
-	movw	$0x100, %ax			# start of destination segment
-	movw	%cs, %bp			# aka SETUPSEG
-	subw	$DELTA_INITSEG, %bp		# aka INITSEG
+	movw	$0x100, %ax			        # start of destination segment
+	movw	%cs, %bp			        # aka SETUPSEG
+	subw	$DELTA_INITSEG, %bp		    # aka INITSEG
 	movw	%cs:start_sys_seg, %bx		# start of source segment
 	cld
 do_move:
 	movw	%ax, %es			# destination segment
-	incb	%ah				# instead of add ax,#0x100
+	incb	%ah				    # instead of add ax,#0x100
 	movw	%bx, %ds			# source segment
 	addw	$0x100, %bx
 	subw	%di, %di
@@ -379,10 +364,8 @@ move_self_here:
 end_move_self:					# now we are at the right place
 	lidt	idt_48				# load idt with 0,0
 	lgdt	gdt_48				# load gdt with whatever is
-						# appropriate
-
+						        # appropriate
 	call	empty_8042
-
 	movb	$0xD1, %al			# command write
 	outb	%al, $0x64
 	call	empty_8042
@@ -395,7 +378,7 @@ end_move_self:					# now we are at the right place
 	push    %es
 	xorw	%ax, %ax			# segment 0x0000
 	movw	%ax, %fs
-	decw	%ax				# segment 0xffff (HMA)
+	decw	%ax                 # segment 0xffff (HMA)
 	movw	%ax, %gs
 a20_wait:
 	incw	%ax
@@ -492,8 +475,8 @@ bootsect_second:
 	incb	%cs:bootsect_dst_base+2		# to 0x10000
 bootsect_ex:
 	movb	%cs:bootsect_dst_base+2, %ah
-	shlb	$4, %ah				# we now have the number of
-						# moved frames in %ax
+	shlb	$4, %ah				# We now have the number of
+						        # moved frames in %ax
 	xorb	%al, %al
 	popw	%bx
 	popw	%si
@@ -509,8 +492,8 @@ bootsect_src:
 
 bootsect_src_base:
 	.byte	0x00, 0x00, 0x01		# base = 0x010000
-	.byte	0x93				# typbyte
-	.word	0				# limit16,base24 =0
+	.byte	0x93                    # typbyte
+	.word	0                       # limit16,base24 =0
 
 bootsect_dst:
 	.word	0xffff
@@ -597,11 +580,11 @@ gdt:
 	.word	0x00CF
 	
 idt_48:
-	.word	0				# idt limit = 0
+	.word	0				    # idt limit = 0
 	.word	0, 0				# idt base = 0L
 gdt_48:
 	.word	0x8000				# gdt limit=2048,
-						#  256 GDT entries
+						        #  256 GDT entries
 
 	.word	512+gdt, 0x9
 
