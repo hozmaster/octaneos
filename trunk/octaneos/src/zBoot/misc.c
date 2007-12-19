@@ -96,7 +96,7 @@ typedef unsigned char  uch;
 typedef unsigned short ush;
 typedef unsigned long  ulg;
 
-// ++ Just in case I dont like the compilers work ++
+// Just in case I dont like the compilers work
 //
 //  va_list/va_args/ blah are gcc dependent, try not write the code yourself?
 
@@ -132,7 +132,7 @@ typedef unsigned long  ulg;
 #define ENCRYPTED    0x20 /* bit 5 set: file is encrypted */
 #define RESERVED     0xC0 /* bit 6,7:   reserved */
 
-// INFLATE.C above ++ MISC.C below ++
+// INFLATE.C above MISC.C below
 
 #define OF(args)  args
 #define STATIC static
@@ -161,7 +161,6 @@ typedef unsigned long  ulg;
 #  define Tracecv(c,x)
 #endif
 
-// ++ new school ++
 struct screen_info {
   unsigned char  orig_x;                  /* 0x00 */
   unsigned char  orig_y;                  /* 0x01 */
@@ -189,8 +188,6 @@ struct screen_info {
 #define LOW_BUFFER_START      0x2000
 #define LOW_BUFFER_MAX       0x90000
 #define HEAP_SIZE             0x3000
-
-// ++ printf.c ++
 
 #define ZEROPAD	1
 #define SIGN	2
@@ -336,7 +333,7 @@ long user_stack [STACK_SIZE];
 struct {
   long * a;
   short b;
-} stack_start = { & user_stack [STACK_SIZE] , __KERNEL_DS };
+} stack_start = { &user_stack[STACK_SIZE], KERNEL_DS };
 
 // blbz
 static void makecrc(void);
@@ -349,7 +346,6 @@ int gunzip(void);
 // END GLOBALS
 //
 //============================================================
-
 
 int sprintf(char * buf, const char *fmt, ...);
 
