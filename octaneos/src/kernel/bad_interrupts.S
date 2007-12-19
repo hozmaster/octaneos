@@ -29,7 +29,7 @@
 
 # Functions Defined:
 # Use FIRST PIC [ 0 to 7 ]
-#  for SECOND PIC [ 8 - 16 ]
+# for SECOND PIC [ 8 - 16 ]
 # bad_interrupt_00
 # bad_interrupt_01
 # bad_interrupt_02
@@ -59,7 +59,7 @@ ENTRY(bad_interrupt_00)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -91,7 +91,7 @@ ENTRY(bad_interrupt_01)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -123,7 +123,7 @@ ENTRY(bad_interrupt_02)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -155,7 +155,7 @@ ENTRY(bad_interrupt_03)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -187,7 +187,7 @@ ENTRY(bad_interrupt_04)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -220,7 +220,7 @@ ENTRY(bad_interrupt_05)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -253,7 +253,7 @@ ENTRY(bad_interrupt_06)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -286,7 +286,7 @@ ENTRY(bad_interrupt_07)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -319,10 +319,9 @@ ENTRY(bad_interrupt_08)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
-
 
     # // SECOND /// ================================
 
@@ -359,7 +358,7 @@ ENTRY(bad_interrupt_09)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -399,7 +398,7 @@ ENTRY(bad_interrupt_10)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -439,7 +438,7 @@ ENTRY(bad_interrupt_11)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -479,7 +478,7 @@ ENTRY(bad_interrupt_12)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -519,7 +518,7 @@ ENTRY(bad_interrupt_13)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -558,7 +557,7 @@ ENTRY(bad_interrupt_14)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
 
@@ -597,7 +596,7 @@ ENTRY(bad_interrupt_15)
     pushl %eax
     pushl %edx
     pushl %ecx
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx
+    movl $SYMBOL_NAME(KERNEL_DS),%edx
     mov %dx,%ds
     mov %dx,%es
     # // SECOND /// ================================

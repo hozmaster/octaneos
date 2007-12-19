@@ -35,14 +35,16 @@ LDFLAGS = -m elf_i386
 ## Kernel File Object Listings
 ##################################################
 OBJS = \
+	scheduler.o system_calls_asm.o                  \
+	system_calls.o                                  \
+	system_calls_undef.o                            \
 	empty.o misc_print.o traps.o                    \
 	exceptions.o interrupts.o                       \
 	bad_interrupts.o hardware_interrupts.o          \
-	lowlevel.o keyboard.o scheduler.o               \
+	lowlevel.o keyboard.o                           \
 	floppy.o time_helpers.o dma_functions.o         \
-	system_calls.o block_devices.o                  \
 	devices.o fs_super.o fs_buffer.o hexdump.o		\
-    inode.o fs_file_table.o                         \
+    inode.o fs_file_table.o block_devices.o         \
 	exec_domain.o fork.o time.o memory.o            \
 	tests/traps/test_traps_1.o						\
 	tests/time/test_time_1.o

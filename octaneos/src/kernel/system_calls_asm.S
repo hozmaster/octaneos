@@ -10,6 +10,53 @@
  * this file is synonymous with irq.c in the linux kernel)
  */
 
+#define __ASSEMBLY__
+
+#include <linux/sys.h>
+#include <linux/linkage.h>
+#include <asm/segment.h>
+		
+#*************************************************
+# Register SAVE_ALL, reusable code block
+#*************************************************
+#define SAVE_ALL       \
+    cld;               \
+    push %gs;          \
+    push %fs;          \
+    push %es;          \
+    push %ds;          \
+    pushl %eax;        \
+    pushl %ebp;        \
+    pushl %edi;        \
+    pushl %esi;        \
+    pushl %edx;        \
+    pushl %ecx;        \
+    pushl %ebx;        \
+    movl $SYMBOL_NAME(KERNEL_DS),%edx; \
+    mov %dx,%ds;       \
+    mov %dx,%es;       \
+    movl $SYMBOL_NAME(USER_DS),%edx;   \
+    mov %dx,%fs;       \
+    movl $0,%edx;
+
+#*************************************************
+# Register RESTORE_ALL, reusable code block
+#*************************************************
+#define RESTORE_ALL    \
+    popl %ebx;         \
+    popl %ecx;         \
+    popl %edx;         \
+    popl %esi;         \
+    popl %edi;         \
+    popl %ebp;         \
+    popl %eax;         \
+    pop %ds;           \
+    pop %es;           \
+    pop %fs;           \
+    pop %gs;           \
+    addl $4,%esp;      \
+    iret
+						
 EBX			= 0x00
 ECX			= 0x04
 EDX			= 0x08
@@ -51,11 +98,12 @@ ENOSYS = 38
 
 .globl system_call, lcall7
 .globl ret_from_sys_call, sys_call_table
-
+	
+		
 #***********************************************************
 # Lcall7
 #***********************************************************  
-ENTRY(lcall7):
+ENTRY(lcall7)
 	pushfl                  # We get a different stack layout with call gates,
 	pushl %eax              # which has to be cleaned up later.
 	SAVE_ALL
@@ -66,7 +114,7 @@ ENTRY(lcall7):
 	movl %edx,EIP(%esp)     # Now we move them to their "normal" places
 	movl %ecx,CS(%esp)
 	movl %esp,%eax
-	movl _current,%edx
+	movl SYMBOL_NAME(current),%edx
 	pushl %eax
 	movl exec_domain(%edx),%edx	# Get the execution domain
 	movl 4(%edx),%edx           # Get the lcall7 handler for the domain
@@ -79,16 +127,16 @@ ENTRY(lcall7):
 #***********************************************************
 handle_bottom_half:
 	pushfl
-	incl _intr_count
+	incl SYMBOL_NAME(intr_count)
 	sti
-	call SYMBOL_NAME(do_bottom_half)
+	#### call SYMBOL_NAME(do_bottom_half)
 	popfl
-	decl _intr_count
+	decl SYMBOL_NAME(intr_count)
 	jmp 9f
 .align 4
 reschedule:
 	pushl $ret_from_sys_call
-	jmp _schedule
+	jmp SYMBOL_NAME(schedule)
 		
 #***********************************************************
 # System Call (public)
@@ -99,10 +147,10 @@ ENTRY(system_call)
 	movl $-ENOSYS,EAX(%esp)
 	cmpl $(NR_syscalls),%eax
 	jae ret_from_sys_call
-	movl SYMBOL_NAME(sys_call_table)(,%eax,4),%eax
-	testl %eax,%eax
+	call *SYMBOL_NAME(sys_call_table)(,%eax,4)
+	testl %eax, %eax
 	je ret_from_sys_call
-	movl _current,%ebx
+	movl SYMBOL_NAME(current),%ebx
 	andl $~CF_MASK,EFLAGS(%esp)	    # clear carry - assume no errors
 	movl $0,errno(%ebx)
 	movl %db6,%edx
@@ -120,9 +168,9 @@ ENTRY(system_call)
 .align 4
 1:  call SYMBOL_NAME(syscall_trace)
 	movl ORIG_EAX(%esp),%eax
-	call SYMBOL_NAME(sys_call_table)(,%eax,4)
+	call *SYMBOL_NAME(sys_call_table)(,%eax,4)
 	movl %eax,EAX(%esp)             # save the return value
-	movl _current,%eax
+	movl SYMBOL_NAME(current),%eax
 	movl errno(%eax),%edx
 	negl %edx
 	je 1f
@@ -132,7 +180,7 @@ ENTRY(system_call)
 
 .align 4, 0x90
 ENTRY(ret_from_sys_call)
-	cmpl $0,_intr_count
+	cmpl $0, SYMBOL_NAME(intr_count)
 	jne 2f
 	movl SYMBOL_NAME(bh_mask),%eax
 	andl SYMBOL_NAME(bh_active),%eax
@@ -146,10 +194,11 @@ ENTRY(ret_from_sys_call)
 	orl $(IF_MASK),%eax  		# these just try to make sure
 	andl $~NT_MASK,%eax  		# the program doesn't do anything
 	movl %eax,EFLAGS(%esp)  	# stupid
-	cmpl $0,_need_resched
+		
+	####cmpl $0,_need_resched
 	jne reschedule
-	movl _current,%eax
-	cmpl _task, %eax   		    # task[0] cannot have signals
+	movl SYMBOL_NAME(current),%eax
+	####cmpl _task, %eax   		    # task[0] cannot have signals
 	je 2f
 	cmpl $0,state(%eax)		    # state
 	jne reschedule
@@ -168,7 +217,7 @@ signal_return:
 	testl $(VM_MASK),EFLAGS(%ecx)
 	jne v86_signal_return
 	pushl %ebx
-	call SYMBOL_NAME(do_signal)
+	####call SYMBOL_NAME(do_signal)
 	popl %ebx
 	popl %ebx
 	RESTORE_ALL
@@ -178,11 +227,11 @@ signal_return:
 #***********************************************************
 .align 4
 v86_signal_return:
-	call SYMBOL_NAME(save_v86_state)
+	###call SYMBOL_NAME(save_v86_state)
 	movl %eax,%esp
 	pushl %eax
 	pushl %ebx
-	call SYMBOL_NAME(do_signal)
+	####call SYMBOL_NAME(do_signal)
 	popl %ebx
 	popl %ebx
 	RESTORE_ALL
@@ -458,4 +507,3 @@ ENTRY(sys_call_table)
 	.rept NR_syscalls-(.-sys_call_table)/4
     .long SYMBOL_NAME(sys_ni_syscall)
 	.endr
-  

@@ -29,10 +29,9 @@
 #define CL_BASE_ADDR    0x90000
 #define CL_OFFSET       0x90022
 
-
 startup_32:
     cld
-    movl $(__KERNEL_DS), %eax
+    movl $(KERNEL_DS), %eax
     movl %eax,%ds
     movl %eax,%es
     movl %eax,%fs
@@ -103,10 +102,10 @@ startup_32:
     lidt idt_descr
 
 
-# Jump to start_kernel ++
+# Jump to start_kernel
 # change the current selector with the code below
-    ljmp $(__KERNEL_CS),$1f
-1:      movl $(__KERNEL_DS),%eax
+    ljmp $(KERNEL_CS),$1f
+1:      movl $(KERNEL_DS),%eax
     movl %eax,%ds
     movl %eax,%es
     movl %eax,%fs
@@ -141,7 +140,7 @@ ALIGN
  */
 setup_idt:
     lea ignore_int,%edx
-    movl $(__KERNEL_CS << 16),%eax
+    movl $(KERNEL_CS << 16),%eax
     movw %dx,%ax
     movw $0x8E00,%dx
     lea SYMBOL_NAME(idt),%edi
@@ -164,7 +163,7 @@ ignore_int:
     pushl %ds
     pushl %es
     pushl %fs
-    movl $(__KERNEL_DS),%eax
+    movl $(KERNEL_DS),%eax
     movl %eax,%ds
     movl %eax,%es
     movl %eax,%fs

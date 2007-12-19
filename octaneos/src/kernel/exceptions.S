@@ -50,61 +50,45 @@ REGI_EIP    = 0x30
 REGI_CS     = 0x34
 REGI_EFLAGS = 0x38
 
-#define SAVE_ALL \
-        cld; \
-        push %gs; \
-        push %fs; \
-        push %es; \
-        push %ds; \
-        pushl %eax; \
-        pushl %ebp; \
-        pushl %edi; \
-        pushl %esi; \
-        pushl %edx; \
-        pushl %ecx; \
-        pushl %ebx; \
-        movl $(__KERNEL_DS),%edx; \
-        mov %dx,%ds; \
-        mov %dx,%es; \
-        movl $(__USER_DS),%edx; \
-        mov %dx,%fs;
+#***********************************************************
+# Register Save All
+#***********************************************************		
+#define SAVE_ALL    \
+	cld;            \
+    push %gs;       \
+    push %fs;       \
+    push %es;       \
+    push %ds;       \
+    pushl %eax;     \
+    pushl %ebp;     \
+    pushl %edi;     \
+    pushl %esi;     \
+    pushl %edx;     \
+    pushl %ecx;     \
+    pushl %ebx;     \
+    movl $(KERNEL_DS),%edx; \
+    mov %dx,%ds;    \
+    mov %dx,%es;    \
+    movl $(USER_DS),%edx; \
+    mov %dx,%fs;
 		
 #***********************************************************
 # Register Restore all
 #***********************************************************
-#define RESTORE_ALL \
-    popl %ebx; \
-        popl %ecx; \
-        popl %edx; \
-        popl %esi; \
-        popl %edi; \
-        popl %ebp; \
-        popl %eax; \
-        pop %ds; \
-        pop %es; \
-        pop %fs; \
-        pop %gs; \
-        addl $4,%esp; \
-        iret
-
-#***********************************************************		
-# System Call:
-# EAX represents the offset in the sys_call table
-# set typically by the calling system function
-#***********************************************************
-ALIGN
-ENTRY(system_call)
-    SAVE_ALL
-    cmpl __NO_SYS_CALLS, %eax
-    jae end_sys_call
-	#*******************************************************
-    # see:   scheduler.c
-    # make the system call from the function pointer array
-    #*******************************************************
-    call *SYMBOL_NAME(system_call_table)(,%eax,4)
-    movl %eax, REGI_EAX(%esp)
-end_sys_call:
-    RESTORE_ALL
+#define RESTORE_ALL  \
+    popl %ebx;       \
+    popl %ecx;       \
+    popl %edx;       \
+    popl %esi;       \
+    popl %edi;       \
+    popl %ebp;       \
+    popl %eax;       \
+    pop %ds;         \
+    pop %es;         \
+    pop %fs;         \
+    pop %gs;         \ 
+    addl $4,%esp;    \
+    iret
 
 #======================== INT_0001 ==========================
 
@@ -127,22 +111,19 @@ ENTRY(load_nmi_error)
     call handler_nmi_error
     RESTORE_ALL
 
-
 #======================== INT_0004 ==========================
 
 ENTRY(load_breakpoint_error)
     SAVE_ALL
     call handler_breakpoint_error
     RESTORE_ALL
-
-
+		
 #======================== INT_0005 ==========================
 
 ENTRY(load_overflow_error)
     SAVE_ALL
     call handler_overflow_error
     RESTORE_ALL
-
 
 #======================== INT_0006 ==========================
 
@@ -151,14 +132,12 @@ ENTRY(load_boundscheck_error)
     call handler_bounds_error
     RESTORE_ALL
 
-
 #======================== INT_0007 ==========================
 
 ENTRY(load_invalidop_error)
     SAVE_ALL
     call handler_invalid_opcode_error
     RESTORE_ALL
-
 
 #======================== INT_0008 ==========================
 
@@ -215,7 +194,6 @@ ENTRY(load_pagefault_error)
     SAVE_ALL
     call handler_pagefault_error
     RESTORE_ALL
-
 
 #======================== INT_0016 ==========================
 

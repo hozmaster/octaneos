@@ -17,19 +17,19 @@
 # We are going to push a lot of stuff onto the stack
 # note:  C is a really big macro assembler
 #
-#    push %gs
-#    push %fs
-#        push %es
-#        push %ds
-#        pushl %eax
-#        pushl %ebp
-#        pushl %edi
-#        pushl %esi
-#        pushl %edx
-#        pushl %ecx
-#        pushl %ebx
+# push %gs
+# push %fs
+# push %es
+# push %ds
+# pushl %eax
+# pushl %ebp
+# pushl %edi
+# pushl %esi
+# pushl %edx
+# pushl %ecx
+# pushl %ebx
 
-# variables we put on the stack ==
+# Variables we put on the stack
 #
 # here placed in order they placed on it
 
@@ -52,8 +52,6 @@ REGI_CS     = 0x34
 REGI_EFLAGS = 0x38
 
 MAX_REGS_STACK  = 0x38
-
-# == end stack return setup ==
 
 ENTRY(get_all_registers)
     movl $-MAX_REGS_STACK, REGI_EAX(%esp)

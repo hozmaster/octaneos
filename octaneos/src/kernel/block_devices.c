@@ -31,16 +31,12 @@
 #include <linux/block_devices.h>
 
 #include <linux/string.h>
+#include <linux/signal.h>
 
 #ifndef MAX_BLKDDEV
 #define MAX_BLKDEV 32
 #endif
 
-
-/* blk_dev_struct is:
- *	do_request-address
- *	next-request
- */
 struct blk_dev_struct blk_dev[MAX_BLKDEV] = {
 	{ NULL, NULL },		/* no_dev */
 	{ NULL, NULL },		/* dev mem */
