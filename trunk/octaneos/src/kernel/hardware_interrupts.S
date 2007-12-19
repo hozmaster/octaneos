@@ -17,6 +17,9 @@
 #include <linux/linkage.h>
 #include <asm/segment.h>
 
+#*************************************************
+# Register SAVE_ALL, reusable code block
+#*************************************************
 #define SAVE_ALL       \
     cld;               \
     push %gs;          \
@@ -30,13 +33,16 @@
     pushl %edx;        \
     pushl %ecx;        \
     pushl %ebx;        \
-    movl $SYMBOL_NAME(__KERNEL_DS),%edx; \
+    movl $SYMBOL_NAME(KERNEL_DS),%edx; \
     mov %dx,%ds;       \
     mov %dx,%es;       \
-    movl $SYMBOL_NAME(__USER_DS),%edx;   \
+    movl $SYMBOL_NAME(USER_DS),%edx;   \
     mov %dx,%fs;       \
     movl $0,%edx;
 
+#*************************************************
+# Register RESTORE_ALL, reusable code block
+#*************************************************
 #define RESTORE_ALL    \
     popl %ebx;         \
     popl %ecx;         \
@@ -166,7 +172,6 @@ ENTRY(hw_interrupt_entry_06)
     movl %esp,%ebx
     pushl %ebx
     pushl $0
-    ###call SYMBOL_NAME(lowlevel_floppy_interrupt)
 	call SYMBOL_NAME(do_IRQ)
     addl $8,%esp
     cli

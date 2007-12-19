@@ -23,17 +23,36 @@
 #include <asm/io.h>
 #include <linux/errno.h>
 #include <linux/signal.h>
+#include <linux/sched.h>
 
+extern volatile unsigned long jiffies;
+
+//************************************************
+// INTERRUPT DEFINES
+//************************************************
 #define HZ                100
 #define CLOCK_TICK_RATE   1193180
 #define CLOCK_TICK_FACTOR 20
 #define TIMER_LATCH       ((CLOCK_TICK_RATE + HZ/2) / HZ)
 
-asmlinkage void get_all_registers(void);
+static unsigned int cached_irq_mask = 0xffff;
 
-extern volatile unsigned long jiffies;
+#define __byte(x,y) 	(((unsigned char *)&(y))[x])
+#define cached_21	(__byte(0,cached_irq_mask))
+#define cached_A1	(__byte(1,cached_irq_mask))
 
+//************************************************
+// Variable Definitions
+//************************************************
+unsigned char cache_21 = 0xff;
+unsigned char cache_A1 = 0xff;
+
+unsigned long intr_count = 0;
 unsigned long bh_active = 0;
+unsigned long bh_mask = 0xFFFFFFFF;
+struct bh_struct bh_base[32];
+
+asmlinkage void get_all_registers(void);
 
 // defined in bad_interrupts.S in assembly
 asmlinkage void bad_interrupt_00(void);
@@ -114,16 +133,6 @@ static struct sigaction irq_sigaction[16] = {
 	{ NULL, 0, 0, NULL }, { NULL, 0, 0, NULL }
 };
 
-static unsigned int cached_irq_mask = 0xffff;
-
-#define __byte(x,y) 	(((unsigned char *)&(y))[x])
-#define cached_21	(__byte(0,cached_irq_mask))
-#define cached_A1	(__byte(1,cached_irq_mask))
-
-// we also might want to use cache_21
-
-unsigned char cache_21 = 0xff;
-unsigned char cache_A1 = 0xff;
 
 extern void set_intr_gate(unsigned int, void *);
 
