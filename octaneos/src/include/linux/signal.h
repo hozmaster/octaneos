@@ -99,7 +99,6 @@ struct sigaction {
 	void (*sa_restorer)(void);
 };
 
-
 struct sigcontext_struct {
 	unsigned short gs, __gsh;
 	unsigned short fs, __fsh;
