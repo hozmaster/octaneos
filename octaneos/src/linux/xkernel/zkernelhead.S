@@ -1,26 +1,21 @@
-//
-// modded:
-//
-// Berlin Brown
-//
-// bigbinc@hotmail.com
-//
-// $Id: zkernelhead.S,v 1.1 2004/03/14 02:55:04 bigbinc Exp $
-//
-
 /*
- *  linux/arch/i386/head.S -- the 32-bit startup code.
+ * Berlin Brown
  *
- *  Copyright (C) 1991, 1992  Linus Torvalds
+ * $Id: zkernelhead.S,v 1.1 2004/03/14 02:55:04 bigbinc Exp $
  *
- *  Enhanced CPU detection and feature setting code by Mike Jagdis
- *  and Martin Mares, November 1997.
+ * linux/arch/i386/head.S -- the 32-bit startup code.
+ *
+ * Copyright (C) 1991, 1992  Linus Torvalds
+ *
+ * Enhanced CPU detection and feature setting code by Mike Jagdis
+ * and Martin Mares, November 1997.
  */
 
 .text
 #include <linux/config.h>
 #include <linux/threads.h>
 #include <linux/linkage.h>
+		
 #include <asm/segment.h>
 #include <asm/page.h>
 #include <asm/pgtable.h>
