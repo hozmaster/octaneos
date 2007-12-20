@@ -371,7 +371,7 @@ void ll_rw_block(int rw, int nr, struct buffer_head *bh[]) {
 	struct request plug;
 	int plugged;
 	int correct_size;
-	struct blk_dev_struct * dev;
+	struct blk_dev_struct *dev;
 	int i;
 
 	/* Make sure that the first block contains something reasonable */

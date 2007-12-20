@@ -203,7 +203,8 @@ void device_setup(void) {
 		nr += p->nr_real;
 	}		
 
-	if (ramdisk_size) {
-		rd_load();
-	}
+	// TODO:
+	//if (ramdisk_size) {
+	//	rd_load();
+	//}
 }

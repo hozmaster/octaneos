@@ -696,36 +696,46 @@ repeat0:
  * 14.02.92: changed it to sync dirty buffers a bit: better performance
  * when the filesystem starts to get full of dirty blocks (I hope).
  */
-struct buffer_head * getblk(dev_t dev, int block, int size)
-{
-	struct buffer_head * bh;
-        int isize = BUFSIZE_INDEX(size);
+struct buffer_head *getblk(dev_t dev, int block, int size) {
+
+	struct buffer_head *bh;
+	int isize = BUFSIZE_INDEX(size);
 
 	/* Update this for the buffer size lav. */
 	buffer_usage[isize]++;
 
-	/* If there are too many dirty buffers, we wake up the update process
-	   now so as to ensure that there are still clean buffers available
-	   for user processes to use (and dirty) */
+	/* 
+	 * If there are too many dirty buffers, we wake up the update process
+	 * now so as to ensure that there are still clean buffers available
+	 * for user processes to use (and dirty) 
+     */
 repeat:
 	bh = get_hash_table(dev, block, size);
 	if (bh) {
-		if (bh->b_uptodate && !bh->b_dirt)
+		if (bh->b_uptodate && !bh->b_dirt) {
 			 put_last_lru(bh);
-		if(!bh->b_dirt) bh->b_flushtime = 0;
+		}
+
+		if(!bh->b_dirt) {
+			bh->b_flushtime = 0;
+		}
+
 		return bh;
 	}
 
-	while(!free_list[isize]) refill_freelist(size);
+	while(!free_list[isize]) {
+		refill_freelist(size);
+	}
 	
-	if (find_buffer(dev,block,size))
-		 goto repeat;
+	if (find_buffer(dev,block,size)) {
+		goto repeat;
+	}
 
 	bh = free_list[isize];
 	remove_from_free_list(bh);
 
-/* OK, FINALLY we know that this buffer is the only one of it's kind, */
-/* and that it's unused (b_count=0), unlocked (b_lock=0), and clean */
+	/* OK, FINALLY we know that this buffer is the only one of it's kind, */
+	/* and that it's unused (b_count=0), unlocked (b_lock=0), and clean */
 	bh->b_count=1;
 	bh->b_dirt=0;
 	bh->b_lock=0;
