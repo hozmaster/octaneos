@@ -260,6 +260,41 @@ void enable_irq(unsigned int irq_nr) {
 }
 
 
+/**
+ * do_bottom_half() runs at normal kernel priority: all interrupts
+ * enabled.  do_bottom_half() is atomic with respect to itself: a
+ * bottom_half handler need not be re-entrant.
+ */
+asmlinkage void do_bottom_half(void) {
+
+	unsigned long active;
+	unsigned long mask, left;
+	struct bh_struct *bh;
+
+	bh = bh_base;
+	active = bh_active & bh_mask;
+	
+	printk("FUCK!!! bm:%d ba:%d active:%d", bh_mask, bh_active, active);
+	
+	// TODO: fix
+	//for (mask = 1, left = ~0; left & active; 
+	//	 bh++,mask += mask,left += left) {
+	//if (mask & active) {
+	if (active) {
+			void (*fn)(void *);
+			bh_active &= ~mask;
+			fn = bh->routine;
+			if (!fn) {
+				goto bad_bh;
+			}
+			fn(bh->data);
+		}
+	//}
+	return;
+bad_bh:
+	printk ("interrupts.c:bad bottom half entry\n");
+}
+
 void free_irq(unsigned int irq) {
 
 	struct sigaction *signal_action = irq + irq_sigaction;

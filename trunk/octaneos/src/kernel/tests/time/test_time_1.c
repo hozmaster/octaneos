@@ -26,17 +26,21 @@
 #include <linux/sched.h>
 
 static void do_simple_request(unsigned long nr) {
-	printk(".");
+	printk("##\n");
 }
 
-static struct timer_list simple_timer[1] = {
+static struct timer_list simple_timer[2] = {
+	{ NULL, NULL, 0, 0, do_simple_request },
 	{ NULL, NULL, 0, 0, do_simple_request }
 };
 
 void test_time_1() {
-	
+	int i = 0;
 	printk("*** Running time test 1\n");
 	del_timer(simple_timer + 0);
-	simple_timer[0].expires = 100;
-	add_timer(simple_timer + 0);
+
+	for (i = 0; i < 2; i++) {
+		simple_timer[i].expires = 10000;
+		add_timer(simple_timer + i);
+	}
 }

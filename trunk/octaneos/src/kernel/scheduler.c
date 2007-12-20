@@ -700,7 +700,6 @@ static void do_timer(struct pt_regs *regs) {
 		current->it_prof_value = current->it_prof_incr;
 		//send_sig(SIGPROF,current,1);
 	}
-
 	for (mask = 1, tp = timer_table+0 ; mask ; tp++,mask += mask) {
 		if (mask > timer_active)
 			break;
@@ -718,7 +717,6 @@ static void do_timer(struct pt_regs *regs) {
 	}
 	if (next_timer) {
 		if (next_timer->expires) {
-			printk("nte=%d  ", next_timer->expires);
 			next_timer->expires--;
 			if (!next_timer->expires) {
 				mark_bh(TIMER_BH);
@@ -831,10 +829,9 @@ void sched_init(void) {
 
 	int i;
 	struct desc_struct *p;
-
-	// TODO:
-	//bh_base[TIMER_BH].routine = timer_bh;
-	//bh_base[TQUEUE_BH].routine = tqueue_bh;
+   
+	bh_base[TIMER_BH].routine = timer_bh;
+	bh_base[TQUEUE_BH].routine = tqueue_bh;
 
 	if (sizeof(struct sigaction) != 16) {
 		panic("Struct sigaction MUST be 16 bytes");
