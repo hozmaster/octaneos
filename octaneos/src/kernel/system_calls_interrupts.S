@@ -1,7 +1,9 @@
 /*
  * Berlin Brown
  *
- * Assembly wrapper functions for system calls.
+ * $Id: hardware_interrupts.S,v 1.6 2004/04/10 14:16:25 bigbinc Exp $
+ *
+ * assembly wrapper functions for interrupts
  *
  * The actual work will get done by other C implementations, these
  * ASM based wrappers are only used to ensure proper stack manipulations.
@@ -15,6 +17,49 @@
 #include <linux/sys.h>
 #include <linux/linkage.h>
 #include <asm/segment.h>
+
+EBX			= 0x00
+ECX			= 0x04
+EDX			= 0x08
+ESI			= 0x0C
+EDI			= 0x10
+EBP			= 0x14
+EAX			= 0x18
+DS			= 0x1C
+ES			= 0x20
+FS			= 0x24
+GS			= 0x28
+ORIG_EAX 	= 0x2C
+EIP   		= 0x30
+CS   		= 0x34
+EFLAGS  	= 0x38
+OLDESP  	= 0x3C
+OLDSS  		= 0x40
+
+CF_MASK  	= 0x00000001
+IF_MASK  	= 0x00000200
+NT_MASK  	= 0x00004000
+VM_MASK  	= 0x00020000
+
+								
+/*
+ * these are offsets into the task-struct.
+ */
+state		=  0
+counter		=  4
+priority	=  8
+signal		= 12
+blocked		= 16
+flags		= 20
+errno		= 24
+dbgreg6		= 52
+dbgreg7		= 56
+exec_domain = 60
+
+ENOSYS = 38
+
+.globl system_call, lcall7
+.globl ret_from_sys_call, sys_call_table
 		
 #*************************************************
 # Register SAVE_ALL, reusable code block
@@ -56,51 +101,131 @@
     pop %gs;           \
     addl $4,%esp;      \
     iret
-						
-EBX			= 0x00
-ECX			= 0x04
-EDX			= 0x08
-ESI			= 0x0C
-EDI			= 0x10
-EBP			= 0x14
-EAX			= 0x18
-DS			= 0x1C
-ES			= 0x20
-FS			= 0x24
-GS			= 0x28
-ORIG_EAX 	= 0x2C
-EIP   		= 0x30
-CS   		= 0x34
-EFLAGS  	= 0x38
-OLDESP  	= 0x3C
-OLDSS  		= 0x40
 
-CF_MASK  	= 0x00000001
-IF_MASK  	= 0x00000200
-NT_MASK  	= 0x00004000
-VM_MASK  	= 0x00020000
+#***************************************************
+# PIC SETUP Routines
+#***************************************************
+#define PIC_CLOSE_FIRST(mask)   \
+    inb $0x21,%al;              \
+    jmp 1f;                     \
+1:  jmp 1f;                     \
+1:  andb $~(mask),cache_21;     \
+    movb cache_21,%al;          \
+    outb %al,$0x21;
 
-/*
- * these are offsets into the task-struct.
- */
-state		=  0
-counter		=  4
-priority	=  8
-signal		= 12
-blocked		= 16
-flags		= 20
-errno		= 24
-dbgreg6		= 52
-dbgreg7		= 56
-exec_domain = 60
+#define PIC_CLOSE_SECOND(mask)  \
+    inb $0xA1,%al;              \
+    jmp 1f;                     \
+1:  jmp 1f;                     \
+1:  andb $~(mask),cache_A1;     \
+    movb cache_A1,%al;          \
+    outb %al,$0xA1;
 
-ENOSYS = 38
+#define SETUP_PIC01(mask)    \
+    inb $0x21,%al;           \
+    jmp 1f;                  \
+1:  jmp 1f;                  \
+1:  orb $mask,cache_21;      \
+    movb cache_21,%al;       \
+    outb %al,$0x21;          \
+    jmp 1f;                  \
+1:  jmp 1f;                  \
+1:  movb $0x20,%al;          \
+    outb %al,$0x20;
 
-.globl system_call, lcall7
-.globl ret_from_sys_call, sys_call_table
-	
-		
-#***********************************************************
+
+#define SETUP_PIC02(mask)   \
+    inb $0xA1,%al;          \
+    jmp 1f;                 \
+1:  jmp 1f;                 \
+1:  orb $mask,cache_A1;     \
+    movb cache_A1,%al;      \
+    outb %al,$0xA1;         \
+    jmp 1f;                 \
+1:  jmp 1f;                 \
+1:  movb $0x20,%al;         \
+    outb %al,$0xA0;         \
+    jmp 1f;                 \
+1:  jmp 1f;                 \
+1:  outb %al,$0x20;
+
+
+/**
+ * Interrupt Vector List:
+ * 0  0x01   system_timer
+ * 1  0x02   keyboard
+ * 2  0x04
+ * 3  0x08
+ * 4  0x10
+ * 5  0x20   harddrive
+ * 6  0x40   floppy
+ * 7  0x80
+ * (Second PIC)
+ * 8  0x01
+ * 9  0x02
+ * 10 0x04
+ * 11 0x08
+ * 12 0x10
+ * 13 0x20
+ * 14 0x40
+ * 15 0x80
+ */		 
+
+#***************************************************
+# TIMER_IRQ
+#***************************************************
+ENTRY(hw_interrupt_entry_00)
+    pushl $-0-2
+    SAVE_ALL
+    SETUP_PIC01(0x01)
+    sti
+    movl %esp,%ebx
+    pushl %ebx
+    pushl $0	# PUSH the IRQ request INDEX number on the stack
+	call SYMBOL_NAME(do_IRQ)
+    addl $8,%esp
+    cli
+    PIC_CLOSE_FIRST(0x01)
+    RESTORE_ALL
+
+#***************************************************
+# KEYBOARD_IRQ
+#***************************************************
+ENTRY(hw_interrupt_entry_01)
+    pushl $-0-2
+    SAVE_ALL
+    SETUP_PIC01(0x02)
+    sti
+    movl %esp,%ebx
+    pushl %ebx
+    pushl $0	# PUSH the IRQ request INDEX number on the stack
+	###call SYMBOL_NAME(do_IRQ)
+	call SYMBOL_NAME(__debug_keyboard_interrupt)
+    addl $8,%esp
+    cli
+    PIC_CLOSE_FIRST(0x02)
+    RESTORE_ALL
+
+#***************************************************
+# FLOPPY_IRQ
+# See floppy.c
+#***************************************************
+ENTRY(hw_interrupt_entry_06)
+    pushl $-0-2
+    SAVE_ALL
+    SETUP_PIC01(0x40)
+    sti
+    movl %esp,%ebx
+    pushl %ebx
+    pushl $0
+	call SYMBOL_NAME(do_IRQ)
+    addl $8,%esp
+    cli
+    PIC_CLOSE_FIRST(0x40)
+    RESTORE_ALL
+
+
+		#***********************************************************
 # Lcall7
 #***********************************************************  
 ENTRY(lcall7)
