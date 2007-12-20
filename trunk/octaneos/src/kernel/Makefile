@@ -46,6 +46,8 @@ OBJS = \
 	devices.o fs_super.o fs_buffer.o hexdump.o		\
     inode.o fs_file_table.o block_devices.o         \
 	exec_domain.o fork.o time.o memory.o            \
+	filesystems_sys_setup.o							\
+	generic_block.o									\
 	tests/traps/test_traps_1.o						\
 	tests/time/test_time_1.o
 
