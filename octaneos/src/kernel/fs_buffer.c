@@ -32,18 +32,22 @@
  * invalidate changed floppy-disk-caches.
  */
  
-#include <linux/config.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/major.h>
 #include <linux/string.h>
-#include <linux/locks.h>
 #include <linux/errno.h>
-#include <linux/malloc.h>
 
-#include <asm/system.h>
 #include <asm/segment.h>
 #include <asm/io.h>
+#include <system/system.h>
+#include <system/major_devices.h>
+#include <linux/gfp.h>
+#include <linux/page.h>
+#include <system/filesystem.h>
+#include <linux/mm.h>
+#include <linux/locks.h>
+#include <asm/segment_fs.h>
 
 #define NR_SIZES 4
 static char buffersize_index[9] = {-1,  0,  1, -1,  2, -1, -1, -1, 3};
@@ -124,8 +128,7 @@ static int bdflush_max[N_PARAM] = {100,5000, 2000, 2000,100, 60000, 60000, 2047,
  * if 'b_wait' is set before calling this, so that the queues aren't set
  * up unnecessarily.
  */
-void __wait_on_buffer(struct buffer_head * bh)
-{
+void __wait_on_buffer(struct buffer_head *bh) {
 	struct wait_queue wait = { current, NULL };
 
 	bh->b_count++;
@@ -244,13 +247,13 @@ asmlinkage int sys_sync(void)
 	return 0;
 }
 
-int file_fsync (struct inode *inode, struct file *filp)
-{
+int file_fsync (struct inode *inode, 
+				struct file *filp) {
 	return fsync_dev(inode->i_dev);
 }
 
-asmlinkage int sys_fsync(unsigned int fd)
-{
+asmlinkage int sys_fsync(unsigned int fd) {
+
 	struct file * file;
 	struct inode * inode;
 
@@ -922,8 +925,8 @@ static void get_more_buffer_heads(void)
 	if (unused_list)
 		return;
 
-	if (!(bh = (struct buffer_head*) get_free_page(GFP_BUFFER)))
-		return;
+	//if (!(bh = (struct buffer_head*) get_free_page(GFP_BUFFER)))
+	//	return;
 
 	for (nr_buffer_heads+=i=PAGE_SIZE/sizeof*bh ; i>0; i--) {
 		bh->b_next_free = unused_list;	/* only make link */
@@ -1034,13 +1037,15 @@ static unsigned long check_aligned(struct buffer_head * first, unsigned long add
 	read_buffers(bh,nrbuf);		/* make sure they are actually read correctly */
 	while (nrbuf-- > 0)
 		brelse(bh[nrbuf]);
-	free_page(address);
+
+	//free_page(address);
 	++current->mm->min_flt;
 	return page;
 no_go:
 	while (nrbuf-- > 0)
 		brelse(bh[nrbuf]);
-	free_page(page);
+
+	//free_page(page);
 	return 0;
 }
 
@@ -1060,10 +1065,14 @@ static unsigned long try_to_load_aligned(unsigned long address,
 	p = b;
 	for (offset = 0 ; offset < PAGE_SIZE ; offset += size) {
 		block = *(p++);
-		if (!block)
+		if (!block) {
 			goto not_aligned;
-		if (find_buffer(dev, block, size))
-			goto not_aligned;
+		}
+		
+		// TODO:
+		//if (find_buffer(dev, block, size)) {
+		//	goto not_aligned;
+		//}
 	}
 	tmp = bh;
 	p = b;
@@ -1162,8 +1171,11 @@ unsigned long bread_page(unsigned long address, dev_t dev, int b[], int size, in
 	where = address;
  	for (i=0, j=0; j<PAGE_SIZE ; i++, j += size,address += size) {
 		if (bh[i]) {
-			if (bh[i]->b_uptodate)
-				COPYBLK(size, (unsigned long) bh[i]->b_data,address);
+			
+			// TODO:
+			//if (bh[i]->b_uptodate) {
+			//	COPYBLK(size, (unsigned long) bh[i]->b_data,address);
+			//}
 			brelse(bh[i]);
 		}
 	}
@@ -1188,11 +1200,12 @@ static int grow_buffers(int pri, int size)
 
 	isize = BUFSIZE_INDEX(size);
 
-	if (!(page = __get_free_page(pri)))
-		return 0;
+	//if (!(page = __get_free_page(pri)))
+	//	return 0;
+
 	bh = create_buffers(page, size);
 	if (!bh) {
-		free_page(page);
+		//free_page(page);
 		return 0;
 	}
 
@@ -1263,7 +1276,7 @@ static int try_to_free(struct buffer_head * bh, struct buffer_head ** bhp)
 	} while (tmp != bh);
 	buffermem -= PAGE_SIZE;
 	buffer_pages[page >> PAGE_SHIFT] = NULL;
-	free_page(page);
+	//free_page(page);
 	return !mem_map[MAP_NR(page)];
 }
 
@@ -1380,10 +1393,11 @@ static int shrink_specific_buffers(unsigned int priority, int size)
 				 continue;
 			if(size && bh->b_size != size) continue;
 			if (bh->b_lock)
-				 if (priority)
-					  continue;
-				 else
-					  wait_on_buffer(bh);
+				if (priority) {
+					continue;
+				} else {
+					wait_on_buffer(bh);
+				}
 			if (bh->b_dirt) {
 				bh->b_count++;
 				bh->b_flushtime = 0;
@@ -1531,12 +1545,14 @@ static unsigned long try_to_generate_cluster(dev_t dev, int block, int size)
 	unsigned long page;
 	int nblock;
 
-	page = get_free_page(GFP_NOBUFFER);
-	if(!page) return 0;
+	//page = get_free_page(GFP_NOBUFFER);
+	//if(!page) {
+	//	return 0;
+	//}
 
 	bh = create_buffers(page, size);
 	if (!bh) {
-		free_page(page);
+		//free_page(page);
 		return 0;
 	};
 	nblock = block;
@@ -1576,7 +1592,7 @@ not_aligned:
 		bh = bh->b_this_page;
 		put_unused_buffer_head(tmp);
 	}
-	free_page(page);
+	//free_page(page);
 	return 0;
 }
 
@@ -1629,12 +1645,13 @@ void buffer_init(void)
 		nr_hash = 997;
 	};
 	
-	hash_table = (struct buffer_head **) vmalloc(nr_hash * 
-						     sizeof(struct buffer_head *));
+	//hash_table = (struct buffer_head **) vmalloc(nr_hash * 
+	//					     sizeof(struct buffer_head *));
 
 
-	buffer_pages = (struct buffer_head **) vmalloc((high_memory >>PAGE_SHIFT) * 
-						     sizeof(struct buffer_head *));
+	//buffer_pages = (struct buffer_head **) vmalloc((high_memory >>PAGE_SHIFT) * 
+	//					     sizeof(struct buffer_head *));
+
 	for (i = 0 ; i < high_memory >> PAGE_SHIFT ; i++)
 		buffer_pages[i] = NULL;
 
@@ -1763,7 +1780,9 @@ asmlinkage int sys_bdflush(int func, int data)
 	int ncount;
 	struct buffer_head * bh, *next;
 
-	if(!suser()) return -EPERM;
+	//if(!suser()) {
+	//	return -EPERM;
+	//}
 
 	if(func == 1)
 		 return sync_old_buffers();
@@ -1774,8 +1793,11 @@ asmlinkage int sys_bdflush(int func, int data)
 		if (i < 0 || i >= N_PARAM) return -EINVAL;
 		if((func & 1) == 0) {
 			error = verify_area(VERIFY_WRITE, (void *) data, sizeof(int));
-			if(error) return error;
-			put_fs_long(bdf_prm.data[i], data);
+			if(error) {
+				return error;
+			}
+			// TODO
+			//put_fs_long(bdf_prm.data[i], data);
 			return 0;
 		};
 		if(data < bdflush_min[i] || data > bdflush_max[i]) return -EINVAL;

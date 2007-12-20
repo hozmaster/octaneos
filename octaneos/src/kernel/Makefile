@@ -48,6 +48,7 @@ OBJS = \
 	exec_domain.o fork.o time.o memory.o            \
 	filesystems_sys_setup.o							\
 	generic_block.o									\
+	fs_buffer.o										\
 	tests/traps/test_traps_1.o						\
 	tests/time/test_time_1.o						\
 	tests/block/test_block_1.o

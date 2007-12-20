@@ -61,9 +61,11 @@ void test_block_1(void) {
 	printk("TEST: RES1=%d\n", res);
 	res = fops->ioctl(&_inode, &_file,  FDFLUSH, 1);
 	printk("TEST: RES1=%d\n", res);
-	
+
+	dev->request_fn();
+
 	//fops->check_media_change(-1);
-	//res = fops->ioctl(&_inode, &_file,  FDFMTTRK, 1);
+	//res = fops->ioctl(&_inode, &_file, FDFMTTRK, 1);
 	//printk("TEST: RES1=%d\n", res);
 		
 	fops->release(&_inode,& _file);	

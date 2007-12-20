@@ -679,8 +679,10 @@ static void rw_interrupt(void) {
 				printk("\n");
 
 			}
-			if (bad)
+
+			if (bad) {
 				bad_flp_intr();
+			}
 			redo_fd_request();
 			return;
 		case 2: /* invalid command given */
@@ -1112,6 +1114,7 @@ repeat:
 }
 
 void do_fd_request(void) {
+	 
 	cli();
 	while (fdc_busy) {
 		sleep_on(&fdc_wait);
