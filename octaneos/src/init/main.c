@@ -36,6 +36,8 @@ extern unsigned long main_get_build_count;
 extern char *main_get_version;
 extern char _end;
 
+int ramdisk_size;
+
 int root_mountflags = 0;
 
 // debugging printk
@@ -184,6 +186,7 @@ asmlinkage void start_kernel(void) {
   //__debug_floppy_open();
   //__debug_floppy_release();
   test_time_1();
+  test_block_1();
 
   tests();
   for(;;) {  

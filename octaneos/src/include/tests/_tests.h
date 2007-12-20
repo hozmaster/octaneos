@@ -21,26 +21,9 @@
  *
  * See LICENSE.OCTANE for more details
  */
-#include <system/system.h>
-#include <linux/time.h>
-#include <linux/sched.h>
+#ifndef _TEST_H_
+#define _TEST_H_
 
-static void do_simple_request(unsigned long nr) {
-	printk("##\n");
-}
+extern void test_block_1();
 
-static struct timer_list simple_timer[2] = {
-	{ NULL, NULL, 0, 0, do_simple_request },
-	{ NULL, NULL, 0, 0, do_simple_request }
-};
-
-void test_time_1() {
-	int i = 0;
-	printk("*** Running time test 1\n");
-	del_timer(simple_timer + 0);
-
-	for (i = 0; i < 2; i++) {
-		simple_timer[i].expires = 100;
-		add_timer(simple_timer + i);
-	}
-}
+#endif

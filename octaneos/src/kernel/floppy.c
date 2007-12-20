@@ -404,13 +404,13 @@ static int floppy_change(struct buffer_head *bh) {
 	if (!bh)
 		return 0;
 
-	// (bh->b_dirt)
-	//	ll_rw_block(WRITE, 1, &bh);
-	//else {
-	//	buffer_track = -1;
-	//	bh->b_uptodate = 0;
-	//	ll_rw_block(READ, 1, &bh);
-	//}
+	if (bh->b_dirt)
+		ll_rw_block(WRITE, 1, &bh);
+	else {
+		buffer_track = -1;
+		bh->b_uptodate = 0;
+		ll_rw_block(READ, 1, &bh);
+	}
 
 	//wait_on_buffer(bh);
 	if (changed_floppies & mask) {
@@ -424,8 +424,9 @@ static int floppy_change(struct buffer_head *bh) {
 static __inline__ void copy_buffer(void *from, void *to) {
 	ulong *p1 = (ulong *)from, *p2 = (ulong *)to;
 	int cnt;
-	for(cnt = 512/4; cnt; cnt-- )
+	for(cnt = 512/4; cnt; cnt-- ) {
 		*p2++ = *p1++;
+	}
 }
 
 static void setup_DMA(void) {
@@ -1176,8 +1177,9 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			format_errors = 0;
 			while (format_status != FORMAT_OKAY && format_status !=
 			    FORMAT_ERROR) {
-				if (fdc_busy) sleep_on(&fdc_wait);
-				else {
+				if (fdc_busy) {
+					sleep_on(&fdc_wait);
+				} else {
 					fdc_busy = 1;
 					redo_fd_request();
 				}
@@ -1192,13 +1194,14 @@ static int fd_ioctl(struct inode *inode, struct file *filp, unsigned int cmd,
 			floppy_off(drive & 3);
 			wake_up(&format_done);
 			return okay ? 0 : -EIO;
+
 		case FDFLUSH:
 			//if (!permission(inode, 2))
 			//	return -EPERM;
 			cli();
 			fake_change |= 1 << (drive & 3);
 			sti();
-			//check_disk_change(inode->i_rdev);
+			check_disk_change(inode->i_rdev);
 			return 0;
  	}
 	// (!suser())
@@ -1344,10 +1347,9 @@ static void floppy_release(struct inode *inode, struct file *filp) {
 	floppy_release_irq_and_dma();
 }
 
-static int check_floppy_change(dev_t dev)
-{
+static int check_floppy_change(dev_t dev) {
 	int i;
-	struct buffer_head * bh;
+	struct buffer_head *bh;
 
 	//if (!(bh = getblk(dev,0,1024)))
 	//	return 0;

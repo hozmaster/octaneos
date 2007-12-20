@@ -22,45 +22,7 @@
 #include <system/major_devices.h>
 #include <system/filesystem.h>
 
-#define MAX_CHRDEV 32
-#define MAX_BLKDEV 32
-
-/*
- * NR_REQUEST is the number of entries in the request-queue.
- * NOTE that writes may use only the low 2/3 of these: reads
- * take precedence.
- */
-#define NR_REQUEST	64
-
-/*
- * Ok, this is an expanded form so that we can use the same
- * request for paging requests when that is implemented. In
- * paging, 'bh' is NULL, and 'waiting' is used to wait for
- * read/write completion.
- */
-struct request {
-	int dev;		/* -1 if no request */
-	int cmd;		/* READ or WRITE */
-	int errors;
-	unsigned long sector;
-	unsigned long nr_sectors;
-	unsigned long current_nr_sectors;
-	char                *buffer;
-	struct task_struct  *waiting;
-	struct buffer_head  *bh;
-	struct buffer_head  *bhtail;
-	struct request      *next;
-};
-
-struct blk_dev_struct {
-	void (*request_fn)(void);
-	struct request * current_request;
-};
-
-struct sec_size {
-	unsigned block_size;
-	unsigned block_size_bits;
-};
+#include <linux/block_devices_structs.h>
 
 extern struct sec_size       *blk_sec[MAX_BLKDEV];
 extern struct blk_dev_struct  blk_dev[MAX_BLKDEV];

@@ -24,15 +24,13 @@
 
 #include <system/system.h>
 #include <linux/errno.h>
-
 #include <system/major_devices.h>
-
 #include <linux/string.h>
 #include <linux/signal.h>
-
 #include <linux/block_devices_structs.h>
-
 #include <system/filesystem.h>
+
+#include <system/floppy.h>
 
 extern struct blk_dev_struct blk_dev[MAX_BLKDEV];
 
@@ -40,6 +38,7 @@ void test_block_1(void) {
 	
 	struct blk_dev_struct *dev;
 	unsigned int major;
+	int res = -1;
 
 	printk("*** Running block 1\n");
 	
@@ -53,10 +52,19 @@ void test_block_1(void) {
 	
 	struct inode _inode;
 	struct file _file;
-
+		
 	struct file_operations *fops = get_blkfops(FLOPPY_MAJOR);
 	
-	fops->open(NULL, NULL);
-	fops->release(NULL, NULL);
+	fops->open(&_inode, &_file);
 
+	res = fops->ioctl(&_inode, &_file,  FDGETPRM, 1);
+	printk("TEST: RES1=%d\n", res);
+	res = fops->ioctl(&_inode, &_file,  FDFLUSH, 1);
+	printk("TEST: RES1=%d\n", res);
+	
+	//fops->check_media_change(-1);
+	//res = fops->ioctl(&_inode, &_file,  FDFMTTRK, 1);
+	//printk("TEST: RES1=%d\n", res);
+		
+	fops->release(&_inode,& _file);	
 }

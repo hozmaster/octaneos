@@ -21,8 +21,8 @@
  *
  * See LICENSE.OCTANE for more details
  */
-#ifndef _TEST_TRAPS_H_
-#define _TEST_TRAPS_H_
+#ifndef _TEST_TIME_H_
+#define _TEST_TIME_H_
 
 extern void test_time_1();
 

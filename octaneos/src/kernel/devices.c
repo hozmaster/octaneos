@@ -71,8 +71,7 @@ struct file_operations *get_blkfops(unsigned int major) {
 	return blkdevs[major].fops;
 }
 
-struct file_operations *get_chrfops(unsigned int major)
-{
+struct file_operations *get_chrfops(unsigned int major) {
 	if (major >= MAX_CHRDEV)
 		return NULL;
 	return chrdevs[major].fops;
@@ -90,10 +89,12 @@ int register_chrdev(unsigned int major, const char * name, struct file_operation
 
 int register_blkdev(unsigned int major, const char * name, struct file_operations *fops) {
 
-	if (major >= MAX_BLKDEV)
+	if (major >= MAX_BLKDEV) {
 		return -EINVAL;
-	if (blkdevs[major].fops)
+	}
+	if (blkdevs[major].fops) {
 		return -EBUSY;
+	}
 	blkdevs[major].name = name;
 	blkdevs[major].fops = fops;
 	return 0;
