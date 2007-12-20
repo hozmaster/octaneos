@@ -1,7 +1,7 @@
-//
-// Copyright (C) 2003, 2007 Berlin Brown
-// $Id: system_calls.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
-//
+/*
+ * Copyright (C) 2003, 2007 Berlin Brown
+ * $Id: system_calls.c,v 1.5 2005/05/26 00:06:53 bigbinc Exp $
+ */
 
 #include <linux/errno.h>
 #include <linux/sched.h>

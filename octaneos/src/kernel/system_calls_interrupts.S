@@ -186,10 +186,20 @@ ENTRY(hw_interrupt_entry_00)
     addl $8,%esp
     cli
     PIC_CLOSE_FIRST(0x01)
-    RESTORE_ALL
+	decl SYMBOL_NAME(intr_count)
+	#*****************
+	# TODO: BUG fix to set the intr_count to zero
+	# for the bottom handler.
+	#*****************
+	xorl %eax, %eax
+	movl %eax, SYMBOL_NAME(intr_count)
+	jmp ret_from_sys_call
 
 #***************************************************
 # KEYBOARD_IRQ
+# Interrupt Entry = 01
+# @see interrupts.c
+# @see scheduler.c
 #***************************************************
 ENTRY(hw_interrupt_entry_01)
     pushl $-0-2
@@ -224,8 +234,7 @@ ENTRY(hw_interrupt_entry_06)
     PIC_CLOSE_FIRST(0x40)
     RESTORE_ALL
 
-
-		#***********************************************************
+#***********************************************************
 # Lcall7
 #***********************************************************  
 ENTRY(lcall7)
@@ -254,7 +263,7 @@ handle_bottom_half:
 	pushfl
 	incl SYMBOL_NAME(intr_count)
 	sti
-	#### call SYMBOL_NAME(do_bottom_half)
+	call SYMBOL_NAME(do_bottom_half)
 	popfl
 	decl SYMBOL_NAME(intr_count)
 	jmp 9f
@@ -318,12 +327,11 @@ ENTRY(ret_from_sys_call)
 1:  sti
 	orl $(IF_MASK),%eax  		# these just try to make sure
 	andl $~NT_MASK,%eax  		# the program doesn't do anything
-	movl %eax,EFLAGS(%esp)  	# stupid
-		
+	movl %eax,EFLAGS(%esp)  	# stupid		
 	####cmpl $0,_need_resched
 	jne reschedule
 	movl SYMBOL_NAME(current),%eax
-	####cmpl _task, %eax   		    # task[0] cannot have signals
+	####cmpl _task, %eax        # task[0] cannot have signals
 	je 2f
 	cmpl $0,state(%eax)		    # state
 	jne reschedule
@@ -352,7 +360,7 @@ signal_return:
 #***********************************************************
 .align 4
 v86_signal_return:
-	###call SYMBOL_NAME(save_v86_state)
+	####call SYMBOL_NAME(save_v86_state)
 	movl %eax,%esp
 	pushl %eax
 	pushl %ebx

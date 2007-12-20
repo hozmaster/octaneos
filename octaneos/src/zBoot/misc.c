@@ -186,7 +186,7 @@ struct screen_info {
 
 #define INPLACE_MOVE_ROUTINE  0x1000
 #define LOW_BUFFER_START      0x2000
-#define LOW_BUFFER_MAX       0x90000
+#define LOW_BUFFER_MAX        0x90000
 #define HEAP_SIZE             0x3000
 
 #define ZEROPAD	1
