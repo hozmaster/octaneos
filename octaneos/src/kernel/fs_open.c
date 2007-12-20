@@ -379,22 +379,34 @@ int do_open(const char * filename,int flags,int mode) {
 	struct file * f;
 	int flag,error,fd;
 
-	for(fd=0 ; fd<NR_OPEN ; fd++)
-		if (!current->files->fd[fd])
+	for(fd=0 ; fd<NR_OPEN ; fd++) {
+		if (!current->files->fd[fd]) {
 			break;
-	if (fd>=NR_OPEN)
+		}
+	}
+
+	if (fd>=NR_OPEN) {
 		return -EMFILE;
+	}
+
 	FD_CLR(fd,&current->files->close_on_exec);
 	f = get_empty_filp();
-	if (!f)
+
+	if (!f) {
 		return -ENFILE;
+	}
+
 	current->files->fd[fd] = f;
 	f->f_flags = flag = flags;
 	f->f_mode = (flag+1) & O_ACCMODE;
-	if (f->f_mode)
+	if (f->f_mode) {
 		flag++;
-	if (flag & (O_TRUNC | O_CREAT))
+	}
+
+	if (flag & (O_TRUNC | O_CREAT)) {
 		flag |= 2;
+	}
+
 	error = open_namei(filename,flag,mode,&inode,NULL);
 	if (error) {
 		current->files->fd[fd]=NULL;
@@ -422,11 +434,10 @@ int do_open(const char * filename,int flags,int mode) {
 	return (fd);
 }
 
-asmlinkage int sys_open(const char * filename,int flags,int mode)
-{
-	char * tmp;
-	int error;
+asmlinkage int sys_open(const char * filename, int flags, int mode) {
 
+	char *tmp;
+	int error;
 	error = getname(filename, &tmp);
 	if (error)
 		return error;
@@ -439,8 +450,7 @@ asmlinkage int sys_creat(const char * pathname, int mode) {
 	return sys_open(pathname, O_CREAT | O_WRONLY | O_TRUNC, mode);
 }
 
-int close_fp(struct file *filp, unsigned int fd)
-{
+int close_fp(struct file *filp, unsigned int fd) {
 	struct inode *inode;
 
 	if (filp->f_count == 0) {

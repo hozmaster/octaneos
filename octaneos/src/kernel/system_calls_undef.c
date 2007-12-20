@@ -12,11 +12,6 @@ asmlinkage int syscall_trace(void) {
     return -ENOSYS;
 }
 
-asmlinkage int sys_setup(void) {
-    // TODO
-    return -ENOSYS;
-}
-
 asmlinkage int sys_exit(void) {
     // TODO
     return -ENOSYS;
