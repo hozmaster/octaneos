@@ -1,0 +1,20 @@
+
+Note: we may need to put the return from sys call in
+our interrupts.
+
+What is inline?
+-------------
+The point of making a function "inline" is to hint to 
+the compiler that it is worth making some form of 
+extra effort to call the function faster than it 
+would otherwise - generally by substituting the code of the function into its caller
+
+When is do_floppy used?
+-----------------------
+	see setup_rw_floppy,
+	Does the following
+	do_floppy = rw_interrupt;
+
+What about all the interrupt method swapping?
+---------------------------------------------
+	
