@@ -808,17 +808,19 @@ void brelse(struct buffer_head * buf)
  * bread() reads a specified block and returns the buffer that contains
  * it. It returns NULL if the block was unreadable.
  */
-struct buffer_head * bread(dev_t dev, int block, int size)
-{
-	struct buffer_head * bh;
+struct buffer_head *bread(dev_t dev, int block, int size) {
 
+	struct buffer_head * bh;
 	if (!(bh = getblk(dev, block, size))) {
 		printk("VFS: bread: READ error on device %d/%d\n",
 						MAJOR(dev), MINOR(dev));
 		return NULL;
 	}
-	if (bh->b_uptodate)
+
+	if (bh->b_uptodate) {
 		return bh;
+	}
+
 	ll_rw_block(READ, 1, &bh);
 	wait_on_buffer(bh);
 	if (bh->b_uptodate)
