@@ -127,11 +127,6 @@ asmlinkage int sys_access(void) {
     return -ENOSYS;
 }
 
-asmlinkage int sys_sync(void) {
-    // TODO
-    return -ENOSYS;
-}
-
 asmlinkage int sys_kill(void) {
     // TODO
     return -ENOSYS;
@@ -412,11 +407,6 @@ asmlinkage int sys_ipc(void) {
     return -ENOSYS;
 }
 
-asmlinkage int sys_fsync(void) {
-    // TODO
-    return -ENOSYS;
-}
-
 asmlinkage int sys_sigreturn(void) {
     // TODO
     return -ENOSYS;
@@ -468,11 +458,6 @@ asmlinkage int sys_quotactl(void) {
 }
 
 asmlinkage int sys_fchdir(void) {
-    // TODO
-    return -ENOSYS;
-}
-
-asmlinkage int sys_bdflush(void) {
     // TODO
     return -ENOSYS;
 }
