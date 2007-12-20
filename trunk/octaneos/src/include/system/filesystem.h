@@ -198,6 +198,7 @@ struct file_system_type {
 	struct file_system_type * next;
 };
 
+extern int read_ahead[];
 
 extern int register_filesystem(struct file_system_type *);
 extern int unregister_filesystem(struct file_system_type *);
