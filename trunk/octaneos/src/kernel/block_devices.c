@@ -326,8 +326,10 @@ void ll_rw_page(int rw, int dev, int page, char *buffer) {
 		printk("Trying to read nonexistent block-device %04x (%d)\n",dev,page*8);
 		return;
 	}
-	if (rw!=READ && rw!=WRITE)
+	if (rw!=READ && rw!=WRITE) {
 		panic("Bad block dev command, must be R/W");
+	}
+
 	if (rw == WRITE && is_read_only(dev)) {
 		printk("Can't page to read-only device 0x%X\n",dev);
 		return;
@@ -346,12 +348,15 @@ void ll_rw_page(int rw, int dev, int page, char *buffer) {
 	req->waiting = current;
 	req->bh = NULL;
 	req->next = NULL;
+
 	current->swapping = 1;
 	current->state = TASK_SWAPPING;
-	add_request(major+blk_dev,req);
+	add_request(major+blk_dev, req);
 	/* The I/O may have inadvertently chagned the task state.
 	   Make sure we really wait until the I/O is done */
-	if (current->swapping) current->state = TASK_SWAPPING;
+	if (current->swapping) {
+		current->state = TASK_SWAPPING;
+	}
 	schedule();
 }
 

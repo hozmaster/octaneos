@@ -35,14 +35,19 @@ static void extended_partition(struct gendisk *hd, int dev) {
 	this_sector = first_sector;
 
 	while (1) {
+
 		if ((current_minor & mask) >= (4 + hd->max_p))
 			return;
-		if (!(bh = bread(dev,0,1024)))
-			return;
-	  /*
-	   * This block is from a device that we're about to stomp on.
-	   * So make sure nobody thinks this block is usable.
-	   */
+
+		// TODO
+		//if (!(bh = bread(dev,0,1024))) {
+		//	return;
+		//}
+
+		/*
+		 * This block is from a device that we're about to stomp on.
+		 * So make sure nobody thinks this block is usable.
+		 */
 		bh->b_dirt = 0;
 		bh->b_uptodate = 0;
 		bh->b_req = 0;
@@ -74,12 +79,16 @@ static void extended_partition(struct gendisk *hd, int dev) {
 			hd->part[current_minor].start_sect = first_sector + p->start_sect;
 			this_sector = first_sector + p->start_sect;
 			dev = ((hd->major) << 8) | current_minor;
-			brelse(bh);
+
+			// TODO:
+			//brelse(bh);
 		} else
 			goto done;
 	}
 done:
-	brelse(bh);
+	4;
+	// TODO:
+	//brelse(bh);
 }
 
 static void check_partition(struct gendisk *hd, unsigned int dev) {
@@ -94,10 +103,13 @@ static void check_partition(struct gendisk *hd, unsigned int dev) {
 		printk("Partition check:\n");
 	first_time = 0;
 	first_sector = hd->part[MINOR(dev)].start_sect;
-	if (!(bh = bread(dev,0,1024))) {
-		printk("  unable to read partition table of device %04x\n",dev);
-		return;
-	}
+	
+	// TODO:
+	//if (!(bh = bread(dev,0,1024))) {
+	//	printk("  unable to read partition table of device %04x\n",dev);
+	//	return;
+	//}
+
 	printk("  %s%c:", hd->major_name, 'a'+(minor >> hd->minor_shift));
 	current_minor += 4;  /* first "extra" minor */
 	if (*(unsigned short *) (bh->b_data+510) == 0xAA55) {
@@ -136,7 +148,9 @@ static void check_partition(struct gendisk *hd, unsigned int dev) {
 	} else
 		printk(" bad partition table");
 	printk("\n");
-	brelse(bh);
+
+	// TODO
+	//brelse(bh);
 }
 
 /**
@@ -188,6 +202,7 @@ void device_setup(void) {
 		setup_dev(p);
 		nr += p->nr_real;
 	}		
+
 	if (ramdisk_size) {
 		rd_load();
 	}
